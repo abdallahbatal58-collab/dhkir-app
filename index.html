@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0d3b2e">
+<meta name="description" content="ذِكْر - أذكار وأدعية وسبحة إلكترونية وقبلة">
+<title>ذِكْر | حياتك بذكر الله أطيب</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@300;400;600;700;900&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ======= شاشة البداية ======= -->
+<div id="splash">
+  <div class="splash-inner">
+    <div class="splash-ornament top">﷽</div>
+    <div class="splash-logo">ذِكْر</div>
+    <div class="splash-sub">حياتك بذكر الله أطيب</div>
+    <div class="splash-loader"><span></span><span></span><span></span></div>
+  </div>
+</div>
+
+<!-- ======= الشريط العلوي ======= -->
+<header id="app-header">
+  <button id="menu-btn" class="icon-btn" aria-label="القائمة">☰</button>
+  <div class="header-title">
+    <span class="title-main">ذِكْر</span>
+  </div>
+  <button id="theme-btn" class="icon-btn" aria-label="الوضع الليلي">🌙</button>
+</header>
+
+<!-- ======= القائمة الجانبية ======= -->
+<aside id="drawer">
+  <div class="drawer-header">
+    <div class="drawer-logo">ذِكْر</div>
+    <p class="drawer-tagline">﴿ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ ﴾</p>
+  </div>
+  <nav class="drawer-nav">
+    <a href="#" data-page="home"><span class="ico">🏠</span> الرئيسية</a>
+    <a href="#" data-page="morning"><span class="ico">🌅</span> أذكار الصباح</a>
+    <a href="#" data-page="evening"><span class="ico">🌙</span> أذكار المساء</a>
+    <a href="#" data-page="tasbih"><span class="ico">📿</span> السبحة الذكية</a>
+    <a href="#" data-page="qibla"><span class="ico">🕌</span> القبلة</a>
+    <a href="#" data-page="duas"><span class="ico">🤲</span> الأدعية</a>
+    <a href="#" data-page="quran"><span class="ico">📖</span> القرآن الكريم</a>
+    <a href="#" data-page="names"><span class="ico">✨</span> أسماء الله الحسنى</a>
+    <a href="#" data-page="settings"><span class="ico">⚙️</span> الإعدادات</a>
+  </nav>
+  <div class="drawer-footer">
+    <p>﴿ وَاذْكُر رَّبَّكَ إِذَا نَسِيتَ ﴾</p>
+  </div>
+</aside>
+<div id="overlay"></div>
+
+<!-- ======= المحتوى الرئيسي ======= -->
+<main id="content">
+
+  <!-- ===== الصفحة الرئيسية ===== -->
+  <section class="page active" id="page-home">
+    <div class="home-greeting">
+      <p class="hijri-date" id="hijri-date">جاري التحميل...</p>
+      <h2 class="greeting-text" id="greeting-text">أهلاً بك</h2>
+      <p class="greeting-sub" id="greeting-sub">نسأل الله أن يجعل يومك مليئاً بالذكر</p>
+    </div>
+
+    <div class="quick-grid">
+      <button class="quick-card" data-page="morning">
+        <div class="qc-icon">🌅</div>
+        <div class="qc-title">أذكار الصباح</div>
+        <div class="qc-sub">حصّن يومك</div>
+      </button>
+      <button class="quick-card" data-page="evening">
+        <div class="qc-icon">🌙</div>
+        <div class="qc-title">أذكار المساء</div>
+        <div class="qc-sub">احفظ ليلك</div>
+      </button>
+      <button class="quick-card" data-page="tasbih">
+        <div class="qc-icon">📿</div>
+        <div class="qc-title">السبحة</div>
+        <div class="qc-sub">سبّح واحتسب</div>
+      </button>
+      <button class="quick-card" data-page="qibla">
+        <div class="qc-icon">🕌</div>
+        <div class="qc-title">القبلة</div>
+        <div class="qc-sub">اتجاه الصلاة</div>
+      </button>
+      <button class="quick-card" data-page="duas">
+        <div class="qc-icon">🤲</div>
+        <div class="qc-title">الأدعية</div>
+        <div class="qc-sub">من الكتاب والسنة</div>
+      </button>
+      <button class="quick-card" data-page="names">
+        <div class="qc-icon">✨</div>
+        <div class="qc-title">أسماء الله</div>
+        <div class="qc-sub">٩٩ اسماً</div>
+      </button>
+    </div>
+
+    <div class="verse-card">
+      <div class="verse-label">آية اليوم</div>
+      <p class="verse-text" id="daily-verse">﴿ فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُوا لِي وَلَا تَكْفُرُونِ ﴾</p>
+      <div class="verse-ref" id="daily-verse-ref">البقرة: ١٥٢</div>
+    </div>
+  </section>
+
+  <!-- ===== أذكار الصباح ===== -->
+  <section class="page" id="page-morning">
+    <div class="page-header">
+      <h2>🌅 أذكار الصباح</h2>
+      <p>تُقال بعد صلاة الفجر حتى الضحى</p>
+    </div>
+    <div class="adhkar-list" id="morning-list"></div>
+  </section>
+
+  <!-- ===== أذكار المساء ===== -->
+  <section class="page" id="page-evening">
+    <div class="page-header">
+      <h2>🌙 أذكار المساء</h2>
+      <p>تُقال بعد صلاة العصر حتى المغرب</p>
+    </div>
+    <div class="adhkar-list" id="evening-list"></div>
+  </section>
+
+  <!-- ===== السبحة ===== -->
+  <section class="page" id="page-tasbih">
+    <div class="page-header">
+      <h2>📿 السبحة الذكية</h2>
+      <p>اضغط الزر أو اضغط على الشاشة للتسبيح</p>
+    </div>
+    <div class="tasbih-selector" id="tasbih-selector"></div>
+    <div class="tasbih-display">
+      <div class="tasbih-dhikr" id="tasbih-dhikr">سُبْحَانَ اللَّهِ</div>
+      <div class="tasbih-counter" id="tasbih-counter">0</div>
+      <div class="tasbih-target" id="tasbih-target">الهدف: 33</div>
+    </div>
+    <button class="tasbih-main-btn" id="tasbih-btn">سبّح</button>
+    <div class="tasbih-actions">
+      <button id="tasbih-reset" class="tasbih-action">🔄 تصفير</button>
+      <button id="tasbih-save" class="tasbih-action">💾 حفظ</button>
+      <button id="tasbih-vibrate" class="tasbih-action active">📳 اهتزاز</button>
+    </div>
+    <div class="tasbih-stats">
+      <div class="stat-box">
+        <div class="stat-num" id="today-total">0</div>
+        <div class="stat-lbl">اليوم</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="total-total">0</div>
+        <div class="stat-lbl">الإجمالي</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="rounds-total">0</div>
+        <div class="stat-lbl">الدورات</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== القبلة ===== -->
+  <section class="page" id="page-qibla">
+    <div class="page-header">
+      <h2>🕌 اتجاه القبلة</h2>
+      <p>اتجاه الكعبة المشرفة من موقعك</p>
+    </div>
+    <div class="qibla-wrap">
+      <div class="compass">
+        <div class="compass-ring"></div>
+        <div class="compass-needle" id="qibla-needle">
+          <div class="needle-arrow">🕋</div>
+        </div>
+        <div class="compass-center">N</div>
+      </div>
+      <div class="qibla-info">
+        <div class="qibla-angle">اتجاه القبلة: <span id="qibla-angle">--</span>°</div>
+        <div class="qibla-distance">المسافة: <span id="qibla-distance">--</span> كم</div>
+        <button id="qibla-start" class="btn-primary">تشغيل البوصلة</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== الأدعية ===== -->
+  <section class="page" id="page-duas">
+    <div class="page-header">
+      <h2>🤲 الأدعية والأذكار</h2>
+      <p>من الكتاب والسنة النبوية</p>
+    </div>
+    <div class="duas-cats" id="duas-cats"></div>
+    <div class="duas-list" id="duas-list"></div>
+  </section>
+
+  <!-- ===== القرآن ===== -->
+  <section class="page" id="page-quran">
+    <div class="page-header">
+      <h2>📖 القرآن الكريم</h2>
+      <p>اقرأ وتدبّر</p>
+    </div>
+    <div class="quran-list" id="quran-list"></div>
+  </section>
+
+  <!-- ===== أسماء الله ===== -->
+  <section class="page" id="page-names">
+    <div class="page-header">
+      <h2>✨ أسماء الله الحسنى</h2>
+      <p>٩٩ اسماً ومعانيها</p>
+    </div>
+    <div class="names-grid" id="names-grid"></div>
+  </section>
+
+  <!-- ===== الإعدادات ===== -->
+  <section class="page" id="page-settings">
+    <div class="page-header">
+      <h2>⚙️ الإعدادات</h2>
+      <p>خصّص تجربتك</p>
+    </div>
+    <div class="settings-list">
+      <div class="setting-item">
+        <span>الوضع الليلي</span>
+        <label class="switch"><input type="checkbox" id="set-dark"><span class="slider"></span></label>
+      </div>
+      <div class="setting-item">
+        <span>حجم الخط</span>
+        <input type="range" id="set-font" min="14" max="28" value="18">
+      </div>
+      <div class="setting-item">
+        <span>الاهتزاز عند التسبيح</span>
+        <label class="switch"><input type="checkbox" id="set-vibrate" checked><span class="slider"></span></label>
+      </div>
+      <div class="setting-item">
+        <span>عن التطبيق</span>
+        <span class="ver">الإصدار 1.0</span>
+      </div>
+    </div>
+    <div class="about-box">
+      <p>﴿ وَذَكِّرْ فَإِنَّ الذِّكْرَىٰ تَنفَعُ الْمُؤْمِنِينَ ﴾</p>
+      <p class="small">صدقة جارية - لا تنسونا من صالح دعائكم</p>
+    </div>
+  </section>
+
+</main>
+
+<!-- ======= الشريط السفلي ======= -->
+<nav id="bottom-nav">
+  <button data-page="home" class="active"><span>🏠</span><small>الرئيسية</small></button>
+  <button data-page="morning"><span>🌅</span><small>الصباح</small></button>
+  <button data-page="tasbih" class="nav-main"><span>📿</span><small>السبحة</small></button>
+  <button data-page="duas"><span>🤲</span><small>الأدعية</small></button>
+  <button data-page="more"><span>☰</span><small>المزيد</small></button>
+</nav>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
