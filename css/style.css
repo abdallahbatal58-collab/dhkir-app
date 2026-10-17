@@ -1,5 +1,5 @@
 /* ============================================
-   ذِكْر | التصميم الاحترافي الشامل (Pro Edition)
+   ذِكْر | التصميم الاحترافي الشامل (Pro Edition V3)
    ============================================ */
 
 /* ===== المتغيرات الأساسية ===== */
@@ -28,12 +28,12 @@
   --radius-sm: 14px;
 }
 
-/* ===== إعدادات الوضع الليلي (احترافية) ===== */
+/* ===== إعدادات الوضع الليلي ===== */
 body.dark {
-  --bg-body: #0f172a;      /* أزرق داكن فخم */
-  --bg-card: #1e293b;      /* لون الكروت */
-  --text-main: #f1f5f9;    /* أبيض ناصع مريح للعين */
-  --text-muted: #94a3b8;   /* رمادي فاتح للنصوص الثانوية */
+  --bg-body: #0f172a;
+  --bg-card: #1e293b;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
   --border-color: rgba(212, 175, 55, 0.2);
   
   --shadow-sm: 0 4px 15px rgba(0, 0, 0, 0.3);
@@ -122,7 +122,9 @@ body {
 }
 .icon-btn:active { transform: scale(0.9); background: rgba(212, 175, 55, 0.2); }
 
-/* ===== القائمة الجانبية (تم إصلاح مشكلة الوضع الليلي هنا) ===== */
+/* =========================================================
+   القائمة الجانبية (تم إصلاح المشكلة هنا جذرياً)
+   ========================================================= */
 #drawer {
   position: fixed;
   top: 0; right: -320px; width: 300px; height: 100vh;
@@ -136,19 +138,24 @@ body {
 #drawer.open { right: 0; }
 .drawer-header { padding: 35px 20px 25px; text-align: center; border-bottom: 1px solid rgba(212, 175, 55, 0.2); }
 .drawer-logo { font-family: 'Amiri', serif; font-size: 2.8em; color: var(--gold); margin-bottom: 10px; }
-.drawer-tagline { color: #cbd5e1; font-family: 'Amiri', serif; font-size: 1.1em; }
+.drawer-tagline { color: #cbd5e1 !important; font-family: 'Amiri', serif; font-size: 1.1em; }
 
-/* إجبار النصوص في القائمة الجانبية تكون فاتحة عشان التباين */
+/* إجبار النصوص في القائمة الجانبية تكون فاتحة عشان التباين (حل نهائي) */
 .drawer-nav { padding: 20px 15px; display: flex; flex-direction: column; gap: 6px; }
-.drawer-nav a {
+#drawer .drawer-nav a, 
+body.dark #drawer .drawer-nav a {
   display: flex; align-items: center; gap: 15px;
-  padding: 15px 20px; color: #e2e8f0; text-decoration: none;
-  border-radius: 12px; font-size: 1.1em; font-weight: 600;
+  padding: 15px 20px; 
+  color: #f8fafc !important; /* فرض اللون الأبيض الناصع */
+  text-decoration: none;
+  border-radius: 12px; font-size: 1.1em; font-weight: 700;
   transition: var(--transition);
 }
-.drawer-nav a.active, .drawer-nav a:active {
-  background: rgba(212, 175, 55, 0.15);
-  color: var(--gold-light);
+#drawer .drawer-nav a.active, 
+#drawer .drawer-nav a:active,
+body.dark #drawer .drawer-nav a.active {
+  background: rgba(212, 175, 55, 0.15) !important;
+  color: var(--gold-light) !important;
   border-right: 4px solid var(--gold);
 }
 .drawer-nav .ico { font-size: 1.3em; }
@@ -241,6 +248,30 @@ body.dark .adhkar-count { color: var(--gold-light); }
 .adhkar-btn:active { transform: scale(0.97); }
 .adhkar-btn.done { background: linear-gradient(135deg, var(--gold), var(--gold-dark)); color: var(--primary); }
 
+/* ===== مواقيت الصلاة (صفحة جديدة) ===== */
+.prayer-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.prayer-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 20px;
+  border-bottom: 1px dashed var(--border-color);
+  font-size: 1.2em;
+  font-weight: 700;
+}
+.prayer-item:last-child { border-bottom: none; }
+.prayer-item .p-name { color: var(--primary); }
+body.dark .prayer-item .p-name { color: var(--gold-light); }
+.prayer-item .p-time { color: var(--gold-dark); font-family: 'Cairo', sans-serif; letter-spacing: 1px; }
+body.dark .prayer-item .p-time { color: var(--gold); }
+
 /* ===== السبحة ===== */
 .tasbih-display {
   text-align: center; padding: 40px 20px; background: var(--bg-card);
@@ -326,49 +357,3 @@ body.dark .dua-title { color: var(--gold); }
 @keyframes pageIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
 @keyframes bounce { 0%, 80%, 100% { transform: scale(0.4); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
 @keyframes pulseGold { 0% { text-shadow: 0 0 20px rgba(212, 175, 55, 0.4); } 100% { text-shadow: 0 0 50px rgba(212, 175, 55, 0.9); } }
-/* ============================================
-   إصلاح جذري وأكيد لألوان القائمة الجانبية (Drawer)
-   ============================================ */
-#drawer .drawer-nav a {
-    color: #f1f5f9 !important; /* فرض اللون الأبيض الناصع */
-    font-weight: 700 !important;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.6) !important; /* ظل للنص عشان يبرز */
-}
-
-#drawer .drawer-nav a.active, 
-#drawer .drawer-nav a:active {
-    color: #f0d878 !important; /* فرض اللون الذهبي للعنصر النشط */
-    background: rgba(212, 175, 55, 0.15) !important;
-    border-right: 4px solid var(--gold) !important;
-}
-
-/* إبراز الأيقونات */
-#drawer .drawer-nav a .ico {
-    filter: drop-shadow(0 0 3px rgba(0,0,0,0.5)) !important;
-/* ============================================
-   الحل الجذري النهائي (فرض الألوان بالقوة)
-   ============================================ */
-#drawer, 
-#drawer nav, 
-#drawer .drawer-nav {
-    background: transparent !important;
-}
-
-#drawer a, 
-#drawer .drawer-nav a, 
-body.dark #drawer .drawer-nav a {
-    color: #ffffff !important; /* أبيض ناصع */
-    font-weight: 600 !important;
-}
-
-#drawer a span, 
-#drawer .drawer-nav a span {
-    color: #ffffff !important; 
-}
-
-#drawer .drawer-nav a.active, 
-body.dark #drawer .drawer-nav a.active {
-    color: #d4af37 !important; /* ذهبي للعنصر النشط */
-    background: rgba(212, 175, 55, 0.15) !important;
-}
-}
