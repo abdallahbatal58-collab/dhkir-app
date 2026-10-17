@@ -4,13 +4,16 @@
   "short_name": "ذِكْر",
   "description": "تطبيق إسلامي شامل: أذكار الصباح والمساء، سبحة إلكترونية، اتجاه القبلة، أدعية من الكتاب والسنة، أسماء الله الحسنى",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait",
   "background_color": "#0d3b2e",
   "theme_color": "#0d3b2e",
   "lang": "ar",
   "dir": "rtl",
   "categories": ["lifestyle", "education"],
+  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
   "icons": [
     {
       "src": "https://placehold.co/192x192/0d3b2e/d4af37.png?text=Dhikr",
@@ -37,6 +40,35 @@
       "sizes": "1080x1920",
       "type": "image/png",
       "form_factor": "narrow"
+    },
+    {
+      "src": "https://placehold.co/1920x1080/0d3b2e/d4af37.png?text=Dhikr",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "أذكار الصباح",
+      "short_name": "الصباح",
+      "description": "قراءة أذكار الصباح",
+      "url": "./index.html#morning",
+      "icons": [{ "src": "https://placehold.co/192x192/0d3b2e/d4af37.png?text=Morning", "sizes": "192x192" }]
+    },
+    {
+      "name": "أذكار المساء",
+      "short_name": "المساء",
+      "description": "قراءة أذكار المساء",
+      "url": "./index.html#evening",
+      "icons": [{ "src": "https://placehold.co/192x192/0d3b2e/d4af37.png?text=Evening", "sizes": "192x192" }]
+    },
+    {
+      "name": "السبحة الذكية",
+      "short_name": "السبحة",
+      "description": "فتح السبحة الإلكترونية",
+      "url": "./index.html#tasbih",
+      "icons": [{ "src": "https://placehold.co/192x192/0d3b2e/d4af37.png?text=Tasbih", "sizes": "192x192" }]
     }
   ]
 }
