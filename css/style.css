@@ -326,3 +326,23 @@ body.dark .dua-title { color: var(--gold); }
 @keyframes pageIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
 @keyframes bounce { 0%, 80%, 100% { transform: scale(0.4); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
 @keyframes pulseGold { 0% { text-shadow: 0 0 20px rgba(212, 175, 55, 0.4); } 100% { text-shadow: 0 0 50px rgba(212, 175, 55, 0.9); } }
+/* ============================================
+   إصلاح جذري وأكيد لألوان القائمة الجانبية (Drawer)
+   ============================================ */
+#drawer .drawer-nav a {
+    color: #f1f5f9 !important; /* فرض اللون الأبيض الناصع */
+    font-weight: 700 !important;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.6) !important; /* ظل للنص عشان يبرز */
+}
+
+#drawer .drawer-nav a.active, 
+#drawer .drawer-nav a:active {
+    color: #f0d878 !important; /* فرض اللون الذهبي للعنصر النشط */
+    background: rgba(212, 175, 55, 0.15) !important;
+    border-right: 4px solid var(--gold) !important;
+}
+
+/* إبراز الأيقونات */
+#drawer .drawer-nav a .ico {
+    filter: drop-shadow(0 0 3px rgba(0,0,0,0.5)) !important;
+}
