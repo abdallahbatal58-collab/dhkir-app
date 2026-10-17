@@ -10,8 +10,10 @@ function init() {
     setupSwipeMenu();
     setupTasbih();
     setupQibla();
+    setupSearch(); // تفعيل البحث
 }
 
+// --- التنقل ---
 function navigateTo(targetId) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     const targetPage = document.getElementById(`page-${targetId}`);
@@ -46,6 +48,53 @@ function setupSwipeMenu() {
     }, {passive: true});
 }
 
+// --- محرك البحث الفوري (Instant Search Engine) ---
+function setupSearch() {
+    const searchInput = document.getElementById('search-input');
+    if(!searchInput) return;
+
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.trim().toLowerCase();
+        if(query.length === 0) {
+            document.getElementById('page-search').classList.remove('active');
+            document.getElementById('page-home').classList.add('active');
+            return;
+        }
+
+        // البحث في كل البيانات
+        const results = [];
+        
+        // بحث في أذكار الصباح
+        MORNING_ADHKAR.forEach(item => { if(item.text.includes(query)) results.push(item); });
+        // بحث في أذكار المساء
+        EVENING_ADHKAR.forEach(item => { if(item.text.includes(query)) results.push(item); });
+        // بحث في أذكار النوم
+        SLEEP_ADHKAR.forEach(item => { if(item.text.includes(query)) results.push(item); });
+        // بحث في الأدعية
+        DUAS.forEach(item => { if(item.text.includes(query) || item.title.includes(query)) results.push(item); });
+        // بحث في الأسماء
+        ALLAH_NAMES.forEach(item => { if(item.ar.includes(query) || item.meaning.includes(query)) results.push({type: 'name', title: item.ar, text: item.meaning}); });
+
+        // عرض النتائج
+        const searchContainer = document.getElementById('list-search');
+        if(results.length > 0) {
+            searchContainer.innerHTML = results.map((d, i) => `
+                <div class="adhkar-card">
+                    ${d.type === 'surah' ? '<p class="basmala" style="text-align:center;margin-bottom:10px;">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>' : ''}
+                    ${d.type === 'ayah' ? '<p class="istiadha" style="text-align:center;margin-bottom:10px;">أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ</p>' : ''}
+                    <div class="${(d.type === 'surah' || d.type === 'ayah') ? 'quran-text' : 'adhkar-text'}">${d.text}</div>
+                </div>
+            `).join('');
+        } else {
+            searchContainer.innerHTML = `<p style="text-align:center; color:var(--muted); margin-top:50px; font-size:1.2rem;">لا توجد نتائج مطابقة لبحثك</p>`;
+        }
+
+        document.getElementById('page-home').classList.remove('active');
+        document.getElementById('page-search').classList.add('active');
+    });
+}
+
+// --- السبحة ---
 function setupTasbih() {
     let count = 0, max = 33;
     const select = document.getElementById('tasbih-select');
@@ -67,6 +116,7 @@ function setupTasbih() {
     function updateCounter() { document.getElementById('tasbih-count').textContent = count; }
 }
 
+// --- البوصلة ---
 function setupQibla() {
     const btn = document.getElementById('btn-qibla'), arrow = document.getElementById('qibla-arrow'), angleText = document.getElementById('qibla-angle-text');
     let qiblaBearing = 0;
@@ -98,6 +148,7 @@ function setupQibla() {
     }
 }
 
+// --- الثيم والبيانات ---
 function loadTheme() {
     const isDark = localStorage.getItem('dark') === 'true';
     if(isDark) document.body.classList.add('dark');
@@ -113,24 +164,13 @@ function loadTheme() {
     if(isDark) document.getElementById('theme-btn').innerHTML = '<i class="fa-solid fa-sun"></i>';
 }
 
-// --- المحرك الذكي للعرض (UI Generator Engine) ---
 function generateCardHTML(item, index, prefix) {
     let headerHTML = '';
-    
-    // هندسة البسملة والاستعاذة
-    if (item.type === 'surah') {
-        headerHTML = `<p class="basmala">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>`;
-    } else if (item.type === 'ayah') {
-        headerHTML = `<p class="istiadha">أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ</p>`;
-    }
+    if (item.type === 'surah') headerHTML = `<p class="basmala">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>`;
+    else if (item.type === 'ayah') headerHTML = `<p class="istiadha">أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ</p>`;
 
     let bodyClass = (item.type === 'surah' || item.type === 'ayah') ? 'quran-text' : 'adhkar-text';
-    
-    let content = `
-        <div class="card-header">${headerHTML}</div>
-        <div class="${bodyClass}">${item.text}</div>
-    `;
-
+    let content = `<div class="card-header">${headerHTML}</div><div class="${bodyClass}">${item.text}</div>`;
     if (prefix !== 'dua') {
         content += `<button class="btn-dhikr ripple" onclick="countDhikr(this, ${item.count || 1}, '${prefix}_${index}')">التكرار (0/${item.count || 1})</button>`;
     }
@@ -139,22 +179,16 @@ function generateCardHTML(item, index, prefix) {
 
 function renderData() {
     document.getElementById('hijri-date').textContent = new Intl.DateTimeFormat('ar-SA-u-ca-islamic').format(new Date());
-    
     const buildList = (data, id, prefix) => {
         const container = document.getElementById(id);
         if (!container) return;
-        container.innerHTML = data.map((d, i) => `
-            <div class="adhkar-card">
-                ${generateCardHTML(d, i, prefix)}
-            </div>
-        `).join('');
+        container.innerHTML = data.map((d, i) => `<div class="adhkar-card">${generateCardHTML(d, i, prefix)}</div>`).join('');
     };
     
     buildList(MORNING_ADHKAR, 'list-morning', 'm');
     buildList(EVENING_ADHKAR, 'list-evening', 'e');
     buildList(SLEEP_ADHKAR, 'list-sleep', 's');
     
-    // الأدعية
     const duasContainer = document.getElementById('list-duas');
     if(duasContainer) {
         duasContainer.innerHTML = DUAS.map((d, i) => `
@@ -168,12 +202,7 @@ function renderData() {
 
     const namesGrid = document.getElementById('list-names');
     if(namesGrid) {
-        namesGrid.innerHTML = ALLAH_NAMES.map(n => `
-            <div class="adhkar-card name-card">
-                <div class="name-ar">${n.ar}</div>
-                <div class="name-meaning">${n.meaning}</div>
-            </div>
-        `).join('');
+        namesGrid.innerHTML = ALLAH_NAMES.map(n => `<div class="adhkar-card name-card"><div class="name-ar">${n.ar}</div><div class="name-meaning">${n.meaning}</div></div>`).join('');
     }
 }
 
