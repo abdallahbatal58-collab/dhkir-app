@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dhikr-v2';
+const CACHE_NAME = 'dhikr-v3';
 const ASSETS = [
   './',
   './index.html',
@@ -39,20 +39,34 @@ self.addEventListener('fetch', (e) => {
   );
 });
 
-// إضافة دعم المزامنة في الخلفية (Background Sync)
+// دعم المزامنة الدورية والمزامنة العادية (Background Sync)
 self.addEventListener('sync', (event) => {
   if (event.tag === 'sync-dhikr') {
     console.log('Background sync performed');
   }
 });
 
-// إضافة دعم الإشعارات (Push Notifications)
+self.addEventListener('periodicsync', (event) => {
+  if (event.tag === 'periodic-dhikr') {
+    console.log('Periodic sync performed');
+  }
+});
+
+// دعم الإشعارات (Push Notifications)
 self.addEventListener('push', (event) => {
   const data = event.data ? event.data.text() : 'تذكير بذكر الله';
   event.waitUntil(
     self.registration.showNotification('ذِكْر', {
       body: data,
-      icon: 'https://placehold.co/192x192/0d3b2e/d4af37.png?text=Dhikr'
+      icon: 'https://placehold.co/192x192/0d3b2e/d4af37.png?text=Dhikr',
+      badge: 'https://placehold.co/192x192/0d3b2e/d4af37.png?text=Dhikr'
     })
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients.openWindow('/')
   );
 });
