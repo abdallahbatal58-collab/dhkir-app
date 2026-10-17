@@ -6,7 +6,7 @@
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui"],
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui", "fullscreen", "tabbed"],
   "orientation": "portrait",
   "background_color": "#0d3b2e",
   "theme_color": "#0d3b2e",
@@ -14,6 +14,47 @@
   "dir": "rtl",
   "categories": ["lifestyle", "education"],
   "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
+  "prefer_related_applications": false,
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.dhikr.app",
+      "id": "com.dhikr.app"
+    }
+  ],
+  "protocol_handlers": [
+    {
+      "protocol": "web+dhikr",
+      "url": "/index.html?protocol=%s"
+    }
+  ],
+  "share_target": {
+    "action": "/index.html",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "file_handlers": [
+    {
+      "action": "/index.html",
+      "accept": {
+        "text/plain": [".txt"]
+      }
+    }
+  ],
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "note_taking": {
+    "new_note_url": "/index.html"
+  },
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
   "icons": [
     {
       "src": "https://placehold.co/192x192/0d3b2e/d4af37.png?text=Dhikr",
