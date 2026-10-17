@@ -4,15 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#042f1a">
-    <title>ذِكْر | Pro V8</title>
+    <title>ذِكْر | Pro V10</title>
     
-    <!-- خطوط وأيقونات احترافية -->
+    <!-- خطوط وأيقونات احترافية (تم تحديث الأيقونات لأحدث إصدار 6.5.1) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <link rel="stylesheet" href="css/style.css?v=8.0">
+    <!-- تحديث نسخة CSS لكسر الكاش (v=10.0) -->
+    <link rel="stylesheet" href="css/style.css?v=10.0">
 </head>
 <body>
 
@@ -42,6 +43,8 @@
             <a href="#" data-target="home" class="active"><i class="fa-solid fa-house"></i> الرئيسية</a>
             <a href="#" data-target="morning"><i class="fa-solid fa-cloud-sun"></i> أذكار الصباح</a>
             <a href="#" data-target="evening"><i class="fa-solid fa-cloud-moon"></i> أذكار المساء</a>
+            <!-- تم إضافة أذكار النوم هنا -->
+            <a href="#" data-target="sleep"><i class="fa-solid fa-bed"></i> أذكار النوم</a>
             <a href="#" data-target="tasbih"><i class="fa-solid fa-circle-nodes"></i> السبحة الذكية</a>
             <a href="#" data-target="qibla"><i class="fa-solid fa-compass"></i> القبلة</a>
             <a href="#" data-target="duas"><i class="fa-solid fa-hands-praying"></i> الأدعية</a>
@@ -93,6 +96,12 @@
         <section id="page-evening" class="page">
             <h2 class="page-title">أذكار المساء</h2>
             <div class="list" id="list-evening"></div>
+        </section>
+
+        <!-- قسم أذكار النوم (تم إضافته) -->
+        <section id="page-sleep" class="page">
+            <h2 class="page-title">أذكار النوم والاستيقاظ</h2>
+            <div class="list" id="list-sleep"></div>
         </section>
 
         <!-- السبحة -->
@@ -168,6 +177,7 @@
         if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
     </script>
     <script src="js/data.js"></script>
-    <script src="js/app.js?v=8.0"></script>
+    <!-- تحديث نسخة JS لكسر الكاش (v=10.0) -->
+    <script src="js/app.js?v=10.0"></script>
 </body>
 </html>
