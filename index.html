@@ -3,36 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#0a2d22">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>ذِكْر | طمأنينة القلب</title>
-    
-    <!-- خطوط جوجل الفخمة -->
+    <meta name="theme-color" content="#042f1a">
+    <title>ذِكْر | Pro V6</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
-    
-    <!-- كسر الكاش v=200 -->
-    <link rel="stylesheet" href="css/style.css?v=200">
+    <link rel="stylesheet" href="css/style.css?v=6.0">
 </head>
 <body>
 
     <!-- شاشة البداية -->
-    <div id="splash-screen">
-        <div class="splash-content">
-            <div class="splash-icon">﷽</div>
+    <div id="splash">
+        <div class="splash-inner">
+            <!-- استخدام كلاس خاص لحجم البسملة عشان متتقصش -->
+            <div class="bismillah">﷽</div>
             <h1 class="splash-title">ذِكْر</h1>
-            <p class="splash-subtitle">حياتك بذكر الله أطيب</p>
-            <div class="loader"></div>
+            <div class="spinner"></div>
         </div>
     </div>
 
     <!-- الشريط العلوي -->
-    <header id="main-header">
-        <button id="menu-btn" class="icon-btn ripple">☰</button>
-        <div class="header-brand">ذِكْر</div>
-        <button id="theme-toggle" class="icon-btn ripple">🌙</button>
+    <header id="header">
+        <button id="menu-btn" class="icon-btn">☰</button>
+        <div class="brand">ذِكْر</div>
+        <button id="theme-btn" class="icon-btn">🌙</button>
     </header>
 
     <!-- القائمة الجانبية -->
@@ -42,148 +36,126 @@
             <p>﴿ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ ﴾</p>
         </div>
         <nav class="sidebar-nav">
-            <a href="#" data-target="home" class="active"><span>🏠</span> الرئيسية</a>
-            <a href="#" data-target="morning"><span>🌅</span> أذكار الصباح</a>
-            <a href="#" data-target="evening"><span>🌙</span> أذكار المساء</a>
-            <a href="#" data-target="tasbih"><span>📿</span> السبحة الذكية</a>
-            <a href="#" data-target="qibla"><span>🧭</span> القبلة</a>
-            <a href="#" data-target="duas"><span>🤲</span> الأدعية</a>
-            <a href="#" data-target="quran"><span>📖</span> القرآن الكريم</a>
-            <a href="#" data-target="names"><span>✨</span> أسماء الله</a>
-            <a href="#" data-target="settings"><span>⚙️</span> الإعدادات</a>
+            <a href="#" data-page="home" class="active"><span>🏠</span> الرئيسية</a>
+            <a href="#" data-page="morning"><span>🌅</span> أذكار الصباح</a>
+            <a href="#" data-page="evening"><span>🌙</span> أذكار المساء</a>
+            <a href="#" data-page="tasbih"><span>📿</span> السبحة الذكية</a>
+            <a href="#" data-page="qibla"><span>🧭</span> القبلة</a>
+            <a href="#" data-page="duas"><span>🤲</span> الأدعية</a>
+            <a href="#" data-page="names"><span>✨</span> أسماء الله</a>
+            <a href="#" data-page="settings"><span>⚙️</span> الإعدادات</a>
         </nav>
     </aside>
-    <div id="sidebar-overlay"></div>
+    <div id="overlay"></div>
 
-    <!-- المحتوى الرئيسي -->
-    <main id="app-content">
+    <!-- حاوية الصفحات (للسحب بين الصفحات) -->
+    <div id="pages-wrapper">
         
         <!-- الصفحة الرئيسية -->
         <section id="page-home" class="page active">
-            <div class="hero-card">
-                <div class="hijri-date" id="hijri-date">جاري التحميل...</div>
-                <h2 class="greeting" id="greeting-text">أهلاً بك</h2>
-                <p class="verse-mini">﴿ فَاذْكُرُونِي أَذْكُرْكُمْ ﴾</p>
+            <div class="hero">
+                <p class="date" id="hijri-date">جاري التحميل...</p>
+                <h2 class="greeting" id="greeting">أهلاً بك</h2>
             </div>
-
-            <div class="quick-grid">
-                <div class="quick-card ripple" data-target="morning">
-                    <div class="qc-icon">🌅</div>
-                    <h3>أذكار الصباح</h3>
-                    <p>حصّن يومك</p>
-                </div>
-                <div class="quick-card ripple" data-target="evening">
-                    <div class="qc-icon">🌙</div>
-                    <h3>أذكار المساء</h3>
-                    <p>احفظ ليلك</p>
-                </div>
-                <div class="quick-card ripple" data-target="tasbih">
-                    <div class="qc-icon">📿</div>
-                    <h3>السبحة</h3>
-                    <p>سبّح واحتسب</p>
-                </div>
-                <div class="quick-card ripple" data-target="qibla">
-                    <div class="qc-icon">🧭</div>
-                    <h3>القبلة</h3>
-                    <p>اتجاه الصلاة</p>
-                </div>
+            <div class="grid">
+                <div class="card" data-go="morning"><span>🌅</span><h3>الصباح</h3></div>
+                <div class="card" data-go="evening"><span>🌙</span><h3>المساء</h3></div>
+                <div class="card" data-go="tasbih"><span>📿</span><h3>السبحة</h3></div>
+                <div class="card" data-go="qibla"><span>🧭</span><h3>القبلة</h3></div>
             </div>
-
-            <div class="daily-verse-card">
-                <span class="badge">آية اليوم</span>
-                <p class="verse-text" id="daily-verse-text">﴿ وَاذْكُر رَّبَّكَ إِذَا نَسِيتَ ﴾</p>
+            <div class="verse-box">
+                <p>﴿ فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُوا لِي وَلَا تَكْفُرُونِ ﴾</p>
             </div>
         </section>
 
         <!-- أذكار الصباح -->
         <section id="page-morning" class="page">
-            <div class="page-title"><h2>🌅 أذكار الصباح</h2></div>
-            <div class="list-container" id="list-morning"></div>
+            <h2 class="page-title">🌅 أذكار الصباح</h2>
+            <div class="list" id="list-morning"></div>
         </section>
 
         <!-- أذكار المساء -->
         <section id="page-evening" class="page">
-            <div class="page-title"><h2>🌙 أذكار المساء</h2></div>
-            <div class="list-container" id="list-evening"></div>
+            <h2 class="page-title">🌙 أذكار المساء</h2>
+            <div class="list" id="list-evening"></div>
         </section>
 
-        <!-- السبحة الذكية -->
+        <!-- السبحة الاحترافية -->
         <section id="page-tasbih" class="page">
-            <div class="page-title"><h2>📿 السبحة الذكية</h2></div>
-            <div class="tasbih-selector" id="tasbih-modes"></div>
-            
-            <div class="tasbih-main">
-                <div class="tasbih-circle" id="tasbih-btn">
-                    <span class="count" id="tasbih-count">0</span>
-                    <span class="target" id="tasbih-target">/ 33</span>
-                </div>
-                <h3 class="current-dhikr" id="tasbih-text">سُبْحَانَ اللَّهِ</h3>
-            </div>
+            <h2 class="page-title">📿 السبحة الذكية</h2>
             
             <div class="tasbih-controls">
-                <button id="tasbih-reset" class="btn-secondary ripple">تصفير 🔄</button>
-                <button id="tasbih-vibrate" class="btn-secondary active ripple">اهتزاز 📳</button>
+                <select id="tasbih-select" class="pro-select"></select>
+                <select id="tasbih-target" class="pro-select">
+                    <option value="33">33 مرة</option>
+                    <option value="100">100 مرة</option>
+                    <option value="1000">1000 مرة</option>
+                    <option value="custom">عدد مخصص...</option>
+                </select>
+            </div>
+
+            <div class="tasbih-circle" id="tasbih-btn">
+                <span class="count" id="tasbih-count">0</span>
+                <span class="target" id="tasbih-max">/ 33</span>
+            </div>
+            
+            <h3 class="dhikr-text" id="tasbih-text">سُبْحَانَ اللَّهِ</h3>
+            
+            <div class="tasbih-btns">
+                <button id="reset-tasbih" class="btn-secondary">🔄 تصفير</button>
             </div>
         </section>
 
-        <!-- القبلة -->
+        <!-- البوصلة -->
         <section id="page-qibla" class="page">
-            <div class="page-title"><h2>🧭 اتجاه القبلة</h2></div>
-            <div class="compass-container">
-                <div class="compass">
-                    <div class="compass-ring"></div>
+            <h2 class="page-title">🧭 اتجاه القبلة</h2>
+            <div class="compass-box">
+                <div class="compass-ring">
                     <div class="compass-arrow" id="qibla-arrow">🕋</div>
                 </div>
-                <h3 id="qibla-degree">--°</h3>
-                <button id="find-qibla" class="btn-primary ripple">تحديد الموقع</button>
+                <h3 id="qibla-angle-text">في انتظار الموقع...</h3>
+                <button id="btn-qibla" class="btn-primary">تحديد اتجاه القبلة</button>
             </div>
         </section>
 
         <!-- الأدعية -->
         <section id="page-duas" class="page">
-            <div class="page-title"><h2>🤲 الأدعية والأذكار</h2></div>
-            <div class="list-container" id="list-duas"></div>
+            <h2 class="page-title">🤲 الأدعية</h2>
+            <div class="list" id="list-duas"></div>
         </section>
 
-        <!-- أسماء الله -->
+        <!-- الأسماء -->
         <section id="page-names" class="page">
-            <div class="page-title"><h2>✨ أسماء الله الحسنى</h2></div>
-            <div class="names-grid" id="names-grid"></div>
+            <h2 class="page-title">✨ أسماء الله</h2>
+            <div class="names-grid" id="list-names"></div>
         </section>
 
         <!-- الإعدادات -->
         <section id="page-settings" class="page">
-            <div class="page-title"><h2>⚙️ الإعدادات</h2></div>
-            <div class="settings-card">
-                <div class="setting-row">
+            <h2 class="page-title">⚙️ الإعدادات</h2>
+            <div class="settings">
+                <div class="set-item">
                     <span>الوضع الليلي</span>
                     <label class="switch"><input type="checkbox" id="set-dark"><span class="slider"></span></label>
-                </div>
-                <div class="setting-row">
-                    <span>حجم الخط</span>
-                    <input type="range" id="set-font" min="14" max="26" value="18">
                 </div>
             </div>
         </section>
 
-    </main>
+    </div>
 
     <!-- الشريط السفلي -->
     <nav id="bottom-nav">
-        <button data-target="home" class="active ripple"><span>🏠</span>الرئيسية</button>
-        <button data-target="morning" class="ripple"><span>🌅</span>الصباح</button>
-        <button data-target="tasbih" class="main-btn ripple"><span>📿</span></button>
-        <button data-target="duas" class="ripple"><span>🤲</span>الأدعية</button>
-        <button id="more-btn" class="ripple"><span>☰</span>المزيد</button>
+        <button data-page="home" class="active"><span>🏠</span>الرئيسية</button>
+        <button data-page="morning"><span>🌅</span>الصباح</button>
+        <button data-page="tasbih" class="main-btn"><span>📿</span></button>
+        <button data-page="duas"><span>🤲</span>الأدعية</button>
+        <button id="more-btn"><span>☰</span>المزيد</button>
     </nav>
 
-    <!-- السكربتات -->
     <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(console.error));
-        }
+        if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
     </script>
     <script src="js/data.js"></script>
-    <script src="js/app.js?v=200"></script>
+    <script src="js/app.js?v=6.0"></script>
 </body>
 </html>
