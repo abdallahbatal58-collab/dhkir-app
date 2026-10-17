@@ -1,10 +1,8 @@
 /* ============================================
-   ذِكْر | التصميم الاحترافي الشامل (Pro Edition V3)
+   ذِكْر | التصميم الاحترافي الشامل (Pro Edition V4 - Full Screen)
    ============================================ */
 
-/* ===== المتغيرات الأساسية ===== */
 :root {
-  /* الألوان الأساسية */
   --primary: #0d3b2e;
   --primary-light: #14563f;
   --primary-dark: #082820;
@@ -12,14 +10,12 @@
   --gold-light: #f0d878;
   --gold-dark: #a8871f;
   
-  /* ألوان الخلفيات والنصوص (الوضع النهاري) */
   --bg-body: #f5f1e8;
   --bg-card: #ffffff;
   --text-main: #1a1a1a;
   --text-muted: #666666;
   --border-color: rgba(212, 175, 55, 0.3);
   
-  /* الظلال والحركات */
   --shadow-sm: 0 4px 15px rgba(13, 59, 46, 0.08);
   --shadow-md: 0 8px 25px rgba(13, 59, 46, 0.15);
   --shadow-lg: 0 15px 40px rgba(13, 59, 46, 0.25);
@@ -28,7 +24,6 @@
   --radius-sm: 14px;
 }
 
-/* ===== إعدادات الوضع الليلي ===== */
 body.dark {
   --bg-body: #0f172a;
   --bg-card: #1e293b;
@@ -41,12 +36,18 @@ body.dark {
   --shadow-lg: 0 15px 40px rgba(0, 0, 0, 0.6);
 }
 
-/* ===== إعادة ضبط أساسية ===== */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
+}
+
+/* إعدادات الشاشة الكاملة */
+html {
+  background-color: var(--primary-dark); /* لون داكن يمنع الشريط الأبيض */
+  height: 100%;
+  width: 100%;
 }
 
 body {
@@ -55,17 +56,21 @@ body {
   color: var(--text-main);
   direction: rtl;
   min-height: 100vh;
-  padding-top: 75px;
-  padding-bottom: 95px;
+  min-height: -webkit-fill-available; /* لدعم متصفحات معينة */
+  padding-top: calc(65px + env(safe-area-inset-top, 0px)); /* يراعي شريط الحالة العلوي */
+  padding-bottom: calc(75px + env(safe-area-inset-bottom, 20px)); /* يراعي أزرار التنقل السفلية */
   transition: background-color 0.4s ease, color 0.4s ease;
   line-height: 1.7;
   overflow-x: hidden;
 }
 
-/* ===== شاشة البداية ===== */
+/* شاشة البداية - تم تعديلها لتأخذ كامل الشاشة 100% */
 #splash {
   position: fixed;
-  inset: 0;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh; /* يتكيف مع متصفحات الموبايل */
   background: linear-gradient(160deg, var(--primary) 0%, var(--primary-dark) 100%);
   z-index: 9999;
   display: flex;
@@ -94,18 +99,19 @@ body {
 .splash-loader span:nth-child(1) { animation-delay: -0.32s; }
 .splash-loader span:nth-child(2) { animation-delay: -0.16s; }
 
-/* ===== الشريط العلوي ===== */
+/* الشريط العلوي */
 #app-header {
   position: fixed;
   top: 0; left: 0; right: 0;
-  height: 65px;
+  height: calc(65px + env(safe-area-inset-top, 0px));
+  padding-top: env(safe-area-inset-top, 0px); /* عشان النوتش */
   background: rgba(13, 59, 46, 0.95);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
+  padding-inline: 20px;
   z-index: 100;
   border-bottom: 2px solid var(--gold);
   box-shadow: var(--shadow-sm);
@@ -122,31 +128,29 @@ body {
 }
 .icon-btn:active { transform: scale(0.9); background: rgba(212, 175, 55, 0.2); }
 
-/* =========================================================
-   القائمة الجانبية (تم إصلاح المشكلة هنا جذرياً)
-   ========================================================= */
+/* القائمة الجانبية - حل جذري */
 #drawer {
   position: fixed;
-  top: 0; right: -320px; width: 300px; height: 100vh;
+  top: 0; right: -320px; width: 300px; height: 100vh; height: 100dvh;
   background: linear-gradient(180deg, var(--primary) 0%, #04120e 100%);
   z-index: 200;
   transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   overflow-y: auto;
   border-left: 3px solid var(--gold);
   box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+  padding-top: env(safe-area-inset-top, 0px);
 }
 #drawer.open { right: 0; }
 .drawer-header { padding: 35px 20px 25px; text-align: center; border-bottom: 1px solid rgba(212, 175, 55, 0.2); }
 .drawer-logo { font-family: 'Amiri', serif; font-size: 2.8em; color: var(--gold); margin-bottom: 10px; }
 .drawer-tagline { color: #cbd5e1 !important; font-family: 'Amiri', serif; font-size: 1.1em; }
 
-/* إجبار النصوص في القائمة الجانبية تكون فاتحة عشان التباين (حل نهائي) */
 .drawer-nav { padding: 20px 15px; display: flex; flex-direction: column; gap: 6px; }
 #drawer .drawer-nav a, 
 body.dark #drawer .drawer-nav a {
   display: flex; align-items: center; gap: 15px;
   padding: 15px 20px; 
-  color: #f8fafc !important; /* فرض اللون الأبيض الناصع */
+  color: #f8fafc !important; 
   text-decoration: none;
   border-radius: 12px; font-size: 1.1em; font-weight: 700;
   transition: var(--transition);
@@ -168,12 +172,11 @@ body.dark #drawer .drawer-nav a.active {
 }
 #overlay.show { opacity: 1; visibility: visible; }
 
-/* ===== المحتوى الرئيسي ===== */
+/* المحتوى الرئيسي */
 #content { max-width: 650px; margin: 0 auto; padding: 20px; }
 .page { display: none; animation: pageIn 0.4s ease; }
 .page.active { display: block; }
 
-/* ===== الصفحة الرئيسية ===== */
 .home-greeting {
   background: linear-gradient(135deg, var(--primary), var(--primary-light));
   border-radius: var(--radius);
@@ -190,7 +193,6 @@ body.dark #drawer .drawer-nav a.active {
 .greeting-text { font-family: 'Amiri', serif; font-size: 2.2em; color: var(--gold); position: relative; z-index: 1; }
 .greeting-sub { font-size: 1em; opacity: 0.9; position: relative; z-index: 1; }
 
-/* كروت الأزرار السريعة */
 .quick-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 25px; }
 .quick-card {
   background: var(--bg-card);
@@ -206,7 +208,6 @@ body.dark #drawer .drawer-nav a.active {
 body.dark .qc-title { color: var(--gold-light); }
 .qc-sub { font-size: 0.85em; color: var(--text-muted); }
 
-/* بطاقة الآية */
 .verse-card {
   background: var(--bg-card); border-radius: var(--radius);
   padding: 30px 20px; border: 1px solid var(--border-color);
@@ -221,7 +222,6 @@ body.dark .qc-title { color: var(--gold-light); }
 body.dark .verse-text { color: var(--gold-light); }
 .verse-ref { font-size: 0.9em; color: var(--text-muted); font-weight: 600; }
 
-/* ===== الأذكار ===== */
 .adhkar-list { display: flex; flex-direction: column; gap: 20px; }
 .adhkar-card {
   background: var(--bg-card); border-radius: var(--radius);
@@ -248,7 +248,6 @@ body.dark .adhkar-count { color: var(--gold-light); }
 .adhkar-btn:active { transform: scale(0.97); }
 .adhkar-btn.done { background: linear-gradient(135deg, var(--gold), var(--gold-dark)); color: var(--primary); }
 
-/* ===== مواقيت الصلاة (صفحة جديدة) ===== */
 .prayer-card {
   background: var(--bg-card);
   border-radius: var(--radius);
@@ -272,7 +271,6 @@ body.dark .prayer-item .p-name { color: var(--gold-light); }
 .prayer-item .p-time { color: var(--gold-dark); font-family: 'Cairo', sans-serif; letter-spacing: 1px; }
 body.dark .prayer-item .p-time { color: var(--gold); }
 
-/* ===== السبحة ===== */
 .tasbih-display {
   text-align: center; padding: 40px 20px; background: var(--bg-card);
   border-radius: 50px; box-shadow: var(--shadow-lg); border: 4px solid var(--gold);
@@ -305,7 +303,6 @@ body.dark .tasbih-dhikr { color: var(--gold-light); }
 body.dark .stat-num { color: var(--gold); }
 .stat-lbl { font-size: 0.9em; color: var(--text-muted); }
 
-/* ===== الأدعية والقرآن ===== */
 .duas-cats { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 15px; margin-bottom: 20px; }
 .dua-cat {
   padding: 10px 20px; background: var(--bg-card); border: 1px solid var(--border-color);
@@ -319,7 +316,6 @@ body.dark .dua-title { color: var(--gold); }
 .dua-text { font-family: 'Scheherazade New', 'Amiri', serif; font-size: 1.4em; line-height: 2.2; color: var(--text-main); }
 .dua-ref { font-size: 0.85em; color: var(--text-muted); margin-top: 10px; text-align: left; }
 
-/* ===== الإعدادات ===== */
 .settings-list { background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border-color); overflow: hidden; }
 .setting-item { padding: 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; font-size: 1.1em; font-weight: 600; }
 .setting-item:last-child { border-bottom: none; }
@@ -330,9 +326,10 @@ body.dark .dua-title { color: var(--gold); }
 .switch input:checked + .slider { background: var(--primary); }
 .switch input:checked + .slider::before { transform: translateX(-25px); background: var(--gold); }
 
-/* ===== الشريط السفلي ===== */
 #bottom-nav {
-  position: fixed; bottom: 0; left: 0; right: 0; height: 75px;
+  position: fixed; bottom: 0; left: 0; right: 0; 
+  height: calc(75px + env(safe-area-inset-bottom, 0px)); /* يراعي شريط التنقل */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   background: rgba(13, 59, 46, 0.95); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
   display: flex; justify-content: space-around; align-items: center;
   z-index: 100; border-top: 2px solid var(--gold); box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
@@ -352,7 +349,6 @@ body.dark .dua-title { color: var(--gold); }
 }
 #bottom-nav .nav-main small { display: none; }
 
-/* ===== الحركات (Animations) ===== */
 @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes pageIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
 @keyframes bounce { 0%, 80%, 100% { transform: scale(0.4); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
