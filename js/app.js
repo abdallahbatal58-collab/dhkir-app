@@ -1,180 +1,211 @@
-// ============================================
-// ذِكْر | V5 Core Logic & Touch Interaction
-// ============================================
-
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. إخفاء شاشة البداية
-    setTimeout(() => {
-        document.getElementById('splash-screen').classList.add('hidden');
-        initApp();
-    }, 2000);
+    setTimeout(() => document.getElementById('splash').classList.add('hide'), 1500);
+    init();
 });
 
-function initApp() {
+// الأقسام بالترتيب عشان السحب
+const pageOrder = ['home', 'morning', 'evening', 'tasbih', 'qibla', 'duas', 'names', 'settings'];
+let currentIndex = 0;
+const wrapper = document.getElementById('pages-wrapper');
+
+function init() {
     loadTheme();
     renderData();
-    setupNavigation();
-    setupSwipeGestures();
-    updateHijriDate();
+    setupTasbih();
+    setupSwipeAndNav();
 }
 
-// --- التنقل (Navigation) ---
-const pages = document.querySelectorAll('.page');
-const navLinks = document.querySelectorAll('.sidebar-nav a, #bottom-nav button[data-target]');
-const sidebar = document.getElementById('sidebar');
-const overlay = document.getElementById('sidebar-overlay');
-
-function navigateTo(targetId) {
-    // إخفاء كل الصفحات وإظهار المطلوبة
-    pages.forEach(p => p.classList.remove('active'));
-    const targetPage = document.getElementById(`page-${targetId}`);
-    if(targetPage) targetPage.classList.add('active');
-
-    // تحديث الروابط النشطة
-    document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.toggle('active', a.dataset.target === targetId));
-    document.querySelectorAll('#bottom-nav button[data-target]').forEach(b => b.classList.toggle('active', b.dataset.target === targetId));
-
-    // غلق القائمة الجانبية إن كانت مفتوحة
-    sidebar.classList.remove('open');
-    overlay.classList.remove('show');
+// --- التنقل والسحب (Swipe Engine) ---
+function goToPage(index) {
+    if(index < 0 || index >= pageOrder.length) return;
+    currentIndex = index;
+    wrapper.style.transform = `translateX(${currentIndex * 20}%)`; // 20% لأن العرض 500%
     
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const targetPage = pageOrder[index];
+    document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.toggle('active', a.dataset.page === targetPage));
+    document.querySelectorAll('#bottom-nav button').forEach(b => b.classList.toggle('active', b.dataset.page === targetPage));
+    
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').classList.remove('show');
 }
 
-function setupNavigation() {
-    // أزرار القائمة الجانبية
-    document.querySelectorAll('.sidebar-nav a').forEach(link => {
-        link.addEventListener('click', (e) => { e.preventDefault(); navigateTo(link.dataset.target); });
+function setupSwipeAndNav() {
+    // أزرار التنقل
+    document.querySelectorAll('[data-page], [data-go]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const page = btn.dataset.page || btn.dataset.go;
+            const idx = pageOrder.indexOf(page);
+            if(idx !== -1) goToPage(idx);
+        });
     });
 
-    // أزرار الشريط السفلي
-    document.querySelectorAll('#bottom-nav button[data-target]').forEach(btn => {
-        btn.addEventListener('click', () => navigateTo(btn.dataset.target));
-    });
+    // فتح القائمة
+    document.getElementById('menu-btn').onclick = () => { document.getElementById('sidebar').classList.add('open'); document.getElementById('overlay').classList.add('show'); };
+    document.getElementById('more-btn').onclick = () => { document.getElementById('sidebar').classList.add('open'); document.getElementById('overlay').classList.add('show'); };
+    document.getElementById('overlay').onclick = () => { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('show'); };
 
-    // كروت الصفحة الرئيسية
-    document.querySelectorAll('.quick-card').forEach(card => {
-        card.addEventListener('click', () => navigateTo(card.dataset.target));
-    });
-
-    // القائمة الجانبية فتح/غلق
-    document.getElementById('menu-btn').addEventListener('click', () => { sidebar.classList.add('open'); overlay.classList.add('show'); });
-    document.getElementById('more-btn').addEventListener('click', () => { sidebar.classList.add('open'); overlay.classList.add('show'); });
-    overlay.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('show'); });
-}
-
-// --- السحب باللمس (Swipe) ---
-function setupSwipeGestures() {
-    let touchStartX = 0;
-    let touchEndX = 0;
-    const appContent = document.getElementById('app-content');
-
-    appContent.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive: true});
-    appContent.addEventListener('touchend', e => {
-        touchEndX = e.changedTouches[0].screenX;
-        handleSwipe();
+    // محرك السحب
+    let startX = 0, startY = 0;
+    wrapper.addEventListener('touchstart', e => {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
     }, {passive: true});
 
-    function handleSwipe() {
-        const swipeThreshold = 100;
-        // فتح القائمة عند السحب لليمين من حافة الشاشة
-        if (touchEndX - touchStartX > swipeThreshold && touchStartX < 50) {
-            sidebar.classList.add('open'); overlay.classList.add('show');
+    wrapper.addEventListener('touchend', e => {
+        let diffX = e.changedTouches[0].clientX - startX;
+        let diffY = e.changedTouches[0].clientY - startY;
+
+        // التأكد إن الحركة أفقية مش رأسية (عشان الصفحة متتحركش بالغلط)
+        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+            if (diffX > 0 && currentIndex > 0) goToPage(currentIndex - 1); // سحب لليمين
+            else if (diffX < 0 && currentIndex < pageOrder.length - 1) goToPage(currentIndex + 1); // سحب للشمال
         }
-        // غلق القائمة عند السحب لليسار
-        if (touchStartX - touchEndX > swipeThreshold && sidebar.classList.contains('open')) {
-            sidebar.classList.remove('open'); overlay.classList.remove('show');
-        }
-    }
+    }, {passive: true});
 }
 
-// --- الوضع الليلي (Dark Mode) ---
-function loadTheme() {
-    const isDark = localStorage.getItem('dhikr_theme') === 'dark';
-    if (isDark) document.body.classList.add('dark');
-    document.getElementById('set-dark').checked = isDark;
-    document.getElementById('theme-toggle').textContent = isDark ? '☀️' : '🌙';
+// --- السبحة الاحترافية ---
+let currentTasbihCount = 0;
+let maxTasbih = 33;
 
-    document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
-    document.getElementById('set-dark').addEventListener('change', toggleTheme);
-}
-
-function toggleTheme() {
-    document.body.classList.toggle('dark');
-    const isDark = document.body.classList.contains('dark');
-    localStorage.setItem('dhikr_theme', isDark ? 'dark' : 'light');
-    document.getElementById('set-dark').checked = isDark;
-    document.getElementById('theme-toggle').textContent = isDark ? '☀️' : '🌙';
-}
-
-// --- التاريخ الهجري ---
-function updateHijriDate() {
-    const date = new Intl.DateTimeFormat('ar-SA-u-ca-islamic', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
-    document.getElementById('hijri-date').textContent = date;
+function setupTasbih() {
+    const select = document.getElementById('tasbih-select');
+    const targetSelect = document.getElementById('tasbih-target');
     
-    const hour = new Date().getHours();
-    let greet = "أهلاً بك";
-    if (hour >= 4 && hour < 12) greet = "صباح الخير ☀️";
-    else if (hour >= 12 && hour < 17) greet = "نهارك سعيد 🌤️";
-    else greet = "مساء الخير 🌙";
-    document.getElementById('greeting-text').textContent = greet;
+    // تعبئة الأذكار
+    select.innerHTML = TASBIH_ITEMS.map((t, i) => `<option value="${i}">${t.name}</option>`).join('');
+    
+    select.addEventListener('change', () => {
+        document.getElementById('tasbih-text').textContent = TASBIH_ITEMS[select.value].name;
+        document.getElementById('tasbih-max').textContent = '/' + TASBIH_ITEMS[select.value].target;
+        maxTasbih = TASBIH_ITEMS[select.value].target;
+        currentTasbihCount = 0;
+        updateCounter();
+    });
+
+    targetSelect.addEventListener('change', () => {
+        if(targetSelect.value === 'custom') {
+            let custom = prompt('أدخل العدد الذي تريده:', '50');
+            if(custom && !isNaN(custom)) { maxTasbih = parseInt(custom); }
+            else { targetSelect.value = '33'; maxTasbih = 33; }
+        } else {
+            maxTasbih = parseInt(targetSelect.value);
+        }
+        document.getElementById('tasbih-max').textContent = '/' + maxTasbih;
+        currentTasbihCount = 0;
+        updateCounter();
+    });
+
+    document.getElementById('tasbih-btn').addEventListener('click', () => {
+        currentTasbihCount++;
+        if(navigator.vibrate) navigator.vibrate(30);
+        if(currentTasbihCount >= maxTasbih) {
+            if(navigator.vibrate) navigator.vibrate([100, 50, 100]);
+            currentTasbihCount = 0;
+            setTimeout(() => alert('أكملت العدد المطلوب! تقبل الله.'), 100);
+        }
+        updateCounter();
+    });
+
+    document.getElementById('reset-tasbih').addEventListener('click', () => {
+        currentTasbihCount = 0; updateCounter();
+    });
 }
 
-// --- بيانات العرض (ملاحظة: تأكد أن ملف data.js به المتغيرات MORNING_ADHKAR, EVENING_ADHKAR, DUAS, ALLAH_NAMES) ---
+function updateCounter() {
+    document.getElementById('tasbih-count').textContent = currentTasbihCount;
+}
+
+// --- البوصلة (البوصلة الحقيقية) ---
+document.getElementById('btn-qibla').addEventListener('click', () => {
+    const btn = document.getElementById('btn-qibla');
+    btn.textContent = 'جاري التحديد...';
+    
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(pos => {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+            const kaabaLat = 21.4225;
+            const kaabaLng = 39.8262;
+            
+            // حساب الزاوية
+            const dLon = (kaabaLng - lng) * Math.PI / 180;
+            const lat1 = lat * Math.PI / 180;
+            const lat2 = kaabaLat * Math.PI / 180;
+            const y = Math.sin(dLon) * Math.cos(lat2);
+            const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
+            let brng = Math.atan2(y, x) * 180 / Math.PI;
+            brng = (brng + 360) % 360;
+            
+            document.getElementById('qibla-angle-text').textContent = `القبلة: ${Math.round(brng)}°`;
+            document.getElementById('qibla-arrow').style.transform = `rotate(${brng}deg)`;
+            btn.textContent = 'تحديث القبلة';
+            
+            // تفعيل حساس الحركة (لو المتصفح بيدعم)
+            if (window.DeviceOrientationEvent) {
+                window.addEventListener('deviceorientationabsolute', (e) => {
+                    if(e.alpha !== null) {
+                        // معادلة دمج حركة الهاتف مع اتجاه القبلة
+                        document.getElementById('qibla-arrow').style.transform = `rotate(${brng - e.alpha}deg)`;
+                    }
+                });
+            }
+        }, () => {
+            alert('يجب السماح بالوصول للموقع لتحديد القبلة');
+            btn.textContent = 'تحديد اتجاه القبلة';
+        });
+    }
+});
+
+// --- باقي الدوال (الثيم، البيانات، التاريخ) ---
+function loadTheme() {
+    const isDark = localStorage.getItem('dark') === 'true';
+    if(isDark) document.body.classList.add('dark');
+    document.getElementById('theme-btn').onclick = () => {
+        document.body.classList.toggle('dark');
+        localStorage.setItem('dark', document.body.classList.contains('dark'));
+    };
+    document.getElementById('set-dark').checked = isDark;
+    document.getElementById('set-dark').onchange = () => {
+        document.body.classList.toggle('dark');
+        localStorage.setItem('dark', document.body.classList.contains('dark'));
+    };
+}
+
 function renderData() {
+    // التاريخ
+    document.getElementById('hijri-date').textContent = new Intl.DateTimeFormat('ar-SA-u-ca-islamic').format(new Date());
+    
     // الأذكار
-    const renderAdhkar = (data, containerId, prefix) => {
-        const container = document.getElementById(containerId);
-        if(!container) return;
-        container.innerHTML = data.map((item, i) => `
+    const buildList = (data, id, prefix) => {
+        document.getElementById(id).innerHTML = data.map((d, i) => `
             <div class="adhkar-card">
-                <div class="adhkar-text">${item.text}</div>
-                <button class="adhkar-btn" onclick="countDhikr(this, ${item.count}, '${prefix}_${i}')">التكرار: 0/${item.count}</button>
+                <div class="adhkar-text">${d.text}</div>
+                <button class="btn-dhikr" onclick="countDhikr(this, ${d.count}, '${prefix}_${i}')">التكرار (0/${d.count})</button>
             </div>
         `).join('');
     };
-    renderAdhkar(MORNING_ADHKAR, 'list-morning', 'm');
-    renderAdhkar(EVENING_ADHKAR, 'list-evening', 'e');
+    buildList(MORNING_ADHKAR, 'list-morning', 'm');
+    buildList(EVENING_ADHKAR, 'list-evening', 'e');
 
     // الأدعية
-    const duasContainer = document.getElementById('list-duas');
-    if(duasContainer && typeof DUAS !== 'undefined') {
-        duasContainer.innerHTML = DUAS.map(d => `
-            <div class="adhkar-card">
-                <div class="adhkar-text" style="font-family:'Tajawal'; font-weight:bold; font-size:1.1em; color:var(--gold);">${d.title}</div>
-                <div class="adhkar-text" style="font-size:1.2em;">${d.text}</div>
-            </div>
-        `).join('');
-    }
-    
-    // أسماء الله
-    const namesGrid = document.getElementById('names-grid');
-    if(namesGrid && typeof ALLAH_NAMES !== 'undefined') {
-        namesGrid.style.display = 'grid';
-        namesGrid.style.gridTemplateColumns = '1fr 1fr';
-        namesGrid.style.gap = '10px';
-        namesGrid.innerHTML = ALLAH_NAMES.slice(0, 30).map(n => `
-            <div class="adhkar-card" style="text-align:center; padding:15px;">
-                <div style="font-family:'Amiri'; font-size:1.4em; color:var(--primary); font-weight:bold;">${n.ar}</div>
-                <div style="font-size:0.8em; color:var(--text-muted); margin-top:5px;">${n.meaning}</div>
-            </div>
-        `).join('');
-    }
+    document.getElementById('list-duas').innerHTML = DUAS.map(d => `
+        <div class="adhkar-card"><div style="color:var(--gold);font-weight:bold;margin-bottom:5px">${d.title}</div><div class="adhkar-text">${d.text}</div></div>
+    `).join('');
+
+    // الأسماء
+    document.getElementById('list-names').innerHTML = ALLAH_NAMES.slice(0, 40).map(n => `
+        <div class="adhkar-card" style="text-align:center"><div style="font-family:'Amiri';font-size:1.5rem;color:var(--primary)">${n.ar}</div></div>
+    `).join('');
 }
 
-// --- الأذكار (عداد التكرار) ---
-function countDhikr(btn, max, key) {
-    let current = parseInt(localStorage.getItem(`dhikr_${key}`) || 0);
-    if (current < max) {
-        current++;
-        localStorage.setItem(`dhikr_${key}`, current);
-        if (navigator.vibrate) navigator.vibrate(30);
-        
-        btn.textContent = `التكرار: ${current}/${max}`;
-        if (current === max) {
-            btn.classList.add('done');
-            btn.textContent = '✓ تم بحمد الله';
-            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-        }
+window.countDhikr = (btn, max, key) => {
+    let cur = parseInt(localStorage.getItem(key) || 0);
+    if(cur < max) {
+        cur++;
+        localStorage.setItem(key, cur);
+        if(navigator.vibrate) navigator.vibrate(20);
+        btn.textContent = `التكرار (${cur}/${max})`;
+        if(cur === max) { btn.classList.add('done'); btn.textContent = '✓ تم'; }
     }
-}
+};
