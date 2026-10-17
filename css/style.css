@@ -345,4 +345,30 @@ body.dark .dua-title { color: var(--gold); }
 /* إبراز الأيقونات */
 #drawer .drawer-nav a .ico {
     filter: drop-shadow(0 0 3px rgba(0,0,0,0.5)) !important;
+/* ============================================
+   الحل الجذري النهائي (فرض الألوان بالقوة)
+   ============================================ */
+#drawer, 
+#drawer nav, 
+#drawer .drawer-nav {
+    background: transparent !important;
+}
+
+#drawer a, 
+#drawer .drawer-nav a, 
+body.dark #drawer .drawer-nav a {
+    color: #ffffff !important; /* أبيض ناصع */
+    font-weight: 600 !important;
+}
+
+#drawer a span, 
+#drawer .drawer-nav a span {
+    color: #ffffff !important; 
+}
+
+#drawer .drawer-nav a.active, 
+body.dark #drawer .drawer-nav a.active {
+    color: #d4af37 !important; /* ذهبي للعنصر النشط */
+    background: rgba(212, 175, 55, 0.15) !important;
+}
 }
