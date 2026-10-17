@@ -12,6 +12,7 @@ function init() {
     setupQibla();
 }
 
+// --- التنقل ---
 function navigateTo(targetId) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     const targetPage = document.getElementById(`page-${targetId}`);
@@ -26,25 +27,15 @@ function navigateTo(targetId) {
 
 function setupNavigation() {
     document.querySelectorAll('[data-target]').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            navigateTo(btn.dataset.target);
-        });
+        btn.addEventListener('click', (e) => { e.preventDefault(); navigateTo(btn.dataset.target); });
     });
-
     document.getElementById('menu-btn').onclick = openMenu;
     document.getElementById('more-btn').onclick = openMenu;
     document.getElementById('sidebar-overlay').onclick = closeMenu;
 }
 
-function openMenu() {
-    document.getElementById('sidebar').classList.add('open');
-    document.getElementById('sidebar-overlay').classList.add('show');
-}
-function closeMenu() {
-    document.getElementById('sidebar').classList.remove('open');
-    document.getElementById('sidebar-overlay').classList.remove('show');
-}
+function openMenu() { document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebar-overlay').classList.add('show'); }
+function closeMenu() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebar-overlay').classList.remove('show'); }
 
 function setupSwipeMenu() {
     let startX = 0;
@@ -56,6 +47,7 @@ function setupSwipeMenu() {
     }, {passive: true});
 }
 
+// --- السبحة ---
 function setupTasbih() {
     let count = 0, max = 33;
     const select = document.getElementById('tasbih-select');
@@ -63,56 +55,97 @@ function setupTasbih() {
     
     select.innerHTML = TASBIH_ITEMS.map((t, i) => `<option value="${i}">${t.name}</option>`).join('');
     
-    select.onchange = () => {
-        document.getElementById('tasbih-text').textContent = TASBIH_ITEMS[select.value].name;
-        count = 0; updateCounter();
-    };
-
+    select.onchange = () => { document.getElementById('tasbih-text').textContent = TASBIH_ITEMS[select.value].name; count = 0; updateCounter(); };
     target.onchange = () => {
         if(target.value === 'custom') {
             let val = prompt('أدخل العدد:', '50');
             max = (val && !isNaN(val)) ? parseInt(val) : 33;
         } else { max = parseInt(target.value); }
-        document.getElementById('tasbih-max').textContent = '/' + max;
-        count = 0; updateCounter();
+        document.getElementById('tasbih-max').textContent = '/' + max; count = 0; updateCounter();
     };
-
     document.getElementById('tasbih-btn').onclick = () => {
         count++;
         if(navigator.vibrate) navigator.vibrate(20);
-        if(count >= max) {
-            if(navigator.vibrate) navigator.vibrate([100, 50, 100]);
-            count = 0; alert('تم إكمال العدد! تقبل الله.');
-        }
+        if(count >= max) { if(navigator.vibrate) navigator.vibrate([100, 50, 100]); count = 0; alert('تم إكمال العدد! تقبل الله.'); }
         updateCounter();
     };
     document.getElementById('reset-tasbih').onclick = () => { count = 0; updateCounter(); };
-
     function updateCounter() { document.getElementById('tasbih-count').textContent = count; }
 }
 
+// --- البوصلة الحقيقية (مع حساس الحركة) ---
 function setupQibla() {
-    document.getElementById('btn-qibla').onclick = () => {
-        const btn = document.getElementById('btn-qibla');
-        const icon = btn.querySelector('i');
+    const btn = document.getElementById('btn-qibla');
+    const arrow = document.getElementById('qibla-arrow');
+    const angleText = document.getElementById('qibla-angle-text');
+    let qiblaBearing = 0;
+
+    btn.onclick = async () => {
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحديد...';
         
-        navigator.geolocation.getCurrentPosition(pos => {
-            const lat = pos.coords.latitude, lng = pos.coords.longitude;
-            const kaabaLat = 21.4225, kaabaLng = 39.8262;
-            const dLon = (kaabaLng - lng) * Math.PI / 180;
-            const y = Math.sin(dLon) * Math.cos(kaabaLat * Math.PI / 180);
-            const x = Math.cos(lat * Math.PI / 180) * Math.sin(kaabaLat * Math.PI / 180) - Math.sin(lat * Math.PI / 180) * Math.cos(kaabaLat * Math.PI / 180) * Math.cos(dLon);
-            let brng = Math.atan2(y, x) * 180 / Math.PI;
-            brng = (brng + 360) % 360;
-            
-            document.getElementById('qibla-angle-text').textContent = `القبلة: ${Math.round(brng)}°`;
-            document.getElementById('qibla-arrow').style.transform = `rotate(${brng}deg)`;
-            btn.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i> تحديث القبلة';
-        }, () => { alert('الرجاء السماح بالوصول للموقع'); btn.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i> تحديد'; });
+        // 1. طلب إذن حساس الحركة (مهم جداً للآيفون)
+        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+            try {
+                const permission = await DeviceOrientationEvent.requestPermission();
+                if (permission !== 'granted') {
+                    alert("يجب السماح بالوصول لحساس الحركة (Motion) لتشغيل البوصلة.");
+                }
+            } catch (error) {
+                console.error("Permission error:", error);
+            }
+        }
+
+        // 2. جلب الموقع وحساب اتجاه القبلة
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(pos => {
+                const lat = pos.coords.latitude, lng = pos.coords.longitude;
+                const kaabaLat = 21.4225, kaabaLng = 39.8262;
+                
+                const dLon = (kaabaLng - lng) * Math.PI / 180;
+                const y = Math.sin(dLon) * Math.cos(kaabaLat * Math.PI / 180);
+                const x = Math.cos(lat * Math.PI / 180) * Math.sin(kaabaLat * Math.PI / 180) - Math.sin(lat * Math.PI / 180) * Math.cos(kaabaLat * Math.PI / 180) * Math.cos(dLon);
+                
+                qiblaBearing = Math.atan2(y, x) * 180 / Math.PI;
+                qiblaBearing = (qiblaBearing + 360) % 360;
+                
+                angleText.textContent = `اتجاه القبلة: ${Math.round(qiblaBearing)}°`;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> البوصلة تعمل الآن (حرك هاتفك)';
+                
+                startCompass(qiblaBearing);
+            }, () => {
+                alert('الرجاء السماح بالوصول للموقع.');
+                btn.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i> إعادة المحاولة';
+            }, { enableHighAccuracy: true });
+        } else {
+            alert('متصفحك لا يدعم تحديد الموقع.');
+        }
     };
+
+    // دالة تشغيل البوصلة وقراءة حركة الهاتف
+    function startCompass(qiblaDeg) {
+        window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+        window.addEventListener('deviceorientation', handleOrientation, true);
+
+        function handleOrientation(event) {
+            let compassHeading = null;
+            
+            // قراءة زاوية الهاتف (تختلف من أندرويد لآيفون)
+            if (event.webkitCompassHeading) {
+                compassHeading = event.webkitCompassHeading; // للآيفون
+            } else if (event.alpha !== null) {
+                compassHeading = 360 - event.alpha; // للأندرويد
+            }
+
+            if (compassHeading !== null) {
+                // معادلة الدوران: اتجاه القبلة - اتجاه الهاتف
+                let rotation = qiblaDeg - compassHeading;
+                arrow.style.transform = `rotate(${rotation}deg)`;
+            }
+        }
+    }
 }
 
+// --- الثيم والبيانات ---
 function loadTheme() {
     const isDark = localStorage.getItem('dark') === 'true';
     if(isDark) document.body.classList.add('dark');
