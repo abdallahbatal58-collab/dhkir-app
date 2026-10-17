@@ -73,7 +73,7 @@ function setupTasbih() {
     function updateCounter() { document.getElementById('tasbih-count').textContent = count; }
 }
 
-// --- البوصلة الحقيقية (مع حساس الحركة) ---
+// --- البوصلة ---
 function setupQibla() {
     const btn = document.getElementById('btn-qibla');
     const arrow = document.getElementById('qibla-arrow');
@@ -83,24 +83,17 @@ function setupQibla() {
     btn.onclick = async () => {
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحديد...';
         
-        // 1. طلب إذن حساس الحركة (مهم جداً للآيفون)
         if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
             try {
                 const permission = await DeviceOrientationEvent.requestPermission();
-                if (permission !== 'granted') {
-                    alert("يجب السماح بالوصول لحساس الحركة (Motion) لتشغيل البوصلة.");
-                }
-            } catch (error) {
-                console.error("Permission error:", error);
-            }
+                if (permission !== 'granted') alert("يجب السماح بالوصول لحساس الحركة.");
+            } catch (error) { console.error(error); }
         }
 
-        // 2. جلب الموقع وحساب اتجاه القبلة
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(pos => {
                 const lat = pos.coords.latitude, lng = pos.coords.longitude;
                 const kaabaLat = 21.4225, kaabaLng = 39.8262;
-                
                 const dLon = (kaabaLng - lng) * Math.PI / 180;
                 const y = Math.sin(dLon) * Math.cos(kaabaLat * Math.PI / 180);
                 const x = Math.cos(lat * Math.PI / 180) * Math.sin(kaabaLat * Math.PI / 180) - Math.sin(lat * Math.PI / 180) * Math.cos(kaabaLat * Math.PI / 180) * Math.cos(dLon);
@@ -109,38 +102,18 @@ function setupQibla() {
                 qiblaBearing = (qiblaBearing + 360) % 360;
                 
                 angleText.textContent = `اتجاه القبلة: ${Math.round(qiblaBearing)}°`;
-                btn.innerHTML = '<i class="fa-solid fa-check"></i> البوصلة تعمل الآن (حرك هاتفك)';
-                
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> البوصلة تعمل الآن';
                 startCompass(qiblaBearing);
-            }, () => {
-                alert('الرجاء السماح بالوصول للموقع.');
-                btn.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i> إعادة المحاولة';
-            }, { enableHighAccuracy: true });
-        } else {
-            alert('متصفحك لا يدعم تحديد الموقع.');
+            }, () => { alert('الرجاء السماح بالوصول للموقع.'); btn.innerHTML = 'إعادة المحاولة'; }, { enableHighAccuracy: true });
         }
     };
 
-    // دالة تشغيل البوصلة وقراءة حركة الهاتف
     function startCompass(qiblaDeg) {
         window.addEventListener('deviceorientationabsolute', handleOrientation, true);
         window.addEventListener('deviceorientation', handleOrientation, true);
-
         function handleOrientation(event) {
-            let compassHeading = null;
-            
-            // قراءة زاوية الهاتف (تختلف من أندرويد لآيفون)
-            if (event.webkitCompassHeading) {
-                compassHeading = event.webkitCompassHeading; // للآيفون
-            } else if (event.alpha !== null) {
-                compassHeading = 360 - event.alpha; // للأندرويد
-            }
-
-            if (compassHeading !== null) {
-                // معادلة الدوران: اتجاه القبلة - اتجاه الهاتف
-                let rotation = qiblaDeg - compassHeading;
-                arrow.style.transform = `rotate(${rotation}deg)`;
-            }
+            let compassHeading = event.webkitCompassHeading ? event.webkitCompassHeading : (event.alpha !== null ? 360 - event.alpha : null);
+            if (compassHeading !== null) arrow.style.transform = `rotate(${qiblaDeg - compassHeading}deg)`;
         }
     }
 }
@@ -161,21 +134,63 @@ function loadTheme() {
     if(isDark) document.getElementById('theme-btn').innerHTML = '<i class="fa-solid fa-sun"></i>';
 }
 
+// --- هندسة عرض البيانات (الآيات والأذكار) ---
 function renderData() {
     document.getElementById('hijri-date').textContent = new Intl.DateTimeFormat('ar-SA-u-ca-islamic').format(new Date());
+    
     const buildList = (data, id, prefix) => {
-        document.getElementById(id).innerHTML = data.map((d, i) => `
+        document.getElementById(id).innerHTML = data.map((d, i) => {
+            // هندسة عرض الآيات القرآنية
+            let contentHTML = '';
+            if (d.type === 'quran') {
+                contentHTML = `
+                    <div class="quran-header">
+                        <p class="istiadha">أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ</p>
+                        <p class="basmala">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>
+                    </div>
+                    <div class="quran-text">${d.text}</div>
+                `;
+            } else {
+                contentHTML = `<div class="adhkar-text">${d.text}</div>`;
+            }
+
+            return `
             <div class="adhkar-card">
-                <div class="adhkar-text">${d.text}</div>
-                <button class="btn-dhikr ripple" onclick="countDhikr(this, ${d.count}, '${prefix}_${i}')">التكرار (0/${d.count})</button>
+                ${contentHTML}
+                <button class="btn-dhikr ripple" onclick="countDhikr(this, ${d.count || 1}, '${prefix}_${i}')">التكرار (0/${d.count || 1})</button>
             </div>
-        `).join('');
+            `;
+        }).join('');
     };
+    
     buildList(MORNING_ADHKAR, 'list-morning', 'm');
     buildList(EVENING_ADHKAR, 'list-evening', 'e');
-    document.getElementById('list-duas').innerHTML = DUAS.map(d => `<div class="adhkar-card"><div style="color:var(--gold);font-weight:bold;margin-bottom:8px;font-size:1.1rem"><i class="fa-solid fa-bookmark"></i> ${d.title}</div><div class="adhkar-text">${d.text}</div></div>`).join('');
+    
+    // الأدعية
+    document.getElementById('list-duas').innerHTML = DUAS.map(d => {
+        let contentHTML = '';
+        if (d.type === 'quran') {
+            contentHTML = `
+                <div class="quran-header">
+                    <p class="istiadha">أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ</p>
+                    <p class="basmala">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>
+                </div>
+                <div class="quran-text">${d.text}</div>
+            `;
+        } else {
+            contentHTML = `<div class="adhkar-text">${d.text}</div>`;
+        }
+        return `
+        <div class="adhkar-card">
+            <div style="color:var(--gold);font-weight:bold;margin-bottom:8px;font-size:1.1rem"><i class="fa-solid fa-bookmark"></i> ${d.title}</div>
+            ${contentHTML}
+        </div>
+        `;
+    }).join('');
+
     document.getElementById('list-names').innerHTML = ALLAH_NAMES.map(n => `<div class="adhkar-card"><div style="font-family:'Amiri';font-size:1.4rem;color:var(--primary);font-weight:bold">${n.ar}</div><div style="font-size:0.85rem;color:var(--muted);margin-top:5px">${n.meaning}</div></div>`).join('');
 }
+
 window.countDhikr = (btn, max, key) => {
     let cur = parseInt(localStorage.getItem(key) || 0);
     if(cur < max) {
