@@ -10,7 +10,8 @@ function init() {
     setupSwipeMenu();
     setupTasbih();
     setupQibla();
-    setupSearch(); // تفعيل البحث
+    setupSearch();
+    setupScrollToTop();
 }
 
 // --- التنقل ---
@@ -48,34 +49,57 @@ function setupSwipeMenu() {
     }, {passive: true});
 }
 
-// --- محرك البحث الفوري (Instant Search Engine) ---
+// --- زر العودة لأعلى ---
+function setupScrollToTop() {
+    const mainContent = document.getElementById('main-content');
+    const scrollTopBtn = document.getElementById('scroll-top-btn');
+
+    mainContent.addEventListener('scroll', () => {
+        if (mainContent.scrollTop > 300) {
+            scrollTopBtn.classList.remove('hidden');
+        } else {
+            scrollTopBtn.classList.add('hidden');
+        }
+    });
+
+    scrollTopBtn.addEventListener('click', () => {
+        mainContent.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+}
+
+// --- محرك البحث العربي الذكي (Smart Arabic Search) ---
+function normalizeArabic(text) {
+    return text
+        .replace(/[أإآ]/g, 'ا') // توحيد الألف
+        .replace(/ة/g, 'ه')     // توحيد التاء المربوطة
+        .replace(/ى/g, 'ي')     // توحيد الياء
+        .replace(/[\u064B-\u065F]/g, '') // إزالة التشكيل
+        .toLowerCase();
+}
+
 function setupSearch() {
     const searchInput = document.getElementById('search-input');
     if(!searchInput) return;
 
     searchInput.addEventListener('input', (e) => {
-        const query = e.target.value.trim().toLowerCase();
+        const rawQuery = e.target.value.trim();
+        const query = normalizeArabic(rawQuery);
+        
         if(query.length === 0) {
             document.getElementById('page-search').classList.remove('active');
             document.getElementById('page-home').classList.add('active');
             return;
         }
 
-        // البحث في كل البيانات
         const results = [];
-        
-        // بحث في أذكار الصباح
-        MORNING_ADHKAR.forEach(item => { if(item.text.includes(query)) results.push(item); });
-        // بحث في أذكار المساء
-        EVENING_ADHKAR.forEach(item => { if(item.text.includes(query)) results.push(item); });
-        // بحث في أذكار النوم
-        SLEEP_ADHKAR.forEach(item => { if(item.text.includes(query)) results.push(item); });
-        // بحث في الأدعية
-        DUAS.forEach(item => { if(item.text.includes(query) || item.title.includes(query)) results.push(item); });
-        // بحث في الأسماء
-        ALLAH_NAMES.forEach(item => { if(item.ar.includes(query) || item.meaning.includes(query)) results.push({type: 'name', title: item.ar, text: item.meaning}); });
+        const checkMatch = (text) => normalizeArabic(text).includes(query);
 
-        // عرض النتائج
+        MORNING_ADHKAR.forEach(item => { if(checkMatch(item.text) || checkMatch(item.source||'')) results.push(item); });
+        EVENING_ADHKAR.forEach(item => { if(checkMatch(item.text) || checkMatch(item.source||'')) results.push(item); });
+        SLEEP_ADHKAR.forEach(item => { if(checkMatch(item.text) || checkMatch(item.source||'')) results.push(item); });
+        DUAS.forEach(item => { if(checkMatch(item.text) || checkMatch(item.title||'')) results.push(item); });
+        ALLAH_NAMES.forEach(item => { if(checkMatch(item.ar) || checkMatch(item.meaning)) results.push({type: 'name', text: `${item.ar} - ${item.meaning}`}); });
+
         const searchContainer = document.getElementById('list-search');
         if(results.length > 0) {
             searchContainer.innerHTML = results.map((d, i) => `
@@ -89,37 +113,65 @@ function setupSearch() {
             searchContainer.innerHTML = `<p style="text-align:center; color:var(--muted); margin-top:50px; font-size:1.2rem;">لا توجد نتائج مطابقة لبحثك</p>`;
         }
 
-        document.getElementById('page-home').classList.remove('active');
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById('page-search').classList.add('active');
     });
 }
 
-// --- السبحة ---
+// --- السبحة (مع حالة الاكتمال) ---
 function setupTasbih() {
     let count = 0, max = 33;
     const select = document.getElementById('tasbih-select');
     const target = document.getElementById('tasbih-target');
+    const circle = document.getElementById('tasbih-btn');
+    
     select.innerHTML = TASBIH_ITEMS.map((t, i) => `<option value="${i}">${t.name}</option>`).join('');
     
-    select.onchange = () => { document.getElementById('tasbih-text').textContent = TASBIH_ITEMS[select.value].name; count = 0; updateCounter(); };
-    target.onchange = () => {
-        if(target.value === 'custom') { let val = prompt('أدخل العدد:', '50'); max = (val && !isNaN(val)) ? parseInt(val) : 33; } 
-        else { max = parseInt(target.value); }
-        document.getElementById('tasbih-max').textContent = '/' + max; count = 0; updateCounter();
-    };
-    document.getElementById('tasbih-btn').onclick = () => {
-        count++; if(navigator.vibrate) navigator.vibrate(20);
-        if(count >= max) { if(navigator.vibrate) navigator.vibrate([100, 50, 100]); count = 0; alert('تم إكمال العدد!'); }
+    function resetTasbih() {
+        count = 0; 
+        circle.classList.remove('completed');
         updateCounter();
+    }
+
+    select.onchange = () => { 
+        document.getElementById('tasbih-text').textContent = TASBIH_ITEMS[select.value].name; 
+        resetTasbih();
     };
-    document.getElementById('reset-tasbih').onclick = () => { count = 0; updateCounter(); };
+
+    target.onchange = () => {
+        if(target.value === 'custom') { 
+            let val = prompt('أدخل العدد:', '50'); 
+            max = (val && !isNaN(val)) ? parseInt(val) : 33; 
+        } else { max = parseInt(target.value); }
+        document.getElementById('tasbih-max').textContent = '/' + max; 
+        resetTasbih();
+    };
+
+    circle.onclick = () => {
+        if(count < max) {
+            count++; 
+            if(navigator.vibrate) navigator.vibrate(20);
+            
+            if(count === max) { 
+                if(navigator.vibrate) navigator.vibrate([100, 50, 100]); 
+                circle.classList.add('completed');
+                // صوت خفيف للاكتمال (اختياري)
+            }
+            updateCounter();
+        }
+    };
+
+    document.getElementById('reset-tasbih').onclick = resetTasbih;
+    
     function updateCounter() { document.getElementById('tasbih-count').textContent = count; }
 }
 
-// --- البوصلة ---
+// --- البوصلة (مع تنعيم الحركة) ---
 function setupQibla() {
     const btn = document.getElementById('btn-qibla'), arrow = document.getElementById('qibla-arrow'), angleText = document.getElementById('qibla-angle-text');
     let qiblaBearing = 0;
+    let currentRotation = 0;
+
     btn.onclick = async () => {
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحديد...';
         if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
@@ -134,16 +186,30 @@ function setupQibla() {
                 qiblaBearing = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
                 angleText.textContent = `اتجاه القبلة: ${Math.round(qiblaBearing)}°`;
                 btn.innerHTML = '<i class="fa-solid fa-check"></i> البوصلة تعمل';
-                startCompass(qiblaBearing);
+                startCompass();
             }, () => { alert('الرجاء السماح بالوصول للموقع.'); btn.innerHTML = 'إعادة المحاولة'; }, { enableHighAccuracy: true });
         }
     };
-    function startCompass(qiblaDeg) {
+
+    function startCompass() {
         window.addEventListener('deviceorientationabsolute', handleOrientation, true);
         window.addEventListener('deviceorientation', handleOrientation, true);
+        
         function handleOrientation(event) {
             let compassHeading = event.webkitCompassHeading ? event.webkitCompassHeading : (event.alpha !== null ? 360 - event.alpha : null);
-            if (compassHeading !== null) arrow.style.transform = `rotate(${qiblaDeg - compassHeading}deg)`;
+            
+            if (compassHeading !== null) {
+                let targetRotation = qiblaBearing - compassHeading;
+                
+                // خوارزمية تنعيم الحركة (Low-pass filter)
+                let diff = targetRotation - currentRotation;
+                // التأكد من أن الدوران يأخذ أقصر مسار
+                while (diff > 180) diff -= 360;
+                while (diff < -180) diff += 360;
+                
+                currentRotation += diff * 0.15; // 0.15 لتقليل الاهتزاز
+                arrow.style.transform = `rotate(${currentRotation}deg)`;
+            }
         }
     }
 }
