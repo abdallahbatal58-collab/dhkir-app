@@ -12,7 +12,6 @@ function init() {
     setupQibla();
 }
 
-// --- التنقل ---
 function navigateTo(targetId) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     const targetPage = document.getElementById(`page-${targetId}`);
@@ -47,67 +46,48 @@ function setupSwipeMenu() {
     }, {passive: true});
 }
 
-// --- السبحة ---
 function setupTasbih() {
     let count = 0, max = 33;
     const select = document.getElementById('tasbih-select');
     const target = document.getElementById('tasbih-target');
-    
     select.innerHTML = TASBIH_ITEMS.map((t, i) => `<option value="${i}">${t.name}</option>`).join('');
     
     select.onchange = () => { document.getElementById('tasbih-text').textContent = TASBIH_ITEMS[select.value].name; count = 0; updateCounter(); };
     target.onchange = () => {
-        if(target.value === 'custom') {
-            let val = prompt('أدخل العدد:', '50');
-            max = (val && !isNaN(val)) ? parseInt(val) : 33;
-        } else { max = parseInt(target.value); }
+        if(target.value === 'custom') { let val = prompt('أدخل العدد:', '50'); max = (val && !isNaN(val)) ? parseInt(val) : 33; } 
+        else { max = parseInt(target.value); }
         document.getElementById('tasbih-max').textContent = '/' + max; count = 0; updateCounter();
     };
     document.getElementById('tasbih-btn').onclick = () => {
-        count++;
-        if(navigator.vibrate) navigator.vibrate(20);
-        if(count >= max) { if(navigator.vibrate) navigator.vibrate([100, 50, 100]); count = 0; alert('تم إكمال العدد! تقبل الله.'); }
+        count++; if(navigator.vibrate) navigator.vibrate(20);
+        if(count >= max) { if(navigator.vibrate) navigator.vibrate([100, 50, 100]); count = 0; alert('تم إكمال العدد!'); }
         updateCounter();
     };
     document.getElementById('reset-tasbih').onclick = () => { count = 0; updateCounter(); };
     function updateCounter() { document.getElementById('tasbih-count').textContent = count; }
 }
 
-// --- البوصلة ---
 function setupQibla() {
-    const btn = document.getElementById('btn-qibla');
-    const arrow = document.getElementById('qibla-arrow');
-    const angleText = document.getElementById('qibla-angle-text');
+    const btn = document.getElementById('btn-qibla'), arrow = document.getElementById('qibla-arrow'), angleText = document.getElementById('qibla-angle-text');
     let qiblaBearing = 0;
-
     btn.onclick = async () => {
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحديد...';
-        
         if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-            try {
-                const permission = await DeviceOrientationEvent.requestPermission();
-                if (permission !== 'granted') alert("يجب السماح بالوصول لحساس الحركة.");
-            } catch (error) { console.error(error); }
+            try { await DeviceOrientationEvent.requestPermission(); } catch (error) {}
         }
-
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(pos => {
-                const lat = pos.coords.latitude, lng = pos.coords.longitude;
-                const kaabaLat = 21.4225, kaabaLng = 39.8262;
+                const lat = pos.coords.latitude, lng = pos.coords.longitude, kaabaLat = 21.4225, kaabaLng = 39.8262;
                 const dLon = (kaabaLng - lng) * Math.PI / 180;
                 const y = Math.sin(dLon) * Math.cos(kaabaLat * Math.PI / 180);
                 const x = Math.cos(lat * Math.PI / 180) * Math.sin(kaabaLat * Math.PI / 180) - Math.sin(lat * Math.PI / 180) * Math.cos(kaabaLat * Math.PI / 180) * Math.cos(dLon);
-                
-                qiblaBearing = Math.atan2(y, x) * 180 / Math.PI;
-                qiblaBearing = (qiblaBearing + 360) % 360;
-                
+                qiblaBearing = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
                 angleText.textContent = `اتجاه القبلة: ${Math.round(qiblaBearing)}°`;
-                btn.innerHTML = '<i class="fa-solid fa-check"></i> البوصلة تعمل الآن';
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> البوصلة تعمل';
                 startCompass(qiblaBearing);
             }, () => { alert('الرجاء السماح بالوصول للموقع.'); btn.innerHTML = 'إعادة المحاولة'; }, { enableHighAccuracy: true });
         }
     };
-
     function startCompass(qiblaDeg) {
         window.addEventListener('deviceorientationabsolute', handleOrientation, true);
         window.addEventListener('deviceorientation', handleOrientation, true);
@@ -118,7 +98,6 @@ function setupQibla() {
     }
 }
 
-// --- الثيم والبيانات ---
 function loadTheme() {
     const isDark = localStorage.getItem('dark') === 'true';
     if(isDark) document.body.classList.add('dark');
@@ -134,61 +113,68 @@ function loadTheme() {
     if(isDark) document.getElementById('theme-btn').innerHTML = '<i class="fa-solid fa-sun"></i>';
 }
 
-// --- هندسة عرض البيانات (الآيات والأذكار) ---
+// --- المحرك الذكي للعرض (UI Generator Engine) ---
+function generateCardHTML(item, index, prefix) {
+    let headerHTML = '';
+    
+    // هندسة البسملة والاستعاذة
+    if (item.type === 'surah') {
+        headerHTML = `<p class="basmala">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>`;
+    } else if (item.type === 'ayah') {
+        headerHTML = `<p class="istiadha">أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ</p>`;
+    }
+
+    let bodyClass = (item.type === 'surah' || item.type === 'ayah') ? 'quran-text' : 'adhkar-text';
+    
+    let content = `
+        <div class="card-header">${headerHTML}</div>
+        <div class="${bodyClass}">${item.text}</div>
+    `;
+
+    if (prefix !== 'dua') {
+        content += `<button class="btn-dhikr ripple" onclick="countDhikr(this, ${item.count || 1}, '${prefix}_${index}')">التكرار (0/${item.count || 1})</button>`;
+    }
+    return content;
+}
+
 function renderData() {
     document.getElementById('hijri-date').textContent = new Intl.DateTimeFormat('ar-SA-u-ca-islamic').format(new Date());
     
     const buildList = (data, id, prefix) => {
-        document.getElementById(id).innerHTML = data.map((d, i) => {
-            // هندسة عرض الآيات القرآنية
-            let contentHTML = '';
-            if (d.type === 'quran') {
-                contentHTML = `
-                    <div class="quran-header">
-                        <p class="istiadha">أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ</p>
-                        <p class="basmala">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>
-                    </div>
-                    <div class="quran-text">${d.text}</div>
-                `;
-            } else {
-                contentHTML = `<div class="adhkar-text">${d.text}</div>`;
-            }
-
-            return `
+        const container = document.getElementById(id);
+        if (!container) return;
+        container.innerHTML = data.map((d, i) => `
             <div class="adhkar-card">
-                ${contentHTML}
-                <button class="btn-dhikr ripple" onclick="countDhikr(this, ${d.count || 1}, '${prefix}_${i}')">التكرار (0/${d.count || 1})</button>
+                ${generateCardHTML(d, i, prefix)}
             </div>
-            `;
-        }).join('');
+        `).join('');
     };
     
     buildList(MORNING_ADHKAR, 'list-morning', 'm');
     buildList(EVENING_ADHKAR, 'list-evening', 'e');
+    buildList(SLEEP_ADHKAR, 'list-sleep', 's');
     
     // الأدعية
-    document.getElementById('list-duas').innerHTML = DUAS.map(d => {
-        let contentHTML = '';
-        if (d.type === 'quran') {
-            contentHTML = `
-                <div class="quran-header">
-                    <p class="istiadha">أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ</p>
-                    <p class="basmala">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>
-                </div>
-                <div class="quran-text">${d.text}</div>
-            `;
-        } else {
-            contentHTML = `<div class="adhkar-text">${d.text}</div>`;
-        }
-        return `
-        <div class="adhkar-card">
-            <div style="color:var(--gold);font-weight:bold;margin-bottom:8px;font-size:1.1rem"><i class="fa-solid fa-bookmark"></i> ${d.title}</div>
-            ${contentHTML}
-        </div>
-        `;
-    }).join('');
+    const duasContainer = document.getElementById('list-duas');
+    if(duasContainer) {
+        duasContainer.innerHTML = DUAS.map((d, i) => `
+            <div class="adhkar-card">
+                <div style="color:var(--gold);font-weight:bold;margin-bottom:8px;font-size:1.2rem;text-align:center;"><i class="fa-solid fa-star"></i> ${d.title}</div>
+                ${generateCardHTML(d, i, 'dua')}
+                <div class="dua-ref">${d.ref || ''}</div>
+            </div>
+        `).join('');
+    }
 
-    document.getElementById('list-names').innerHTML = ALLAH_NAMES.map(n => `<div class="adhkar-card"><div style="font-family:'Amiri';font-size:1.4rem;color:var(--primary);font-weight:bold">${n.ar}</div><div style="font-size:0.85rem;color:var(--muted);margin-top:5px">${n.meaning}</div></div>`).join('');
+    const namesGrid = document.getElementById('list-names');
+    if(namesGrid) {
+        namesGrid.innerHTML = ALLAH_NAMES.map(n => `
+            <div class="adhkar-card name-card">
+                <div class="name-ar">${n.ar}</div>
+                <div class="name-meaning">${n.meaning}</div>
+            </div>
+        `).join('');
+    }
 }
 
 window.countDhikr = (btn, max, key) => {
