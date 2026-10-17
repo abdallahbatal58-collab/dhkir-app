@@ -190,3 +190,70 @@ body.dark #bottom-nav .main-btn { background: #0a5030; }
 .ripple { position: relative; overflow: hidden; }
 .ripple::after { content: ""; display: block; position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; background-image: radial-gradient(circle, #fff 10%, transparent 10.01%); background-repeat: no-repeat; background-position: 50%; transform: scale(10, 10); opacity: 0; transition: transform .5s, opacity 1s; }
 .ripple:active::after { transform: scale(0, 0); opacity: .2; transition: 0s; }
+/* ============================================
+   هندسة التصميم للآيات القرآنية (Pro Royal Design)
+   ============================================ */
+.quran-header {
+    text-align: center;
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+    position: relative;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.istiadha {
+    font-family: 'Amiri', serif;
+    color: var(--muted);
+    font-size: 1.2rem;
+    margin-bottom: 5px;
+    letter-spacing: 0.5px;
+}
+
+.basmala {
+    font-family: 'Amiri', serif;
+    color: var(--gold);
+    font-size: 1.6rem;
+    font-weight: bold;
+    text-shadow: 0 0 12px rgba(212, 175, 55, 0.3);
+}
+
+.quran-text {
+    font-family: 'Scheherazade New', 'Amiri', serif;
+    font-size: 1.55rem;
+    line-height: 2.2;
+    color: var(--primary);
+    text-align: center;
+    background: rgba(212, 175, 55, 0.03);
+    padding: 25px 15px;
+    border-radius: 14px;
+    border: 1.5px solid rgba(212, 175, 55, 0.4);
+    box-shadow: inset 0 0 20px rgba(212, 175, 55, 0.05);
+    position: relative;
+    margin-bottom: 15px;
+}
+
+/* إضافة زخرفة الزوايا للآية */
+.quran-text::before, .quran-text::after {
+    content: '❁';
+    color: var(--gold);
+    font-size: 1.2rem;
+    position: absolute;
+    opacity: 0.7;
+}
+.quran-text::before { top: 8px; right: 12px; }
+.quran-text::after { bottom: 8px; left: 12px; }
+
+/* تعديل الآيات في الوضع الليلي */
+body.dark .quran-text {
+    color: var(--gold-light);
+    background: rgba(0, 0, 0, 0.25);
+    border-color: rgba(212, 175, 55, 0.6);
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+}
+body.dark .istiadha {
+    color: #94a3b8;
+}
+body.dark .basmala {
+    color: var(--gold);
+    text-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+}
