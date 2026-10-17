@@ -1,11 +1,7 @@
-const CACHE_NAME = 'dhikr-v6-pro';
-self.addEventListener('install', (e) => {
-  self.skipWaiting();
-});
+const CACHE_NAME = 'dhikr-v7-perfect';
+self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (e) => {
   e.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))));
   self.clients.claim();
 });
-self.addEventListener('fetch', (e) => {
-  e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
-});
+self.addEventListener('fetch', (e) => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
