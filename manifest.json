@@ -6,10 +6,13 @@
   "start_url": "./index.html",
   "scope": "./",
   "scope_extensions": [
-    { "origin": "https://abdallahbatal58-collab.github.io" }
+    { 
+      "type": "origin", 
+      "value": "https://abdallahbatal58-collab.github.io" 
+    }
   ],
   "display": "standalone",
-  "display_override": ["window-controls-overlay", "standalone", "minimal-ui", "fullscreen", "tabbed"],
+  "display_override": ["tabbed", "window-controls-overlay", "standalone", "minimal-ui", "fullscreen"],
   "orientation": "portrait",
   "background_color": "#0d3b2e",
   "theme_color": "#0d3b2e",
