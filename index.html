@@ -13,7 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <link rel="stylesheet" href="css/style.css?v=111.0">
+    <link rel="stylesheet" href="css/style.css?v=112.0">
 </head>
 <body>
 
@@ -62,7 +62,6 @@
     </aside>
     <div id="sidebar-overlay"></div>
 
-    <!-- حاوية السحب Swiper (الصفحات الأساسية فقط) -->
     <main id="main-content" class="swiper">
         <div class="swiper-wrapper">
             
@@ -84,10 +83,15 @@
                 <div class="verse-box"><p>﴿ فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُوا لِي وَلَا تَكْفُرُونِ ﴾</p></div>
             </section>
 
-            <section id="page-morning" class="swiper-slide page">
-                <h2 class="page-title">أذكار الصباح</h2>
-                <div class="list" id="list-morning"></div>
-            </section>
+            <section id="page-morning" class="swiper-slide page"><h2 class="page-title">أذكار الصباح</h2><div class="list" id="list-morning"></div></section>
+            
+            <section id="page-evening" class="swiper-slide page"><h2 class="page-title">أذكار المساء</h2><div class="list" id="list-evening"></div></section>
+
+            <section id="page-sleep" class="swiper-slide page"><h2 class="page-title">أذكار النوم</h2><div class="list" id="list-sleep"></div></section>
+            
+            <section id="page-wake" class="swiper-slide page"><h2 class="page-title">أذكار الاستيقاظ</h2><div class="list" id="list-wake"></div></section>
+
+            <section id="page-duas" class="swiper-slide page"><h2 class="page-title">الأدعية</h2><div class="list" id="list-duas"></div></section>
 
             <section id="page-tasbih" class="swiper-slide page">
                 <h2 class="page-title">السبحة الذكية</h2>
@@ -108,21 +112,10 @@
                 </div>
             </section>
 
-            <section id="page-duas" class="swiper-slide page">
-                <h2 class="page-title">الأدعية</h2>
-                <div class="list" id="list-duas"></div>
-            </section>
-
             <section id="page-quran" class="swiper-slide page">
                 <h2 class="page-title">فهرس السور</h2>
                 <div class="list" id="list-quran"><p class="loading-text"><i class="fa-solid fa-spinner fa-spin"></i> جاري تحميل السور...</p></div>
             </section>
-
-            <section id="page-evening" class="swiper-slide page"><h2 class="page-title">أذكار المساء</h2><div class="list" id="list-evening"></div></section>
-            
-            <section id="page-sleep" class="swiper-slide page"><h2 class="page-title">أذكار النوم</h2><div class="list" id="list-sleep"></div></section>
-            
-            <section id="page-wake" class="swiper-slide page"><h2 class="page-title">أذكار الاستيقاظ</h2><div class="list" id="list-wake"></div></section>
 
             <section id="page-qibla" class="swiper-slide page">
                 <h2 class="page-title">اتجاه القبلة</h2>
@@ -166,7 +159,6 @@
     </main>
 
     <!-- الشاشات المنبثقة (Overlays) -->
-    <!-- 1. قارئ القرآن -->
     <div id="overlay-quran-reader" class="overlay-page">
         <div class="reader-header">
             <button id="close-reader" class="icon-btn" style="color: var(--primary);"><i class="fa-solid fa-arrow-right"></i></button>
@@ -178,7 +170,6 @@
         </div>
     </div>
 
-    <!-- 2. نتائج البحث -->
     <div id="overlay-search" class="overlay-page">
         <div class="reader-header">
             <button id="close-search" class="icon-btn" style="color: var(--primary);"><i class="fa-solid fa-arrow-right"></i></button>
@@ -190,15 +181,19 @@
 
     <button id="scroll-top-btn" class="icon-btn hidden"><i class="fa-solid fa-arrow-up"></i></button>
 
+    <!-- الشريط السفلي الشامل -->
     <nav id="bottom-nav">
         <div class="nav-scroll-wrapper">
-            <button data-index="0" class="active"><i class="fa-solid fa-house"></i><span>الرئيسية</span></button>
-            <button data-index="1"><i class="fa-solid fa-list-ul"></i><span>الأذكار</span></button>
-            <button data-index="2" class="main-btn"><i class="fa-solid fa-circle-nodes"></i></button>
-            <button data-index="3"><i class="fa-solid fa-hands-praying"></i><span>الأدعية</span></button>
-            <button data-index="4"><i class="fa-solid fa-book-quran"></i><span>القرآن</span></button>
-            <button data-index="8"><i class="fa-solid fa-compass"></i><span>القبلة</span></button>
-            <button data-index="9"><i class="fa-solid fa-gear"></i><span>الإعدادات</span></button>
+            <button data-target="home" class="active"><i class="fa-solid fa-house"></i><span>الرئيسية</span></button>
+            <button data-target="quran"><i class="fa-solid fa-book-quran"></i><span>القرآن</span></button>
+            <button data-target="morning"><i class="fa-solid fa-cloud-sun"></i><span>الصباح</span></button>
+            <button data-target="evening"><i class="fa-solid fa-cloud-moon"></i><span>المساء</span></button>
+            <button data-target="sleep"><i class="fa-solid fa-bed"></i><span>النوم</span></button>
+            <button data-target="wake"><i class="fa-solid fa-sun"></i><span>الاستيقاظ</span></button>
+            <button data-target="duas"><i class="fa-solid fa-hands-praying"></i><span>الأدعية</span></button>
+            <button data-target="tasbih" class="gold-btn"><i class="fa-solid fa-circle-nodes"></i><span>السبحة</span></button>
+            <button data-target="qibla"><i class="fa-solid fa-compass"></i><span>القبلة</span></button>
+            <button data-target="settings"><i class="fa-solid fa-gear"></i><span>الإعدادات</span></button>
         </div>
     </nav>
 
@@ -206,7 +201,7 @@
     <script>
         if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
     </script>
-    <script src="js/data.js?v=111.0"></script>
-    <script src="js/app.js?v=111.0"></script>
+    <script src="js/data.js?v=112.0"></script>
+    <script src="js/app.js?v=112.0"></script>
 </body>
 </html>
