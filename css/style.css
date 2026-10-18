@@ -53,6 +53,14 @@ body { font-family: var(--font-main); background: var(--bg-main); color: var(--t
 .swiper-slide::-webkit-scrollbar { width: 6px; }
 .swiper-slide::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
 
+/* Overlays (الشاشات المنبثقة) */
+.overlay-page {
+    position: fixed; top: 65px; bottom: 75px; left: 0; right: 0;
+    background: var(--bg-main); z-index: 120; padding: 20px;
+    overflow-y: auto; display: none; animation: slideUpFade 0.3s ease-out;
+}
+.overlay-page.active { display: block; }
+
 .page-title { font-family: 'Amiri'; color: var(--primary); text-align: center; margin-bottom: 25px; font-size: 2rem; font-weight: bold; }
 body.dark .page-title { color: var(--gold); }
 
@@ -95,7 +103,7 @@ body.dark .mushaf-container { background-color: #1a1a1a; border-color: #a8871f; 
 body.dark .mushaf-text { color: var(--text-main); }
 .verse-number { display: inline-flex; justify-content: center; align-items: center; width: 35px; height: 35px; background: transparent; border: 2px solid var(--gold); border-radius: 50%; color: var(--gold); font-family: 'Tajawal', sans-serif; font-size: 0.9rem; font-weight: bold; margin: 0 8px; vertical-align: middle; }
 
-/* Tajweed Colors (Quran Foundation API) */
+/* Tajweed Colors */
 .tajweed { font-family: inherit; }
 .ham_wasl { color: #aaaaaa; }
 .laam_shamsiyah { color: #aaaaaa; }
@@ -148,7 +156,7 @@ body.dark .slider { background: #334155; }
 .switch input:checked + .slider { background: var(--gold); }
 .switch input:checked + .slider:before { transform: translateX(-22px); background: #000; }
 
-/* Bottom Nav - Dynamic */
+/* Bottom Nav */
 #bottom-nav { position: fixed; bottom: 0; width: 100%; height: 75px; background: var(--glass-bg); backdrop-filter: blur(20px); display: flex; justify-content: center; align-items: center; border-top: 1px solid var(--border-color); z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
 .nav-scroll-wrapper { display: flex; overflow-x: auto; width: 100%; padding: 0 10px; scrollbar-width: none; -ms-overflow-style: none; align-items: center; justify-content: space-around; }
 .nav-scroll-wrapper::-webkit-scrollbar { display: none; }
@@ -162,3 +170,5 @@ body.dark #bottom-nav .main-btn { background: #0a5030; }
 
 #scroll-top-btn { position: fixed; bottom: 90px; left: 20px; width: 45px; height: 45px; border-radius: 50%; background: var(--glass-bg); border: 1px solid var(--gold); color: var(--gold); display: flex; justify-content: center; align-items: center; z-index: 90; transition: all 0.3s ease; }
 #scroll-top-btn.hidden { opacity: 0; transform: translateY(20px); pointer-events: none; }
+
+@keyframes slideUpFade { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
