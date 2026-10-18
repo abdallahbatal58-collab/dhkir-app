@@ -5,12 +5,12 @@ const settings = {
     resetCounter: localStorage.getItem('dhikr_reset') !== 'false'
 };
 
-// خريطة الصفحات
+// خريطة الصفحات (الآن 10 صفحات فقط)
 const pageMap = [
     { id: 'home', index: 0 }, { id: 'morning', index: 1 }, { id: 'tasbih', index: 2 },
-    { id: 'duas', index: 3 }, { id: 'quran', index: 4 }, { id: 'quran-reader', index: 5 },
-    { id: 'evening', index: 6 }, { id: 'sleep', index: 7 }, { id: 'wake', index: 8 },
-    { id: 'qibla', index: 9 }, { id: 'settings', index: 10 }, { id: 'search', index: 11 }
+    { id: 'duas', index: 3 }, { id: 'quran', index: 4 }, { id: 'evening', index: 5 },
+    { id: 'sleep', index: 6 }, { id: 'wake', index: 7 }, { id: 'qibla', index: 8 },
+    { id: 'settings', index: 9 }
 ];
 
 let swiper;
@@ -40,7 +40,7 @@ function setupSwiper() {
             slideChange: function () {
                 updateNavState(this.activeIndex);
                 const currentId = pageMap[this.activeIndex].id;
-                if (currentId !== 'quran-reader' && settings.resetCounter && state.currentPage !== currentId) {
+                if (settings.resetCounter && state.currentPage !== currentId) {
                     resetAdhkarCounters();
                 }
                 state.currentPage = currentId;
@@ -78,7 +78,14 @@ function setupNavigation() {
     });
     document.getElementById('menu-btn').onclick = openSidebar;
     document.getElementById('sidebar-overlay').onclick = closeSidebar;
-    document.getElementById('back-to-quran').onclick = () => navigateTo('quran');
+    
+    // غلق شاشات الـ Overlay
+    document.getElementById('close-reader').onclick = () => {
+        document.getElementById('overlay-quran-reader').classList.remove('active');
+    };
+    document.getElementById('close-search').onclick = () => {
+        document.getElementById('overlay-search').classList.remove('active');
+    };
 }
 
 function openSidebar() { 
@@ -162,7 +169,9 @@ function executeSearch() {
     const results = ADHKAR_DATA.filter(i => normalize(i.text).includes(nq));
     const searchContainer = document.getElementById('list-search');
     if(searchContainer) searchContainer.innerHTML = results.length ? results.map(generateCardHTML).join('') : `<div class="loading-text">لا توجد نتائج مطابقة</div>`;
-    navigateTo('search');
+    
+    // فتح شاشة نتائج البحث المنبثقة
+    document.getElementById('overlay-search').classList.add('active');
 }
 
 // --- محرك القرآن (المجود) ---
@@ -184,19 +193,22 @@ async function loadQuranSurahs() {
     } catch (e) { container.innerHTML = '<p class="loading-text">تأكد من اتصالك بالإنترنت.</p>'; }
 }
 
-// دالة مساعدة لتنسيق وسوم التجويد
 function formatTajweed(text) {
     return text.replace(/<tajweed class=([a-z_]+)>/g, '<span class="$1">').replace(/<\/tajweed>/g, '</span>');
 }
 
 async function openSurah(number, name) {
-    navigateTo('quran-reader');
-    document.getElementById('reader-title').textContent = name;
+    const title = document.getElementById('reader-title');
+    if(title) title.textContent = name;
+    
     const container = document.getElementById('list-quran-verses');
+    if(!container) return;
     container.innerHTML = '<p class="loading-text" style="color:var(--gold);"><i class="fa-solid fa-spinner fa-spin"></i> جاري تحميل الآيات...</p>';
     
+    // فتح شاشة القارئ المنبثقة
+    document.getElementById('overlay-quran-reader').classList.add('active');
+
     try {
-        // استخدام Quran Foundation API للنص المجود
         const res = await fetch(`https://api.quran.com/api/v4/quran/verses/uthmani_tajweed?chapter_number=${number}`);
         const data = await res.json();
         
@@ -205,17 +217,13 @@ async function openSurah(number, name) {
             if (number !== 1 && number !== 9) {
                 versesHTML += `<div style="text-align:center; margin-bottom: 20px;"><span style="font-family:'Amiri Quran', serif; font-size:calc(var(--base-font-size) + 4px); color:var(--gold);">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</span></div>`;
             }
-            
             versesHTML += data.verses.map(v => {
                 const formattedText = formatTajweed(v.text_uthmani_tajweed);
-                // استخراج رقم الآية من مفتاح الآية (مثلاً "1:1" -> 1)
                 const ayahNum = v.verse_key.split(':')[1];
                 return `<span>${formattedText}</span> <span class="verse-number">${ayahNum}</span> `;
             }).join('');
-            
             container.innerHTML = versesHTML;
         } else {
-            // Fallback إلى AlQuran Cloud
             const fallbackRes = await fetch(`https://api.alquran.cloud/v1/surah/${number}/quran-tajweed`);
             const fallbackData = await fallbackRes.json();
             if (fallbackData.code === 200) {
@@ -233,7 +241,7 @@ async function openSurah(number, name) {
                 container.innerHTML = '<p class="loading-text">تعذر تحميل الآيات.</p>';
             }
         }
-        document.querySelector('.swiper-slide-active').scrollTo({ top: 0, behavior: 'smooth' });
+        document.getElementById('overlay-quran-reader').scrollTo({ top: 0, behavior: 'smooth' });
     } catch (e) {
         container.innerHTML = '<p class="loading-text">تعذر تحميل الآيات. تأكد من اتصالك بالإنترنت.</p>';
     }
