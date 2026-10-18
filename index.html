@@ -14,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <link rel="stylesheet" href="css/style.css?v=109.0">
+    <link rel="stylesheet" href="css/style.css?v=110.0">
 </head>
 <body>
 
@@ -196,13 +196,17 @@
 
     <button id="scroll-top-btn" class="icon-btn hidden"><i class="fa-solid fa-arrow-up"></i></button>
 
-    <!-- الشريط السفلي المضبوط -->
+    <!-- الشريط السفلي الديناميكي -->
     <nav id="bottom-nav">
-        <button data-index="0" class="active"><i class="fa-solid fa-house"></i><span>الرئيسية</span></button>
-        <button data-index="1"><i class="fa-solid fa-list-ul"></i><span>الأذكار</span></button>
-        <button data-index="2" class="main-btn"><i class="fa-solid fa-circle-nodes"></i></button>
-        <button data-index="3"><i class="fa-solid fa-hands-praying"></i><span>الأدعية</span></button>
-        <button id="more-btn"><i class="fa-solid fa-bars-staggered"></i><span>المزيد</span></button>
+        <div class="nav-scroll-wrapper">
+            <button data-index="0" class="active"><i class="fa-solid fa-house"></i><span>الرئيسية</span></button>
+            <button data-index="1"><i class="fa-solid fa-list-ul"></i><span>الأذكار</span></button>
+            <button data-index="2" class="main-btn"><i class="fa-solid fa-circle-nodes"></i></button>
+            <button data-index="3"><i class="fa-solid fa-hands-praying"></i><span>الأدعية</span></button>
+            <button data-index="4"><i class="fa-solid fa-book-quran"></i><span>القرآن</span></button>
+            <button data-index="9"><i class="fa-solid fa-compass"></i><span>القبلة</span></button>
+            <button data-index="10"><i class="fa-solid fa-gear"></i><span>الإعدادات</span></button>
+        </div>
     </nav>
 
     <!-- مكتبة Swiper JS -->
@@ -210,7 +214,7 @@
     <script>
         if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
     </script>
-    <script src="js/data.js?v=109.0"></script>
-    <script src="js/app.js?v=109.0"></script>
+    <script src="js/data.js?v=110.0"></script>
+    <script src="js/app.js?v=110.0"></script>
 </body>
 </html>
