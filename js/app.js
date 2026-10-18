@@ -5,20 +5,12 @@ const settings = {
     resetCounter: localStorage.getItem('dhikr_reset') !== 'false'
 };
 
-// خريطة الصفحات لتطابق الترتيب في HTML
+// خريطة الصفحات
 const pageMap = [
-    { id: 'home', index: 0 },
-    { id: 'morning', index: 1 },
-    { id: 'tasbih', index: 2 },
-    { id: 'duas', index: 3 },
-    { id: 'quran', index: 4 },
-    { id: 'quran-reader', index: 5 },
-    { id: 'evening', index: 6 },
-    { id: 'sleep', index: 7 },
-    { id: 'wake', index: 8 },
-    { id: 'qibla', index: 9 },
-    { id: 'settings', index: 10 },
-    { id: 'search', index: 11 }
+    { id: 'home', index: 0 }, { id: 'morning', index: 1 }, { id: 'tasbih', index: 2 },
+    { id: 'duas', index: 3 }, { id: 'quran', index: 4 }, { id: 'quran-reader', index: 5 },
+    { id: 'evening', index: 6 }, { id: 'sleep', index: 7 }, { id: 'wake', index: 8 },
+    { id: 'qibla', index: 9 }, { id: 'settings', index: 10 }, { id: 'search', index: 11 }
 ];
 
 let swiper;
@@ -32,38 +24,24 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initApp() {
-    applySettings(); 
-    renderAllAdhkar(); 
-    setupSwiper(); 
-    setupNavigation(); 
-    setupSearch(); 
-    setupSettingsUI();
-    setupTasbih(); 
-    setupQibla(); 
-    setupScrollTop(); 
-    updateHijriDate();
-    loadQuranSurahs();
+    applySettings(); renderAllAdhkar(); setupSwiper(); setupNavigation(); 
+    setupSearch(); setupSettingsUI(); setupTasbih(); setupQibla(); 
+    setupScrollTop(); updateHijriDate(); loadQuranSurahs();
 }
 
-// --- إعداد Swiper للسحب الاحترافي ---
+// --- إعداد Swiper ---
 function setupSwiper() {
     swiper = new Swiper('.swiper', {
         direction: 'horizontal',
         loop: false,
-        speed: 400, // سرعة السحب
-        resistanceRatio: 0.85, // مقاومة السحب عند الأطراف
+        speed: 350,
+        resistanceRatio: 0.85,
         on: {
             slideChange: function () {
-                const activeIndex = this.activeIndex;
-                updateNavState(activeIndex);
-                
-                // إذا خرجنا من صفحة القرآن، نرجع لصفحة الفهرس الرئيسية
-                const currentId = pageMap[activeIndex].id;
-                if (currentId !== 'quran-reader') {
-                    // تصفير العدادات لو الإعداد مفعل
-                    if (settings.resetCounter && state.currentPage !== currentId) {
-                        resetAdhkarCounters();
-                    }
+                updateNavState(this.activeIndex);
+                const currentId = pageMap[this.activeIndex].id;
+                if (currentId !== 'quran-reader' && settings.resetCounter && state.currentPage !== currentId) {
+                    resetAdhkarCounters();
                 }
                 state.currentPage = currentId;
             }
@@ -72,55 +50,35 @@ function setupSwiper() {
 }
 
 function updateNavState(index) {
-    // تحديث أزرار الشريط السفلي
     document.querySelectorAll('#bottom-nav button[data-index]').forEach(btn => {
         btn.classList.toggle('active', parseInt(btn.dataset.index) === index);
     });
-    
-    // تحديث أزرار القائمة الجانبية
     const currentId = pageMap[index].id;
     document.querySelectorAll('.nav-group a').forEach(a => {
         a.classList.toggle('active', a.dataset.target === currentId);
     });
-    
     closeSidebar();
 }
 
 // --- التنقل ---
 function navigateTo(pageId) {
     const pageInfo = pageMap.find(p => p.id === pageId);
-    if (pageInfo !== undefined && swiper) {
-        swiper.slideTo(pageInfo.index);
-    }
+    if (pageInfo !== undefined && swiper) swiper.slideTo(pageInfo.index);
 }
 
 function setupNavigation() {
-    // أزرار القائمة الجانبية
     document.querySelectorAll('.nav-group a').forEach(btn => {
         btn.addEventListener('click', (e) => { e.preventDefault(); navigateTo(btn.dataset.target); });
     });
-    
-    // كروت الصفحة الرئيسية
     document.querySelectorAll('.card[data-target]').forEach(btn => {
         btn.addEventListener('click', () => navigateTo(btn.dataset.target));
     });
-    
-    // أزرار الشريط السفلي
     document.querySelectorAll('#bottom-nav button[data-index]').forEach(btn => {
         btn.addEventListener('click', () => navigateTo(pageMap[parseInt(btn.dataset.index)].id));
     });
-    
-    const menuBtn = document.getElementById('menu-btn');
-    if(menuBtn) menuBtn.onclick = openSidebar;
-    
-    const moreBtn = document.getElementById('more-btn');
-    if(moreBtn) moreBtn.onclick = openSidebar;
-    
-    const overlay = document.getElementById('sidebar-overlay');
-    if(overlay) overlay.onclick = closeSidebar;
-    
-    const backToQuran = document.getElementById('back-to-quran');
-    if(backToQuran) backToQuran.onclick = () => navigateTo('quran');
+    document.getElementById('menu-btn').onclick = openSidebar;
+    document.getElementById('sidebar-overlay').onclick = closeSidebar;
+    document.getElementById('back-to-quran').onclick = () => navigateTo('quran');
 }
 
 function openSidebar() { 
@@ -138,28 +96,22 @@ function closeSidebar() {
 function applySettings() {
     if (settings.darkMode) { 
         document.body.classList.add('dark'); 
-        const themeBtn = document.getElementById('theme-btn');
-        if(themeBtn) themeBtn.innerHTML = '<i class="fa-solid fa-sun"></i>'; 
-        if(document.getElementById('set-dark')) document.getElementById('set-dark').checked = true; 
+        document.getElementById('theme-btn').innerHTML = '<i class="fa-solid fa-sun"></i>'; 
+        document.getElementById('set-dark').checked = true; 
     } else { 
         document.body.classList.remove('dark'); 
-        const themeBtn = document.getElementById('theme-btn');
-        if(themeBtn) themeBtn.innerHTML = '<i class="fa-solid fa-moon"></i>'; 
+        document.getElementById('theme-btn').innerHTML = '<i class="fa-solid fa-moon"></i>'; 
     }
     document.documentElement.style.setProperty('--base-font-size', settings.fontScale + 'px');
-    if(document.getElementById('set-font')) document.getElementById('set-font').value = settings.fontScale;
-    if(document.getElementById('set-reset-counter')) document.getElementById('set-reset-counter').checked = settings.resetCounter;
+    document.getElementById('set-font').value = settings.fontScale;
+    document.getElementById('set-reset-counter').checked = settings.resetCounter;
 }
 
 function setupSettingsUI() {
-    const themeBtn = document.getElementById('theme-btn');
-    if(themeBtn) themeBtn.onclick = () => { settings.darkMode = !settings.darkMode; localStorage.setItem('dhikr_dark', settings.darkMode); applySettings(); };
-    const setDark = document.getElementById('set-dark');
-    if(setDark) setDark.onchange = (e) => { settings.darkMode = e.target.checked; localStorage.setItem('dhikr_dark', settings.darkMode); applySettings(); };
-    const setFont = document.getElementById('set-font');
-    if(setFont) setFont.oninput = (e) => { settings.fontScale = e.target.value; localStorage.setItem('dhikr_font', settings.fontScale); document.documentElement.style.setProperty('--base-font-size', settings.fontScale + 'px'); };
-    const setReset = document.getElementById('set-reset-counter');
-    if(setReset) setReset.onchange = (e) => { settings.resetCounter = e.target.checked; localStorage.setItem('dhikr_reset', settings.resetCounter); };
+    document.getElementById('theme-btn').onclick = () => { settings.darkMode = !settings.darkMode; localStorage.setItem('dhikr_dark', settings.darkMode); applySettings(); };
+    document.getElementById('set-dark').onchange = (e) => { settings.darkMode = e.target.checked; localStorage.setItem('dhikr_dark', settings.darkMode); applySettings(); };
+    document.getElementById('set-font').oninput = (e) => { settings.fontScale = e.target.value; localStorage.setItem('dhikr_font', settings.fontScale); document.documentElement.style.setProperty('--base-font-size', settings.fontScale + 'px'); };
+    document.getElementById('set-reset-counter').onchange = (e) => { settings.resetCounter = e.target.checked; localStorage.setItem('dhikr_reset', settings.resetCounter); };
 }
 
 // --- عرض الأذكار ---
@@ -174,13 +126,7 @@ function generateCardHTML(item) {
     let header = item.type === 'surah' ? `<p class="basmala">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>` : (item.type === 'ayah' ? `<p class="istiadha">أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ</p>` : '');
     let body = (item.type === 'surah' || item.type === 'ayah') ? 'adhkar-text' : 'adhkar-text';
     let btn = item.category !== 'duas' ? `<button class="btn-dhikr" onclick="incrementDhikr(this, '${item.id}', ${item.count})">التكرار (0/${item.count})</button>` : '';
-    
-    return `<div class="adhkar-card" id="card-${item.id}">
-                <div class="card-header">${header}</div>
-                <div class="${body}">${item.text}</div>
-                <div class="dua-ref">${item.source || ''}</div>
-                ${btn}
-            </div>`;
+    return `<div class="adhkar-card" id="card-${item.id}"><div class="card-header">${header}</div><div class="${body}">${item.text}</div><div class="dua-ref">${item.source || ''}</div>${btn}</div>`;
 }
 
 window.incrementDhikr = (btn, id, max) => {
@@ -189,11 +135,7 @@ window.incrementDhikr = (btn, id, max) => {
         cur++; localStorage.setItem(`count_${id}`, cur);
         if (navigator.vibrate) navigator.vibrate(15);
         btn.textContent = `التكرار (${cur}/${max})`;
-        if (cur === max) { 
-            btn.classList.add('done'); 
-            btn.innerHTML = '✓ تم'; 
-            if (navigator.vibrate) navigator.vibrate([100, 50, 100]); 
-        }
+        if (cur === max) { btn.classList.add('done'); btn.innerHTML = '✓ تم'; if (navigator.vibrate) navigator.vibrate([100, 50, 100]); }
     }
 };
 
@@ -211,9 +153,7 @@ function setupSearch() {
     if (form) form.addEventListener('submit', (e) => { e.preventDefault(); executeSearch(); });
 }
 
-function normalize(text) { 
-    return text ? text.replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/[\u064B-\u065F]/g, '').trim() : ''; 
-}
+function normalize(text) { return text ? text.replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/[\u064B-\u065F]/g, '').trim() : ''; }
 
 function executeSearch() {
     const q = document.getElementById('search-input').value.trim();
@@ -221,13 +161,11 @@ function executeSearch() {
     const nq = normalize(q);
     const results = ADHKAR_DATA.filter(i => normalize(i.text).includes(nq));
     const searchContainer = document.getElementById('list-search');
-    if(searchContainer) {
-        searchContainer.innerHTML = results.length ? results.map(generateCardHTML).join('') : `<div class="loading-text">لا توجد نتائج مطابقة</div>`;
-    }
+    if(searchContainer) searchContainer.innerHTML = results.length ? results.map(generateCardHTML).join('') : `<div class="loading-text">لا توجد نتائج مطابقة</div>`;
     navigateTo('search');
 }
 
-// --- محرك القرآن ---
+// --- محرك القرآن (المجود) ---
 async function loadQuranSurahs() {
     const container = document.getElementById('list-quran');
     if(!container) return;
@@ -243,37 +181,59 @@ async function loadQuranSurahs() {
                     </div>
                 </div>`).join('');
         }
-    } catch (e) { container.innerHTML = '<p class="loading-text">تأكد من اتصالك بالإنترنت لتحميل الفهرس.</p>'; }
+    } catch (e) { container.innerHTML = '<p class="loading-text">تأكد من اتصالك بالإنترنت.</p>'; }
+}
+
+// دالة مساعدة لتنسيق وسوم التجويد
+function formatTajweed(text) {
+    return text.replace(/<tajweed class=([a-z_]+)>/g, '<span class="$1">').replace(/<\/tajweed>/g, '</span>');
 }
 
 async function openSurah(number, name) {
     navigateTo('quran-reader');
-    const title = document.getElementById('reader-title');
-    if(title) title.textContent = name;
-    
+    document.getElementById('reader-title').textContent = name;
     const container = document.getElementById('list-quran-verses');
-    if(!container) return;
     container.innerHTML = '<p class="loading-text" style="color:var(--gold);"><i class="fa-solid fa-spinner fa-spin"></i> جاري تحميل الآيات...</p>';
     
     try {
-        const res = await fetch(`https://api.alquran.cloud/v1/surah/${number}/quran-uthmani`);
+        // استخدام Quran Foundation API للنص المجود
+        const res = await fetch(`https://api.quran.com/api/v4/quran/verses/uthmani_tajweed?chapter_number=${number}`);
         const data = await res.json();
-        if (data.code === 200) {
-            const ayahs = data.data.ayahs;
+        
+        if (data.verses && data.verses.length > 0) {
             let versesHTML = '';
-            
             if (number !== 1 && number !== 9) {
                 versesHTML += `<div style="text-align:center; margin-bottom: 20px;"><span style="font-family:'Amiri Quran', serif; font-size:calc(var(--base-font-size) + 4px); color:var(--gold);">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</span></div>`;
             }
-
-            versesHTML += ayahs.map(a => `
-                <span>${a.text}</span> <span class="verse-number">${a.numberInSurah}</span> 
-            `).join('');
+            
+            versesHTML += data.verses.map(v => {
+                const formattedText = formatTajweed(v.text_uthmani_tajweed);
+                // استخراج رقم الآية من مفتاح الآية (مثلاً "1:1" -> 1)
+                const ayahNum = v.verse_key.split(':')[1];
+                return `<span>${formattedText}</span> <span class="verse-number">${ayahNum}</span> `;
+            }).join('');
             
             container.innerHTML = versesHTML;
-            const swiperContainer = document.querySelector('.swiper-slide-active');
-            if(swiperContainer) swiperContainer.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            // Fallback إلى AlQuran Cloud
+            const fallbackRes = await fetch(`https://api.alquran.cloud/v1/surah/${number}/quran-tajweed`);
+            const fallbackData = await fallbackRes.json();
+            if (fallbackData.code === 200) {
+                const ayahs = fallbackData.data.ayahs;
+                let versesHTML = '';
+                if (number !== 1 && number !== 9) {
+                    versesHTML += `<div style="text-align:center; margin-bottom: 20px;"><span style="font-family:'Amiri Quran', serif; font-size:calc(var(--base-font-size) + 4px); color:var(--gold);">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</span></div>`;
+                }
+                versesHTML += ayahs.map(a => {
+                    const formattedText = formatTajweed(a.text);
+                    return `<span>${formattedText}</span> <span class="verse-number">${a.numberInSurah}</span> `;
+                }).join('');
+                container.innerHTML = versesHTML;
+            } else {
+                container.innerHTML = '<p class="loading-text">تعذر تحميل الآيات.</p>';
+            }
         }
+        document.querySelector('.swiper-slide-active').scrollTo({ top: 0, behavior: 'smooth' });
     } catch (e) {
         container.innerHTML = '<p class="loading-text">تعذر تحميل الآيات. تأكد من اتصالك بالإنترنت.</p>';
     }
@@ -286,12 +246,11 @@ function setupTasbih() {
     const circle = document.getElementById('tasbih-btn');
     if (!select) return;
     select.innerHTML = TASBIH_ITEMS.map((t, i) => `<option value="${i}">${t.name}</option>`).join('');
-    const reset = () => { state.tasbihCount = 0; const c = document.getElementById('tasbih-count'); if(c) c.textContent = 0; };
-    select.onchange = () => { const txt = document.getElementById('tasbih-text'); if(txt) txt.textContent = TASBIH_ITEMS[select.value].name; reset(); };
-    if(target) target.onchange = () => { state.tasbihTarget = target.value === 'custom' ? parseInt(prompt('أدخل العدد:', '50') || 33) : parseInt(target.value); const max = document.getElementById('tasbih-max'); if(max) max.textContent = '/' + state.tasbihTarget; reset(); };
-    if(circle) circle.onclick = () => { if(state.tasbihCount < state.tasbihTarget) { state.tasbihCount++; const c = document.getElementById('tasbih-count'); if(c) c.textContent = state.tasbihCount; if(navigator.vibrate) navigator.vibrate(15); } };
-    const resetBtn = document.getElementById('reset-tasbih');
-    if(resetBtn) resetBtn.onclick = reset;
+    const reset = () => { state.tasbihCount = 0; document.getElementById('tasbih-count').textContent = 0; };
+    select.onchange = () => { document.getElementById('tasbih-text').textContent = TASBIH_ITEMS[select.value].name; reset(); };
+    target.onchange = () => { state.tasbihTarget = target.value === 'custom' ? parseInt(prompt('أدخل العدد:', '50') || 33) : parseInt(target.value); document.getElementById('tasbih-max').textContent = '/' + state.tasbihTarget; reset(); };
+    circle.onclick = () => { if(state.tasbihCount < state.tasbihTarget) { state.tasbihCount++; document.getElementById('tasbih-count').textContent = state.tasbihCount; if(navigator.vibrate) navigator.vibrate(15); } };
+    document.getElementById('reset-tasbih').onclick = reset;
 }
 
 function setupQibla() {
@@ -306,12 +265,11 @@ function setupQibla() {
                 const y = Math.sin(dLon) * Math.cos(kLat * Math.PI / 180);
                 const x = Math.cos(lat * Math.PI / 180) * Math.sin(kLat * Math.PI / 180) - Math.sin(lat * Math.PI / 180) * Math.cos(kLat * Math.PI / 180) * Math.cos(dLon);
                 state.qiblaBearing = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
-                const angleTxt = document.getElementById('qibla-angle-text');
-                if(angleTxt) angleTxt.textContent = `القبلة: ${Math.round(state.qiblaBearing)}°`;
+                document.getElementById('qibla-angle-text').textContent = `القبلة: ${Math.round(state.qiblaBearing)}°`;
                 btn.innerHTML = '<i class="fa-solid fa-check"></i> البوصلة تعمل';
                 window.addEventListener('deviceorientationabsolute', (e) => {
                     let h = e.webkitCompassHeading || (360 - e.alpha);
-                    if(h) { const arrow = document.getElementById('qibla-arrow'); if(arrow) arrow.style.transform = `rotate(${state.qiblaBearing - h}deg)`; }
+                    if(h) document.getElementById('qibla-arrow').style.transform = `rotate(${state.qiblaBearing - h}deg)`;
                 });
             }, () => { alert('الرجاء السماح بالموقع'); btn.innerHTML = 'إعادة المحاولة'; });
         }
@@ -321,17 +279,9 @@ function setupQibla() {
 // --- أدوات مساعدة ---
 function updateHijriDate() { const d = document.getElementById('hijri-date'); if(d) d.textContent = new Intl.DateTimeFormat('ar-SA-u-ca-islamic').format(new Date()); }
 function setupScrollTop() { 
-    const btn = document.getElementById('scroll-top-btn'); 
-    if(!btn) return;
-    // إخفاء/إظهار الزر بناءً على تمرير الـ Swiper Slide النشط
+    const btn = document.getElementById('scroll-top-btn'); if(!btn) return;
     document.querySelectorAll('.swiper-slide').forEach(slide => {
-        slide.addEventListener('scroll', () => {
-            if(slide.scrollTop > 300) btn.classList.remove('hidden');
-            else btn.classList.add('hidden');
-        });
+        slide.addEventListener('scroll', () => { if(slide.scrollTop > 300) btn.classList.remove('hidden'); else btn.classList.add('hidden'); });
     });
-    btn.onclick = () => {
-        const activeSlide = document.querySelector('.swiper-slide-active');
-        if(activeSlide) activeSlide.scrollTo({top:0, behavior:'smooth'});
-    };
+    btn.onclick = () => { const active = document.querySelector('.swiper-slide-active'); if(active) active.scrollTo({top:0, behavior:'smooth'}); };
 }
