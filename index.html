@@ -5,12 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#042f1a">
     <title>ذِكْر | Ultimate</title>
+    
+    <!-- مكتبة Swiper للسحب الاحترافي -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- ضفنا خط Amiri Quran عشان المصحف -->
     <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=108.0">
+    
+    <link rel="stylesheet" href="css/style.css?v=109.0">
 </head>
 <body>
 
@@ -59,124 +63,154 @@
     </aside>
     <div id="sidebar-overlay"></div>
 
-    <main id="main-content">
-        
-        <section id="page-home" class="page active">
-            <div class="hero">
-                <p class="date" id="hijri-date">جاري التحميل...</p>
-                <h2 class="greeting">أهلاً بك</h2>
-                <form id="search-form" class="search-box">
-                    <input type="text" id="search-input" placeholder="ابحث في الأذكار..." autocomplete="off">
-                    <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
-                </form>
-            </div>
-            <div class="grid">
-                <div class="card ripple" data-target="morning"><i class="fa-solid fa-cloud-sun card-icon"></i><h3>الصباح</h3></div>
-                <div class="card ripple" data-target="evening"><i class="fa-solid fa-cloud-moon card-icon"></i><h3>المساء</h3></div>
-                <div class="card ripple" data-target="tasbih"><i class="fa-solid fa-circle-nodes card-icon"></i><h3>السبحة</h3></div>
-                <div class="card ripple" data-target="quran"><i class="fa-solid fa-book-quran card-icon"></i><h3>القرآن</h3></div>
-            </div>
-            <div class="verse-box"><p>﴿ فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُوا لِي وَلَا تَكْفُرُونِ ﴾</p></div>
-        </section>
-
-        <section id="page-quran" class="page">
-            <h2 class="page-title">فهرس السور</h2>
-            <div class="list" id="list-quran"><p class="loading-text"><i class="fa-solid fa-spinner fa-spin"></i> جاري تحميل السور...</p></div>
-        </section>
-
-        <!-- صفحة قارئ القرآن (المصحف) -->
-        <section id="page-quran-reader" class="page">
-            <div class="reader-header">
-                <button id="back-to-quran" class="icon-btn" style="color: var(--primary);"><i class="fa-solid fa-arrow-right"></i></button>
-                <h2 id="reader-title">اسم السورة</h2>
-                <div style="width: 40px;"></div>
-            </div>
-            <!-- حاوية المصحف الشريف -->
-            <div class="mushaf-container">
-                <div id="list-quran-verses" class="mushaf-text"></div>
-            </div>
-        </section>
-
-        <section id="page-morning" class="page"><h2 class="page-title">أذكار الصباح</h2><div class="list" id="list-morning"></div></section>
-        <section id="page-evening" class="page"><h2 class="page-title">أذكار المساء</h2><div class="list" id="list-evening"></div></section>
-        <section id="page-sleep" class="page"><h2 class="page-title">أذكار النوم</h2><div class="list" id="list-sleep"></div></section>
-        <section id="page-wake" class="page"><h2 class="page-title">أذكار الاستيقاظ</h2><div class="list" id="list-wake"></div></section>
-        <section id="page-duas" class="page"><h2 class="page-title">الأدعية</h2><div class="list" id="list-duas"></div></section>
-        <section id="page-search" class="page"><h2 class="page-title">نتائج البحث</h2><div class="list" id="list-search"></div></section>
-
-        <section id="page-tasbih" class="page">
-            <h2 class="page-title">السبحة الذكية</h2>
-            <div class="tasbih-container">
-                <select id="tasbih-select" class="pro-select"></select>
-                <select id="tasbih-target" class="pro-select">
-                    <option value="33">33 مرة</option>
-                    <option value="100">100 مرة</option>
-                    <option value="1000">1000 مرة</option>
-                    <option value="custom">عدد مخصص...</option>
-                </select>
-                <div class="tasbih-circle" id="tasbih-btn">
-                    <span class="count" id="tasbih-count">0</span>
-                    <span class="target" id="tasbih-max">/ 33</span>
+    <!-- حاوية السحب Swiper -->
+    <main id="main-content" class="swiper">
+        <div class="swiper-wrapper">
+            
+            <!-- 0. الرئيسية -->
+            <section id="page-home" class="swiper-slide page">
+                <div class="hero">
+                    <p class="date" id="hijri-date">جاري التحميل...</p>
+                    <h2 class="greeting">أهلاً بك</h2>
+                    <form id="search-form" class="search-box">
+                        <input type="text" id="search-input" placeholder="ابحث في الأذكار..." autocomplete="off">
+                        <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+                    </form>
                 </div>
-                <h3 class="dhikr-text" id="tasbih-text">سُبْحَانَ اللَّهِ</h3>
-                <button id="reset-tasbih" class="btn-secondary"><i class="fa-solid fa-rotate-right"></i> تصفير</button>
-            </div>
-        </section>
-
-        <section id="page-qibla" class="page">
-            <h2 class="page-title">اتجاه القبلة</h2>
-            <div class="compass-container">
-                <div class="compass-wrapper">
-                    <div class="compass-ring"></div>
-                    <div class="compass-arrow" id="qibla-arrow"><i class="fa-solid fa-kaaba"></i></div>
+                <div class="grid">
+                    <div class="card ripple" data-target="morning"><i class="fa-solid fa-cloud-sun card-icon"></i><h3>الصباح</h3></div>
+                    <div class="card ripple" data-target="evening"><i class="fa-solid fa-cloud-moon card-icon"></i><h3>المساء</h3></div>
+                    <div class="card ripple" data-target="tasbih"><i class="fa-solid fa-circle-nodes card-icon"></i><h3>السبحة</h3></div>
+                    <div class="card ripple" data-target="quran"><i class="fa-solid fa-book-quran card-icon"></i><h3>القرآن</h3></div>
                 </div>
-                <h3 id="qibla-angle-text">في انتظار الموقع...</h3>
-                <button id="btn-qibla" class="btn-primary"><i class="fa-solid fa-location-crosshairs"></i> تحديد القبلة</button>
-            </div>
-        </section>
+                <div class="verse-box"><p>﴿ فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُوا لِي وَلَا تَكْفُرُونِ ﴾</p></div>
+            </section>
 
-        <section id="page-settings" class="page">
-            <h2 class="page-title">الإعدادات</h2>
-            <div class="settings-group">
-                <h3 class="settings-title">المظهر والقراءة</h3>
-                <div class="settings-card">
-                    <div class="set-item">
-                        <span><i class="fa-solid fa-moon"></i> الوضع الليلي</span>
-                        <label class="switch"><input type="checkbox" id="set-dark"><span class="slider"></span></label>
+            <!-- 1. الأذكار (مثلاً الصباح) -->
+            <section id="page-morning" class="swiper-slide page">
+                <h2 class="page-title">أذكار الصباح</h2>
+                <div class="list" id="list-morning"></div>
+            </section>
+
+            <!-- 2. السبحة -->
+            <section id="page-tasbih" class="swiper-slide page">
+                <h2 class="page-title">السبحة الذكية</h2>
+                <div class="tasbih-container">
+                    <select id="tasbih-select" class="pro-select"></select>
+                    <select id="tasbih-target" class="pro-select">
+                        <option value="33">33 مرة</option>
+                        <option value="100">100 مرة</option>
+                        <option value="1000">1000 مرة</option>
+                        <option value="custom">عدد مخصص...</option>
+                    </select>
+                    <div class="tasbih-circle" id="tasbih-btn">
+                        <span class="count" id="tasbih-count">0</span>
+                        <span class="target" id="tasbih-max">/ 33</span>
                     </div>
-                    <div class="set-item">
-                        <span><i class="fa-solid fa-text-height"></i> حجم الخط</span>
-                        <input type="range" id="set-font" min="18" max="36" value="24">
-                    </div>
+                    <h3 class="dhikr-text" id="tasbih-text">سُبْحَانَ اللَّهِ</h3>
+                    <button id="reset-tasbih" class="btn-secondary"><i class="fa-solid fa-rotate-right"></i> تصفير</button>
                 </div>
-            </div>
-            <div class="settings-group">
-                <h3 class="settings-title">سلوك العدادات</h3>
-                <div class="settings-card">
-                    <div class="set-item">
-                        <span><i class="fa-solid fa-rotate-left"></i> تصفير العدادات عند الخروج</span>
-                        <label class="switch"><input type="checkbox" id="set-reset-counter" checked><span class="slider"></span></label>
-                    </div>
-                </div>
-            </div>
-        </section>
+            </section>
 
+            <!-- 3. الأدعية -->
+            <section id="page-duas" class="swiper-slide page">
+                <h2 class="page-title">الأدعية</h2>
+                <div class="list" id="list-duas"></div>
+            </section>
+
+            <!-- 4. القرآن -->
+            <section id="page-quran" class="swiper-slide page">
+                <h2 class="page-title">فهرس السور</h2>
+                <div class="list" id="list-quran"><p class="loading-text"><i class="fa-solid fa-spinner fa-spin"></i> جاري تحميل السور...</p></div>
+            </section>
+
+            <!-- 5. قارئ القرآن -->
+            <section id="page-quran-reader" class="swiper-slide page">
+                <div class="reader-header">
+                    <button id="back-to-quran" class="icon-btn" style="color: var(--primary);"><i class="fa-solid fa-arrow-right"></i></button>
+                    <h2 id="reader-title">اسم السورة</h2>
+                    <div style="width: 40px;"></div>
+                </div>
+                <div class="mushaf-container">
+                    <div id="list-quran-verses" class="mushaf-text"></div>
+                </div>
+            </section>
+
+            <!-- 6. المساء -->
+            <section id="page-evening" class="swiper-slide page"><h2 class="page-title">أذكار المساء</h2><div class="list" id="list-evening"></div></section>
+            
+            <!-- 7. النوم -->
+            <section id="page-sleep" class="swiper-slide page"><h2 class="page-title">أذكار النوم</h2><div class="list" id="list-sleep"></div></section>
+            
+            <!-- 8. الاستيقاظ -->
+            <section id="page-wake" class="swiper-slide page"><h2 class="page-title">أذكار الاستيقاظ</h2><div class="list" id="list-wake"></div></section>
+
+            <!-- 9. القبلة -->
+            <section id="page-qibla" class="swiper-slide page">
+                <h2 class="page-title">اتجاه القبلة</h2>
+                <div class="compass-container">
+                    <div class="compass-wrapper">
+                        <div class="compass-ring"></div>
+                        <div class="compass-arrow" id="qibla-arrow"><i class="fa-solid fa-kaaba"></i></div>
+                    </div>
+                    <h3 id="qibla-angle-text">في انتظار الموقع...</h3>
+                    <button id="btn-qibla" class="btn-primary"><i class="fa-solid fa-location-crosshairs"></i> تحديد القبلة</button>
+                </div>
+            </section>
+
+            <!-- 10. الإعدادات -->
+            <section id="page-settings" class="swiper-slide page">
+                <h2 class="page-title">الإعدادات</h2>
+                <div class="settings-group">
+                    <h3 class="settings-title">المظهر والقراءة</h3>
+                    <div class="settings-card">
+                        <div class="set-item">
+                            <span><i class="fa-solid fa-moon"></i> الوضع الليلي</span>
+                            <label class="switch"><input type="checkbox" id="set-dark"><span class="slider"></span></label>
+                        </div>
+                        <div class="set-item">
+                            <span><i class="fa-solid fa-text-height"></i> حجم الخط</span>
+                            <input type="range" id="set-font" min="18" max="36" value="24">
+                        </div>
+                    </div>
+                </div>
+                <div class="settings-group">
+                    <h3 class="settings-title">سلوك العدادات</h3>
+                    <div class="settings-card">
+                        <div class="set-item">
+                            <span><i class="fa-solid fa-rotate-left"></i> تصفير العدادات عند الخروج</span>
+                            <label class="switch"><input type="checkbox" id="set-reset-counter" checked><span class="slider"></span></label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 11. البحث -->
+            <section id="page-search" class="swiper-slide page">
+                <h2 class="page-title">نتائج البحث</h2>
+                <div class="list" id="list-search"></div>
+            </section>
+
+        </div>
     </main>
 
     <button id="scroll-top-btn" class="icon-btn hidden"><i class="fa-solid fa-arrow-up"></i></button>
 
+    <!-- الشريط السفلي المضبوط -->
     <nav id="bottom-nav">
-        <button data-target="home" class="active"><i class="fa-solid fa-house"></i><span>الرئيسية</span></button>
-        <button data-target="quran"><i class="fa-solid fa-book-quran"></i><span>القرآن</span></button>
-        <button data-target="tasbih" class="main-btn"><i class="fa-solid fa-circle-nodes"></i></button>
-        <button data-target="duas"><i class="fa-solid fa-hands-praying"></i><span>الأدعية</span></button>
+        <button data-index="0" class="active"><i class="fa-solid fa-house"></i><span>الرئيسية</span></button>
+        <button data-index="1"><i class="fa-solid fa-list-ul"></i><span>الأذكار</span></button>
+        <button data-index="2" class="main-btn"><i class="fa-solid fa-circle-nodes"></i></button>
+        <button data-index="3"><i class="fa-solid fa-hands-praying"></i><span>الأدعية</span></button>
         <button id="more-btn"><i class="fa-solid fa-bars-staggered"></i><span>المزيد</span></button>
     </nav>
 
+    <!-- مكتبة Swiper JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
         if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
     </script>
-    <script src="js/data.js?v=108.0"></script>
-    <script src="js/app.js?v=108.0"></script>
+    <script src="js/data.js?v=109.0"></script>
+    <script src="js/app.js?v=109.0"></script>
 </body>
 </html>
