@@ -1,11 +1,7 @@
-/* ============================================
-   ذِكْر | V107 Ultimate Engine (Fixed Touch & Quran)
-   ============================================ */
-
 const state = { currentPage: 'home', isSidebarOpen: false, tasbihCount: 0, tasbihTarget: 33, qiblaBearing: 0, currentRotation: 0 };
 const settings = {
     darkMode: localStorage.getItem('dhikr_dark') === 'true',
-    fontScale: localStorage.getItem('dhikr_font') || '22',
+    fontScale: localStorage.getItem('dhikr_font') || '24',
     resetCounter: localStorage.getItem('dhikr_reset') !== 'false'
 };
 
@@ -25,10 +21,10 @@ function initApp() {
     setupSettingsUI();
     setupTasbih(); 
     setupQibla(); 
-    setupSwipeGestures(); // محرك اللمس الجديد
+    setupSwipeGestures(); // محرك اللمس
     setupScrollTop(); 
     updateHijriDate();
-    loadQuranSurahs();
+    loadQuranSurahs(); // تحميل الفهرس
 }
 
 // --- الإعدادات ---
@@ -85,7 +81,7 @@ function setupSettingsUI() {
     }
 }
 
-// --- التنقل ---
+// --- التنقل الأساسي ---
 function navigateTo(pageId) {
     if (settings.resetCounter && state.currentPage !== pageId) resetAdhkarCounters();
     
@@ -137,7 +133,7 @@ function closeSidebar() {
     state.isSidebarOpen = false; 
 }
 
-// --- محرك اللمس (Swipe Engine) المصحح هندسياً ---
+// --- محرك اللمس (Swipe Engine) المصحح 100% ليتبع الإصبع ---
 function setupSwipeGestures() {
     let startX = 0, startY = 0;
     const main = document.getElementById('main-content');
@@ -152,32 +148,35 @@ function setupSwipeGestures() {
         let endX = e.changedTouches[0].clientX;
         let endY = e.changedTouches[0].clientY;
         
-        // حساب المسافة (X و Y)
-        let diffX = startX - endX; // موجب = سحب لليسار، سالب = سحب لليمين
-        let diffY = startY - endY;
+        let diffX = endX - startX; // موجب = سحب لليمين، سالب = سحب لليسار
+        let diffY = endY - startY;
         
-        // التأكد إن السحب أفقي وليس رأسي (عشان التمرير ميبوظش التنقل)
+        // لو السحب أفقي (تجاهل التمرير الرأسي)
         if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 60) {
             
-            // 1. فتح القائمة الجانبية (سحب من الحافة اليمنى لليسار)
-            if (startX > window.innerWidth - 50 && diffX > 0) { 
+            // 1. فتح القائمة الجانبية (سحب من الحافة اليمنى)
+            if (startX > window.innerWidth - 50 && diffX < 0) { // سحب لليسار من اليمين
                 openSidebar(); 
                 return; 
             }
             
-            // 2. التنقل بين الصفحات
-            if (!state.isSidebarOpen) {
+            // 2. إغلاق القائمة الجانبية لو مفتوحة (سحب لليمين)
+            if (state.isSidebarOpen) {
+                if (diffX > 60) closeSidebar();
+                return;
+            }
+            
+            // 3. التنقل بين الصفحات بناءً على اتجاه الإصبع
+            if (!state.isSidebarOpen && state.currentPage !== 'quran-reader') {
                 let idx = pages.indexOf(state.currentPage);
-                
-                // لو إحنا في صفحة فرعية (زي الإعدادات أو القرآن) ممنوع السحب
                 if (idx === -1) return; 
                 
-                // التصحيح الهندسي: السحب لليسار (diffX > 0) يوديك للصفحة اللي بعدها
-                if (diffX > 0) {
+                // إنت بتسحب صباعك ناحية الشمال (diffX < 0) => الصفحة تتقلب ناحية الشمال (Next)
+                if (diffX < 0) {
                     navigateTo(pages[(idx + 1) % pages.length]);
                 } 
-                // السحب لليمين (diffX < 0) يرجعك للصفحة اللي قبلها
-                else if (diffX < 0) {
+                // إنت بتسحب صباعك ناحية اليمين (diffX > 0) => الصفحة تتقلب ناحية اليمين (Prev)
+                else if (diffX > 0) {
                     navigateTo(pages[(idx - 1 + pages.length) % pages.length]);
                 }
             }
@@ -195,7 +194,7 @@ function renderAllAdhkar() {
 
 function generateCardHTML(item) {
     let header = item.type === 'surah' ? `<p class="basmala">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>` : (item.type === 'ayah' ? `<p class="istiadha">أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ</p>` : '');
-    let body = (item.type === 'surah' || item.type === 'ayah') ? 'quran-text' : 'adhkar-text';
+    let body = (item.type === 'surah' || item.type === 'ayah') ? 'adhkar-text' : 'adhkar-text'; // استخدمنا نفس الكلاس لتوحيد الشكل
     let btn = item.category !== 'duas' ? `<button class="btn-dhikr" onclick="incrementDhikr(this, '${item.id}', ${item.count})">التكرار (0/${item.count})</button>` : '';
     
     return `<div class="adhkar-card" id="card-${item.id}">
@@ -251,7 +250,7 @@ function executeSearch() {
     navigateTo('search');
 }
 
-// --- محرك القرآن ---
+// --- محرك القرآن (المصحف العثماني) ---
 async function loadQuranSurahs() {
     const container = document.getElementById('list-quran');
     if(!container) return;
@@ -262,7 +261,7 @@ async function loadQuranSurahs() {
             container.innerHTML = data.data.map(s => `
                 <div class="adhkar-card" style="cursor:pointer;" onclick="openSurah(${s.number}, '${s.name}')">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div><h3 style="color:var(--gold); font-family:'Amiri'; font-size:1.4rem;">${s.name}</h3><p style="color:var(--text-muted); font-size:0.9rem;">${s.numberOfAyahs} آية</p></div>
+                        <div><h3 style="color:var(--gold); font-family:'Amiri Quran'; font-size:1.4rem;">${s.name}</h3><p style="color:var(--text-muted); font-size:0.9rem;">${s.numberOfAyahs} آية</p></div>
                         <div style="background:var(--primary); color:var(--gold); width:40px; height:40px; display:flex; justify-content:center; align-items:center; border-radius:50%; font-weight:bold;">${s.number}</div>
                     </div>
                 </div>`).join('');
@@ -277,24 +276,23 @@ async function openSurah(number, name) {
     
     const container = document.getElementById('list-quran-verses');
     if(!container) return;
-    container.innerHTML = '<p class="loading-text"><i class="fa-solid fa-spinner fa-spin"></i> جاري تحميل الآيات...</p>';
+    container.innerHTML = '<p class="loading-text" style="color:var(--gold);"><i class="fa-solid fa-spinner fa-spin"></i> جاري تحميل الآيات...</p>';
     
     try {
-        const res = await fetch(`https://api.alquran.cloud/v1/surah/${number}`);
+        // جلب النص العثماني
+        const res = await fetch(`https://api.alquran.cloud/v1/surah/${number}/quran-uthmani`);
         const data = await res.json();
         if (data.code === 200) {
             const ayahs = data.data.ayahs;
             let versesHTML = '';
             
-            // إضافة البسملة إلا في سورة التوبة والفاتحة
+            // البسملة في بداية السورة (إلا التوبة والفاتحة)
             if (number !== 1 && number !== 9) {
-                versesHTML += `<div class="card-header"><p class="basmala">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p></div>`;
+                versesHTML += `<div style="text-align:center; margin-bottom: 20px;"><span style="font-family:'Amiri Quran', serif; font-size:calc(var(--base-font-size) + 4px); color:var(--gold);">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</span></div>`;
             }
 
             versesHTML += ayahs.map(a => `
-                <div class="verse-item">
-                    ${a.text} <span class="verse-number">${a.numberInSurah}</span>
-                </div>
+                <span>${a.text}</span> <span class="verse-number">${a.numberInSurah}</span> 
             `).join('');
             
             container.innerHTML = versesHTML;
