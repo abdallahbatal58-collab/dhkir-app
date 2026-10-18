@@ -1,379 +1,179 @@
-/* ============================================
-   ذِكْر | V16 Core Engine (Full)
-   ============================================ */
-
-const state = {
-    currentPage: 'home',
-    isSidebarOpen: false,
-    searchQuery: '',
-    tasbihCount: 0,
-    tasbihTarget: 33,
-    qiblaBearing: 0,
-    currentRotation: 0
-};
-
+const state = { currentPage: 'home', isSidebarOpen: false, tasbihCount: 0, tasbihTarget: 33, qiblaBearing: 0, currentRotation: 0 };
 const settings = {
     darkMode: localStorage.getItem('dhikr_dark') === 'true',
     fontScale: localStorage.getItem('dhikr_font') || '1',
-    cardStyle: localStorage.getItem('dhikr_card') || 'classic',
-    resetCounter: localStorage.getItem('dhikr_reset') !== 'false',
-    autoNext: localStorage.getItem('dhikr_autonext') === 'true'
+    resetCounter: localStorage.getItem('dhikr_reset') !== 'false'
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-        document.getElementById('splash').classList.add('hide');
-        initApp();
-    }, 1500);
+    setTimeout(() => { document.getElementById('splash').classList.add('hide'); initApp(); }, 1500);
 });
 
 function initApp() {
-    applySettings();
-    renderAllAdhkar();
-    setupNavigation();
-    setupSearch();
-    setupSettingsUI();
-    setupTasbih();
-    setupQibla();
-    setupSwipeGestures(); // السحب الدائري الجديد
-    setupScrollTop();
-    updateHijriDate();
+    applySettings(); renderAllAdhkar(); setupNavigation(); setupSearch(); setupSettingsUI();
+    setupTasbih(); setupQibla(); setupSwipeGestures(); setupScrollTop(); updateHijriDate();
+    loadQuranSurahs(); // تحميل القرآن
 }
 
-// --- الإعدادات ---
 function applySettings() {
-    if (settings.darkMode) {
-        document.body.classList.add('dark');
-        document.getElementById('theme-btn').innerHTML = '<i class="fa-solid fa-sun"></i>';
-        if(document.getElementById('set-dark')) document.getElementById('set-dark').checked = true;
-    } else {
-        document.body.classList.remove('dark');
-        document.getElementById('theme-btn').innerHTML = '<i class="fa-solid fa-moon"></i>';
-    }
-
+    if (settings.darkMode) { document.body.classList.add('dark'); document.getElementById('theme-btn').innerHTML = '<i class="fa-solid fa-sun"></i>'; if(document.getElementById('set-dark')) document.getElementById('set-dark').checked = true; }
+    else { document.body.classList.remove('dark'); document.getElementById('theme-btn').innerHTML = '<i class="fa-solid fa-moon"></i>'; }
     document.documentElement.style.setProperty('--font-scale', settings.fontScale);
     if(document.getElementById('set-font')) document.getElementById('set-font').value = settings.fontScale;
-
-    document.body.classList.remove('style-classic', 'style-glass', 'style-minimal');
-    document.body.classList.add(`style-${settings.cardStyle}`);
-    if(document.getElementById('set-card-style')) document.getElementById('set-card-style').value = settings.cardStyle;
-
     if(document.getElementById('set-reset-counter')) document.getElementById('set-reset-counter').checked = settings.resetCounter;
-    if(document.getElementById('set-auto-next')) document.getElementById('set-auto-next').checked = settings.autoNext;
 }
 
 function setupSettingsUI() {
-    document.getElementById('theme-btn').onclick = () => {
-        settings.darkMode = !settings.darkMode;
-        localStorage.setItem('dhikr_dark', settings.darkMode);
-        applySettings();
-    };
-
-    const setDark = document.getElementById('set-dark');
-    if(setDark) setDark.onchange = (e) => {
-        settings.darkMode = e.target.checked;
-        localStorage.setItem('dhikr_dark', settings.darkMode);
-        applySettings();
-    };
-
-    const setFont = document.getElementById('set-font');
-    if(setFont) setFont.oninput = (e) => {
-        settings.fontScale = e.target.value;
-        localStorage.setItem('dhikr_font', settings.fontScale);
-        document.documentElement.style.setProperty('--font-scale', settings.fontScale);
-    };
-
-    const setCard = document.getElementById('set-card-style');
-    if(setCard) setCard.onchange = (e) => {
-        settings.cardStyle = e.target.value;
-        localStorage.setItem('dhikr_card', settings.cardStyle);
-        applySettings();
-    };
-
-    const setReset = document.getElementById('set-reset-counter');
-    if(setReset) setReset.onchange = (e) => {
-        settings.resetCounter = e.target.checked;
-        localStorage.setItem('dhikr_reset', settings.resetCounter);
-    };
-
-    const setNext = document.getElementById('set-auto-next');
-    if(setAutoNext) setNext.onchange = (e) => {
-        settings.autoNext = e.target.checked;
-        localStorage.setItem('dhikr_autonext', settings.autoNext);
-    };
+    document.getElementById('theme-btn').onclick = () => { settings.darkMode = !settings.darkMode; localStorage.setItem('dhikr_dark', settings.darkMode); applySettings(); };
+    if(document.getElementById('set-dark')) document.getElementById('set-dark').onchange = (e) => { settings.darkMode = e.target.checked; localStorage.setItem('dhikr_dark', settings.darkMode); applySettings(); };
+    if(document.getElementById('set-font')) document.getElementById('set-font').oninput = (e) => { settings.fontScale = e.target.value; localStorage.setItem('dhikr_font', settings.fontScale); document.documentElement.style.setProperty('--font-scale', settings.fontScale); };
+    if(document.getElementById('set-reset-counter')) document.getElementById('set-reset-counter').onchange = (e) => { settings.resetCounter = e.target.checked; localStorage.setItem('dhikr_reset', settings.resetCounter); };
 }
 
-// --- التنقل ---
 function navigateTo(pageId) {
-    if (settings.resetCounter && state.currentPage !== pageId) {
-        resetAdhkarCounters();
-    }
-
+    if (settings.resetCounter && state.currentPage !== pageId) resetAdhkarCounters();
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    const targetPage = document.getElementById(`page-${pageId}`);
-    if (targetPage) targetPage.classList.add('active');
+    const target = document.getElementById(`page-${pageId}`);
+    if (target) target.classList.add('active');
     state.currentPage = pageId;
-
-    document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.toggle('active', a.dataset.target === pageId));
+    document.querySelectorAll('.nav-group a').forEach(a => a.classList.toggle('active', a.dataset.target === pageId));
     document.querySelectorAll('#bottom-nav button[data-target]').forEach(b => b.classList.toggle('active', b.dataset.target === pageId));
-
     closeSidebar();
     document.getElementById('main-content').scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function setupNavigation() {
     document.querySelectorAll('[data-target]').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            navigateTo(btn.dataset.target);
-        });
+        btn.addEventListener('click', (e) => { e.preventDefault(); navigateTo(btn.dataset.target); });
     });
-
     document.getElementById('menu-btn').onclick = openSidebar;
     document.getElementById('more-btn').onclick = openSidebar;
     document.getElementById('sidebar-overlay').onclick = closeSidebar;
 }
 
-function openSidebar() {
-    document.getElementById('sidebar').classList.add('open');
-    document.getElementById('sidebar-overlay').classList.add('show');
-    state.isSidebarOpen = true;
-}
+function openSidebar() { document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebar-overlay').classList.add('show'); state.isSidebarOpen = true; }
+function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebar-overlay').classList.remove('show'); state.isSidebarOpen = false; }
 
-function closeSidebar() {
-    document.getElementById('sidebar').classList.remove('open');
-    document.getElementById('sidebar-overlay').classList.remove('show');
-    state.isSidebarOpen = false;
-}
-
-// --- السحب باللمس (Infinite Loop) ---
 function setupSwipeGestures() {
     let startX = 0, startY = 0;
-    const mainContent = document.getElementById('main-content');
-    const pagesOrder = ['home', 'quran', 'morning', 'evening', 'tasbih', 'duas']; 
-
-    mainContent.addEventListener('touchstart', e => {
-        startX = e.touches[0].clientX;
-        startY = e.touches[0].clientY;
-    }, { passive: true });
-
-    mainContent.addEventListener('touchend', e => {
-        let endX = e.changedTouches[0].clientX;
-        let endY = e.changedTouches[0].clientY;
-        let diffX = startX - endX;
-        let diffY = startY - endY;
-
+    const main = document.getElementById('main-content');
+    const pages = ['home', 'quran', 'morning', 'evening', 'tasbih', 'duas'];
+    main.addEventListener('touchstart', e => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; }, { passive: true });
+    main.addEventListener('touchend', e => {
+        let diffX = startX - e.changedTouches[0].clientX, diffY = startY - e.changedTouches[0].clientY;
         if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 70) {
-            if (startX > window.innerWidth - 50 && diffX < -70) {
-                openSidebar();
-                return;
-            }
-
+            if (startX > window.innerWidth - 50 && diffX < -70) { openSidebar(); return; }
             if (!state.isSidebarOpen) {
-                let currentIndex = pagesOrder.indexOf(state.currentPage);
-                if (currentIndex === -1) return;
-
-                if (diffX > 70) {
-                    currentIndex = (currentIndex + 1) % pagesOrder.length;
-                    navigateTo(pagesOrder[currentIndex]);
-                } else if (diffX < -70) {
-                    currentIndex = (currentIndex - 1 + pagesOrder.length) % pagesOrder.length;
-                    navigateTo(pagesOrder[currentIndex]);
-                }
+                let idx = pages.indexOf(state.currentPage);
+                if (idx === -1) return;
+                if (diffX > 70) navigateTo(pages[(idx + 1) % pages.length]);
+                else if (diffX < -70) navigateTo(pages[(idx - 1 + pages.length) % pages.length]);
             }
         }
     }, { passive: true });
 }
 
-// --- عرض الأذكار ---
 function renderAllAdhkar() {
-    const categories = ['morning', 'evening', 'sleep', 'wake', 'duas'];
-    categories.forEach(cat => {
-        const container = document.getElementById(`list-${cat}`);
-        if (!container) return;
-        const items = ADHKAR_DATA.filter(d => d.category === cat);
-        container.innerHTML = items.map(item => generateCardHTML(item)).join('');
+    ['morning', 'evening', 'sleep', 'wake', 'duas'].forEach(cat => {
+        const c = document.getElementById(`list-${cat}`);
+        if(c) c.innerHTML = ADHKAR_DATA.filter(d => d.category === cat).map(generateCardHTML).join('');
     });
 }
 
 function generateCardHTML(item) {
-    let headerHTML = '';
-    if (item.type === 'surah') headerHTML = `<p class="basmala">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>`;
-    else if (item.type === 'ayah') headerHTML = `<p class="istiadha">أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ</p>`;
-
-    let bodyClass = (item.type === 'surah' || item.type === 'ayah') ? 'quran-text' : 'adhkar-text';
-    let counterBtn = '';
-    if (item.category !== 'duas') {
-        counterBtn = `<button class="btn-dhikr ripple" onclick="incrementDhikr(this, '${item.id}', ${item.count})">التكرار (0/${item.count})</button>`;
-    }
-
-    return `
-        <div class="adhkar-card" id="card-${item.id}">
-            <div class="card-header">${headerHTML}</div>
-            <div class="${bodyClass}">${item.text}</div>
-            <div class="dua-ref">${item.source || ''}</div>
-            ${counterBtn}
-        </div>
-    `;
+    let header = item.type === 'surah' ? `<p class="basmala">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>` : (item.type === 'ayah' ? `<p class="istiadha">أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ</p>` : '');
+    let body = (item.type === 'surah' || item.type === 'ayah') ? 'quran-text' : 'adhkar-text';
+    let btn = item.category !== 'duas' ? `<button class="btn-dhikr" onclick="incrementDhikr(this, '${item.id}', ${item.count})">التكرار (0/${item.count})</button>` : '';
+    return `<div class="adhkar-card" id="card-${item.id}"><div class="card-header">${header}</div><div class="${body}">${item.text}</div><div class="dua-ref">${item.source}</div>${btn}</div>`;
 }
 
 window.incrementDhikr = (btn, id, max) => {
     let cur = parseInt(localStorage.getItem(`count_${id}`) || 0);
     if (cur < max) {
-        cur++;
-        localStorage.setItem(`count_${id}`, cur);
+        cur++; localStorage.setItem(`count_${id}`, cur);
         if (navigator.vibrate) navigator.vibrate(15);
         btn.textContent = `التكرار (${cur}/${max})`;
-        if (cur === max) { 
-            btn.classList.add('done'); 
-            btn.innerHTML = '<i class="fa-solid fa-check"></i> تم بحمد الله'; 
-            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-        }
+        if (cur === max) { btn.classList.add('done'); btn.innerHTML = '✓ تم'; if (navigator.vibrate) navigator.vibrate([100, 50, 100]); }
     }
 };
 
 function resetAdhkarCounters() {
-    ADHKAR_DATA.forEach(item => {
-        localStorage.setItem(`count_${item.id}`, 0);
-        const btn = document.querySelector(`#card-${item.id} .btn-dhikr`);
-        if (btn) {
-            btn.classList.remove('done');
-            btn.textContent = `التكرار (0/${item.count})`;
-        }
+    ADHKAR_DATA.forEach(i => {
+        localStorage.setItem(`count_${i.id}`, 0);
+        const b = document.querySelector(`#card-${i.id} .btn-dhikr`);
+        if(b) { b.classList.remove('done'); b.textContent = `التكرار (0/${i.count})`; }
     });
 }
 
-// --- البحث ---
 function setupSearch() {
     const form = document.getElementById('search-form');
-    if (!form) return;
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        executeSearch();
-    });
+    if (form) form.addEventListener('submit', (e) => { e.preventDefault(); executeSearch(); });
 }
 
-function normalizeArabic(text) {
-    if (!text) return '';
-    return text.replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/[\u064B-\u065F]/g, '').trim().toLowerCase();
-}
+function normalize(text) { return text ? text.replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/[\u064B-\u065F]/g, '').trim() : ''; }
 
 function executeSearch() {
-    const query = document.getElementById('search-input').value.trim();
-    if (query.length === 0) return;
-    const normalizedQuery = normalizeArabic(query);
-    
-    const results = ADHKAR_DATA.filter(item => {
-        const matchText = normalizeArabic(item.text).includes(normalizedQuery);
-        const matchTitle = item.title ? normalizeArabic(item.title).includes(normalizedQuery) : false;
-        return matchText || matchTitle;
-    });
-
-    const container = document.getElementById('list-search');
-    if (results.length > 0) {
-        container.innerHTML = results.map(item => generateCardHTML(item)).join('');
-    } else {
-        container.innerHTML = `<div style="text-align:center; padding: 50px 20px; color: var(--text-muted);"><p>لا توجد نتائج لبحثك عن "${query}"</p></div>`;
-    }
+    const q = document.getElementById('search-input').value.trim();
+    if (!q) return;
+    const nq = normalize(q);
+    const results = ADHKAR_DATA.filter(i => normalize(i.text).includes(nq));
+    document.getElementById('list-search').innerHTML = results.length ? results.map(generateCardHTML).join('') : `<div class="loading-text">لا توجد نتائج</div>`;
     navigateTo('search');
 }
 
-// --- السبحة ---
+// محرك القرآن
+async function loadQuranSurahs() {
+    const container = document.getElementById('list-quran');
+    try {
+        const res = await fetch('https://api.alquran.cloud/v1/surah');
+        const data = await res.json();
+        if (data.code === 200) {
+            container.innerHTML = data.data.map(s => `
+                <div class="adhkar-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div><h3 style="color:var(--gold); font-family:'Amiri'; font-size:1.4rem;">${s.name}</h3><p style="color:var(--text-muted); font-size:0.9rem;">${s.numberOfAyahs} آية</p></div>
+                        <div style="background:var(--primary); color:var(--gold); width:40px; height:40px; display:flex; justify-content:center; align-items:center; border-radius:50%; font-weight:bold;">${s.number}</div>
+                    </div>
+                </div>`).join('');
+        }
+    } catch (e) { container.innerHTML = '<p class="loading-text">تأكد من اتصالك بالإنترنت لتحميل القرآن.</p>'; }
+}
+
 function setupTasbih() {
     const select = document.getElementById('tasbih-select');
-    const targetSelect = document.getElementById('tasbih-target');
+    const target = document.getElementById('tasbih-target');
     const circle = document.getElementById('tasbih-btn');
     if (!select) return;
-
     select.innerHTML = TASBIH_ITEMS.map((t, i) => `<option value="${i}">${t.name}</option>`).join('');
-    
-    function resetTasbih() {
-        state.tasbihCount = 0; 
-        circle.classList.remove('completed');
-        document.getElementById('tasbih-count').textContent = 0;
-    }
-
-    select.onchange = () => { 
-        document.getElementById('tasbih-text').textContent = TASBIH_ITEMS[select.value].name; 
-        resetTasbih();
-    };
-
-    targetSelect.onchange = () => {
-        if(targetSelect.value === 'custom') { 
-            let val = prompt('أدخل العدد:', '50'); 
-            state.tasbihTarget = (val && !isNaN(val)) ? parseInt(val) : 33; 
-        } else { state.tasbihTarget = parseInt(targetSelect.value); }
-        document.getElementById('tasbih-max').textContent = '/' + state.tasbihTarget; 
-        resetTasbih();
-    };
-
-    circle.onclick = () => {
-        if(state.tasbihCount < state.tasbihTarget) {
-            state.tasbihCount++; 
-            if(navigator.vibrate) navigator.vibrate(15);
-            if(state.tasbihCount === state.tasbihTarget) { 
-                if(navigator.vibrate) navigator.vibrate([100, 50, 100]); 
-                circle.classList.add('completed');
-            }
-            document.getElementById('tasbih-count').textContent = state.tasbihCount;
-        }
-    };
-    document.getElementById('reset-tasbih').onclick = resetTasbih;
+    const reset = () => { state.tasbihCount = 0; document.getElementById('tasbih-count').textContent = 0; };
+    select.onchange = () => { document.getElementById('tasbih-text').textContent = TASBIH_ITEMS[select.value].name; reset(); };
+    target.onchange = () => { state.tasbihTarget = target.value === 'custom' ? parseInt(prompt('أدخل العدد:', '50') || 33) : parseInt(target.value); document.getElementById('tasbih-max').textContent = '/' + state.tasbihTarget; reset(); };
+    circle.onclick = () => { if(state.tasbihCount < state.tasbihTarget) { state.tasbihCount++; document.getElementById('tasbih-count').textContent = state.tasbihCount; if(navigator.vibrate) navigator.vibrate(15); } };
+    document.getElementById('reset-tasbih').onclick = reset;
 }
 
-// --- القبلة ---
 function setupQibla() {
-    const btn = document.getElementById('btn-qibla'), arrow = document.getElementById('qibla-arrow'), angleText = document.getElementById('qibla-angle-text');
+    const btn = document.getElementById('btn-qibla');
     if (!btn) return;
-
     btn.onclick = async () => {
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحديد...';
-        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-            try { await DeviceOrientationEvent.requestPermission(); } catch (error) {}
-        }
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(pos => {
-                const lat = pos.coords.latitude, lng = pos.coords.longitude, kaabaLat = 21.4225, kaabaLng = 39.8262;
-                const dLon = (kaabaLng - lng) * Math.PI / 180;
-                const y = Math.sin(dLon) * Math.cos(kaabaLat * Math.PI / 180);
-                const x = Math.cos(lat * Math.PI / 180) * Math.sin(kaabaLat * Math.PI / 180) - Math.sin(lat * Math.PI / 180) * Math.cos(kaabaLat * Math.PI / 180) * Math.cos(dLon);
+                const lat = pos.coords.latitude, lng = pos.coords.longitude, kLat = 21.4225, kLng = 39.8262;
+                const dLon = (kLng - lng) * Math.PI / 180;
+                const y = Math.sin(dLon) * Math.cos(kLat * Math.PI / 180);
+                const x = Math.cos(lat * Math.PI / 180) * Math.sin(kLat * Math.PI / 180) - Math.sin(lat * Math.PI / 180) * Math.cos(kLat * Math.PI / 180) * Math.cos(dLon);
                 state.qiblaBearing = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
-                angleText.textContent = `اتجاه القبلة: ${Math.round(state.qiblaBearing)}°`;
+                document.getElementById('qibla-angle-text').textContent = `القبلة: ${Math.round(state.qiblaBearing)}°`;
                 btn.innerHTML = '<i class="fa-solid fa-check"></i> البوصلة تعمل';
-                startCompass();
-            }, () => { alert('الرجاء السماح بالموقع.'); btn.innerHTML = 'إعادة المحاولة'; }, { enableHighAccuracy: true });
+                window.addEventListener('deviceorientationabsolute', (e) => {
+                    let h = e.webkitCompassHeading || (360 - e.alpha);
+                    if(h) document.getElementById('qibla-arrow').style.transform = `rotate(${state.qiblaBearing - h}deg)`;
+                });
+            }, () => { alert('الرجاء السماح بالموقع'); btn.innerHTML = 'إعادة المحاولة'; });
         }
     };
-
-    function startCompass() {
-        window.addEventListener('deviceorientationabsolute', handleOrientation, true);
-        window.addEventListener('deviceorientation', handleOrientation, true);
-        function handleOrientation(event) {
-            let compassHeading = event.webkitCompassHeading ? event.webkitCompassHeading : (event.alpha !== null ? 360 - event.alpha : null);
-            if (compassHeading !== null) {
-                let targetRotation = state.qiblaBearing - compassHeading;
-                let diff = targetRotation - state.currentRotation;
-                while (diff > 180) diff -= 360;
-                while (diff < -180) diff += 360;
-                state.currentRotation += diff * 0.15; 
-                arrow.style.transform = `rotate(${state.currentRotation}deg)`;
-            }
-        }
-    }
 }
 
-// --- أدوات مساعدة ---
-function updateHijriDate() {
-    const dateEl = document.getElementById('hijri-date');
-    if (dateEl) dateEl.textContent = new Intl.DateTimeFormat('ar-SA-u-ca-islamic').format(new Date());
-}
-
-function setupScrollTop() {
-    const mainContent = document.getElementById('main-content');
-    const scrollTopBtn = document.getElementById('scroll-top-btn');
-    mainContent.addEventListener('scroll', () => {
-        if (mainContent.scrollTop > 300) scrollTopBtn.classList.remove('hidden');
-        else scrollTopBtn.classList.add('hidden');
-    });
-    scrollTopBtn.addEventListener('click', () => mainContent.scrollTo({ top: 0, behavior: 'smooth' }));
-}
+function updateHijriDate() { const d = document.getElementById('hijri-date'); if(d) d.textContent = new Intl.DateTimeFormat('ar-SA-u-ca-islamic').format(new Date()); }
+function setupScrollTop() { const mc = document.getElementById('main-content'), b = document.getElementById('scroll-top-btn'); mc.addEventListener('scroll', () => { mc.scrollTop > 300 ? b.classList.remove('hidden') : b.classList.add('hidden'); }); b.onclick = () => mc.scrollTo({top:0, behavior:'smooth'}); }
