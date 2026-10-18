@@ -6,7 +6,6 @@
     <meta name="theme-color" content="#042f1a">
     <title>ذِكْر | Ultimate</title>
     
-    <!-- مكتبة Swiper للسحب الاحترافي -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,7 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <link rel="stylesheet" href="css/style.css?v=110.0">
+    <link rel="stylesheet" href="css/style.css?v=111.0">
 </head>
 <body>
 
@@ -63,11 +62,10 @@
     </aside>
     <div id="sidebar-overlay"></div>
 
-    <!-- حاوية السحب Swiper -->
+    <!-- حاوية السحب Swiper (الصفحات الأساسية فقط) -->
     <main id="main-content" class="swiper">
         <div class="swiper-wrapper">
             
-            <!-- 0. الرئيسية -->
             <section id="page-home" class="swiper-slide page">
                 <div class="hero">
                     <p class="date" id="hijri-date">جاري التحميل...</p>
@@ -86,13 +84,11 @@
                 <div class="verse-box"><p>﴿ فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُوا لِي وَلَا تَكْفُرُونِ ﴾</p></div>
             </section>
 
-            <!-- 1. الأذكار (مثلاً الصباح) -->
             <section id="page-morning" class="swiper-slide page">
                 <h2 class="page-title">أذكار الصباح</h2>
                 <div class="list" id="list-morning"></div>
             </section>
 
-            <!-- 2. السبحة -->
             <section id="page-tasbih" class="swiper-slide page">
                 <h2 class="page-title">السبحة الذكية</h2>
                 <div class="tasbih-container">
@@ -112,40 +108,22 @@
                 </div>
             </section>
 
-            <!-- 3. الأدعية -->
             <section id="page-duas" class="swiper-slide page">
                 <h2 class="page-title">الأدعية</h2>
                 <div class="list" id="list-duas"></div>
             </section>
 
-            <!-- 4. القرآن -->
             <section id="page-quran" class="swiper-slide page">
                 <h2 class="page-title">فهرس السور</h2>
                 <div class="list" id="list-quran"><p class="loading-text"><i class="fa-solid fa-spinner fa-spin"></i> جاري تحميل السور...</p></div>
             </section>
 
-            <!-- 5. قارئ القرآن -->
-            <section id="page-quran-reader" class="swiper-slide page">
-                <div class="reader-header">
-                    <button id="back-to-quran" class="icon-btn" style="color: var(--primary);"><i class="fa-solid fa-arrow-right"></i></button>
-                    <h2 id="reader-title">اسم السورة</h2>
-                    <div style="width: 40px;"></div>
-                </div>
-                <div class="mushaf-container">
-                    <div id="list-quran-verses" class="mushaf-text"></div>
-                </div>
-            </section>
-
-            <!-- 6. المساء -->
             <section id="page-evening" class="swiper-slide page"><h2 class="page-title">أذكار المساء</h2><div class="list" id="list-evening"></div></section>
             
-            <!-- 7. النوم -->
             <section id="page-sleep" class="swiper-slide page"><h2 class="page-title">أذكار النوم</h2><div class="list" id="list-sleep"></div></section>
             
-            <!-- 8. الاستيقاظ -->
             <section id="page-wake" class="swiper-slide page"><h2 class="page-title">أذكار الاستيقاظ</h2><div class="list" id="list-wake"></div></section>
 
-            <!-- 9. القبلة -->
             <section id="page-qibla" class="swiper-slide page">
                 <h2 class="page-title">اتجاه القبلة</h2>
                 <div class="compass-container">
@@ -158,7 +136,6 @@
                 </div>
             </section>
 
-            <!-- 10. الإعدادات -->
             <section id="page-settings" class="swiper-slide page">
                 <h2 class="page-title">الإعدادات</h2>
                 <div class="settings-group">
@@ -185,18 +162,34 @@
                 </div>
             </section>
 
-            <!-- 11. البحث -->
-            <section id="page-search" class="swiper-slide page">
-                <h2 class="page-title">نتائج البحث</h2>
-                <div class="list" id="list-search"></div>
-            </section>
-
         </div>
     </main>
 
+    <!-- الشاشات المنبثقة (Overlays) -->
+    <!-- 1. قارئ القرآن -->
+    <div id="overlay-quran-reader" class="overlay-page">
+        <div class="reader-header">
+            <button id="close-reader" class="icon-btn" style="color: var(--primary);"><i class="fa-solid fa-arrow-right"></i></button>
+            <h2 id="reader-title">اسم السورة</h2>
+            <div style="width: 40px;"></div>
+        </div>
+        <div class="mushaf-container">
+            <div id="list-quran-verses" class="mushaf-text"></div>
+        </div>
+    </div>
+
+    <!-- 2. نتائج البحث -->
+    <div id="overlay-search" class="overlay-page">
+        <div class="reader-header">
+            <button id="close-search" class="icon-btn" style="color: var(--primary);"><i class="fa-solid fa-arrow-right"></i></button>
+            <h2 class="page-title" style="margin-bottom: 0;">نتائج البحث</h2>
+            <div style="width: 40px;"></div>
+        </div>
+        <div class="list" id="list-search"></div>
+    </div>
+
     <button id="scroll-top-btn" class="icon-btn hidden"><i class="fa-solid fa-arrow-up"></i></button>
 
-    <!-- الشريط السفلي الديناميكي -->
     <nav id="bottom-nav">
         <div class="nav-scroll-wrapper">
             <button data-index="0" class="active"><i class="fa-solid fa-house"></i><span>الرئيسية</span></button>
@@ -204,17 +197,16 @@
             <button data-index="2" class="main-btn"><i class="fa-solid fa-circle-nodes"></i></button>
             <button data-index="3"><i class="fa-solid fa-hands-praying"></i><span>الأدعية</span></button>
             <button data-index="4"><i class="fa-solid fa-book-quran"></i><span>القرآن</span></button>
-            <button data-index="9"><i class="fa-solid fa-compass"></i><span>القبلة</span></button>
-            <button data-index="10"><i class="fa-solid fa-gear"></i><span>الإعدادات</span></button>
+            <button data-index="8"><i class="fa-solid fa-compass"></i><span>القبلة</span></button>
+            <button data-index="9"><i class="fa-solid fa-gear"></i><span>الإعدادات</span></button>
         </div>
     </nav>
 
-    <!-- مكتبة Swiper JS -->
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
         if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
     </script>
-    <script src="js/data.js?v=110.0"></script>
-    <script src="js/app.js?v=110.0"></script>
+    <script src="js/data.js?v=111.0"></script>
+    <script src="js/app.js?v=111.0"></script>
 </body>
 </html>
