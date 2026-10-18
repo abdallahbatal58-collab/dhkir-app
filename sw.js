@@ -1,7 +1,9 @@
-const CACHE_NAME = 'dhikr-v108-quran-uthmani';
+const CACHE_NAME = 'dhikr-v109-swiper';
 const ASSETS = [
-    './', './index.html', './css/style.css?v=108.0',
-    './js/data.js', './js/app.js?v=108.0',
+    './', './index.html', './css/style.css?v=109.0',
+    './js/data.js', './js/app.js?v=109.0',
+    'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css',
+    'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js',
     'https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800&family=Scheherazade+New:wght@400;700&display=swap',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css'
 ];
