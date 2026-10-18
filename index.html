@@ -2,14 +2,15 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#042f1a">
     <title>ذِكْر | Ultimate</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
+    <!-- ضفنا خط Amiri Quran عشان المصحف -->
+    <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=105.0">
+    <link rel="stylesheet" href="css/style.css?v=108.0">
 </head>
 <body>
 
@@ -52,7 +53,6 @@
             </div>
             <div class="nav-group">
                 <span class="nav-title">المفضلة والإعدادات</span>
-                <a href="#" data-target="favorites"><i class="fa-solid fa-heart"></i> المفضلة</a>
                 <a href="#" data-target="settings"><i class="fa-solid fa-gear"></i> الإعدادات</a>
             </div>
         </div>
@@ -79,20 +79,22 @@
             <div class="verse-box"><p>﴿ فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُوا لِي وَلَا تَكْفُرُونِ ﴾</p></div>
         </section>
 
-        <!-- فهرس السور -->
         <section id="page-quran" class="page">
             <h2 class="page-title">فهرس السور</h2>
             <div class="list" id="list-quran"><p class="loading-text"><i class="fa-solid fa-spinner fa-spin"></i> جاري تحميل السور...</p></div>
         </section>
 
-        <!-- قارئ القرآن (صفحة جديدة) -->
+        <!-- صفحة قارئ القرآن (المصحف) -->
         <section id="page-quran-reader" class="page">
             <div class="reader-header">
                 <button id="back-to-quran" class="icon-btn" style="color: var(--primary);"><i class="fa-solid fa-arrow-right"></i></button>
                 <h2 id="reader-title">اسم السورة</h2>
-                <div style="width: 40px;"></div> <!-- للتوازن -->
+                <div style="width: 40px;"></div>
             </div>
-            <div class="list" id="list-quran-verses"></div>
+            <!-- حاوية المصحف الشريف -->
+            <div class="mushaf-container">
+                <div id="list-quran-verses" class="mushaf-text"></div>
+            </div>
         </section>
 
         <section id="page-morning" class="page"><h2 class="page-title">أذكار الصباح</h2><div class="list" id="list-morning"></div></section>
@@ -101,7 +103,6 @@
         <section id="page-wake" class="page"><h2 class="page-title">أذكار الاستيقاظ</h2><div class="list" id="list-wake"></div></section>
         <section id="page-duas" class="page"><h2 class="page-title">الأدعية</h2><div class="list" id="list-duas"></div></section>
         <section id="page-search" class="page"><h2 class="page-title">نتائج البحث</h2><div class="list" id="list-search"></div></section>
-        <section id="page-favorites" class="page"><h2 class="page-title">المفضلة</h2><div class="list" id="list-favorites"><p class="loading-text">لا توجد أذكار في المفضلة.</p></div></section>
 
         <section id="page-tasbih" class="page">
             <h2 class="page-title">السبحة الذكية</h2>
@@ -145,7 +146,7 @@
                     </div>
                     <div class="set-item">
                         <span><i class="fa-solid fa-text-height"></i> حجم الخط</span>
-                        <input type="range" id="set-font" min="16" max="32" value="22">
+                        <input type="range" id="set-font" min="18" max="36" value="24">
                     </div>
                 </div>
             </div>
@@ -175,7 +176,7 @@
     <script>
         if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
     </script>
-    <script src="js/data.js?v=105.0"></script>
-    <script src="js/app.js?v=105.0"></script>
+    <script src="js/data.js?v=108.0"></script>
+    <script src="js/app.js?v=108.0"></script>
 </body>
 </html>
