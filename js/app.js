@@ -1,7 +1,8 @@
 const state = { currentPage: 'home', isSidebarOpen: false, tasbihCount: 0, tasbihTarget: 33, qiblaBearing: 0, currentRotation: 0 };
 const settings = {
     darkMode: localStorage.getItem('dhikr_dark') === 'true',
-    fontScale: localStorage.getItem('dhikr_font') || '1',
+    // القيمة الافتراضية بقت 22 بكسل بدل 1
+    fontScale: localStorage.getItem('dhikr_font') || '22', 
     resetCounter: localStorage.getItem('dhikr_reset') !== 'false'
 };
 
@@ -12,13 +13,16 @@ document.addEventListener('DOMContentLoaded', () => {
 function initApp() {
     applySettings(); renderAllAdhkar(); setupNavigation(); setupSearch(); setupSettingsUI();
     setupTasbih(); setupQibla(); setupSwipeGestures(); setupScrollTop(); updateHijriDate();
-    loadQuranSurahs(); // تحميل القرآن
+    loadQuranSurahs();
 }
 
 function applySettings() {
     if (settings.darkMode) { document.body.classList.add('dark'); document.getElementById('theme-btn').innerHTML = '<i class="fa-solid fa-sun"></i>'; if(document.getElementById('set-dark')) document.getElementById('set-dark').checked = true; }
     else { document.body.classList.remove('dark'); document.getElementById('theme-btn').innerHTML = '<i class="fa-solid fa-moon"></i>'; }
-    document.documentElement.style.setProperty('--font-scale', settings.fontScale);
+    
+    // تطبيق حجم الخط كـ Pixels مباشرة
+    document.documentElement.style.setProperty('--base-font-size', settings.fontScale + 'px');
+    
     if(document.getElementById('set-font')) document.getElementById('set-font').value = settings.fontScale;
     if(document.getElementById('set-reset-counter')) document.getElementById('set-reset-counter').checked = settings.resetCounter;
 }
@@ -26,7 +30,16 @@ function applySettings() {
 function setupSettingsUI() {
     document.getElementById('theme-btn').onclick = () => { settings.darkMode = !settings.darkMode; localStorage.setItem('dhikr_dark', settings.darkMode); applySettings(); };
     if(document.getElementById('set-dark')) document.getElementById('set-dark').onchange = (e) => { settings.darkMode = e.target.checked; localStorage.setItem('dhikr_dark', settings.darkMode); applySettings(); };
-    if(document.getElementById('set-font')) document.getElementById('set-font').oninput = (e) => { settings.fontScale = e.target.value; localStorage.setItem('dhikr_font', settings.fontScale); document.documentElement.style.setProperty('--font-scale', settings.fontScale); };
+    
+    // تعديل السلايدر
+    if(document.getElementById('set-font')) {
+        document.getElementById('set-font').oninput = (e) => { 
+            settings.fontScale = e.target.value; 
+            localStorage.setItem('dhikr_font', settings.fontScale); 
+            document.documentElement.style.setProperty('--base-font-size', settings.fontScale + 'px'); 
+        };
+    }
+    
     if(document.getElementById('set-reset-counter')) document.getElementById('set-reset-counter').onchange = (e) => { settings.resetCounter = e.target.checked; localStorage.setItem('dhikr_reset', settings.resetCounter); };
 }
 
@@ -121,7 +134,6 @@ function executeSearch() {
     navigateTo('search');
 }
 
-// محرك القرآن
 async function loadQuranSurahs() {
     const container = document.getElementById('list-quran');
     try {
