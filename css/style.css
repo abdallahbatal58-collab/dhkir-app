@@ -2,14 +2,14 @@
     --bg-main: #f4f7f6; --bg-card: #ffffff; --primary: #042f1a; --primary-light: #0a5030;
     --gold: #d4af37; --gold-glow: rgba(212, 175, 55, 0.4); --text-main: #1f2937;
     --text-muted: #6b7280; --border-color: rgba(212, 175, 55, 0.3);
-    --glass-bg: rgba(255, 255, 255, 0.9); --shadow: 0 8px 25px rgba(0,0,0,0.06);
+    --glass-bg: rgba(255, 255, 255, 0.95); --shadow: 0 8px 25px rgba(0,0,0,0.06);
     --radius: 18px; --font-main: 'Tajawal', sans-serif; --font-quran: 'Scheherazade New', 'Amiri', serif;
     --base-font-size: 24px;
 }
 body.dark {
     --bg-main: #061217; --bg-card: #11222b; --primary: #d4af37; --primary-light: #1e3a47;
     --text-main: #f1f5f9; --text-muted: #94a3b8; --border-color: rgba(212, 175, 55, 0.2);
-    --glass-bg: rgba(4, 47, 26, 0.9); --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    --glass-bg: rgba(4, 47, 26, 0.95); --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 body { font-family: var(--font-main); background: var(--bg-main); color: var(--text-main); overflow: hidden; transition: background 0.4s, color 0.4s; user-select: none; }
@@ -156,17 +156,18 @@ body.dark .slider { background: #334155; }
 .switch input:checked + .slider { background: var(--gold); }
 .switch input:checked + .slider:before { transform: translateX(-22px); background: #000; }
 
-/* Bottom Nav */
-#bottom-nav { position: fixed; bottom: 0; width: 100%; height: 75px; background: var(--glass-bg); backdrop-filter: blur(20px); display: flex; justify-content: center; align-items: center; border-top: 1px solid var(--border-color); z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
-.nav-scroll-wrapper { display: flex; overflow-x: auto; width: 100%; padding: 0 10px; scrollbar-width: none; -ms-overflow-style: none; align-items: center; justify-content: space-around; }
+/* Bottom Nav - Dynamic & Full */
+#bottom-nav { position: fixed; bottom: 0; width: 100%; height: 75px; background: var(--glass-bg); backdrop-filter: blur(20px); display: flex; justify-content: flex-start; align-items: center; border-top: 1px solid var(--border-color); z-index: 100; padding-bottom: env(safe-area-inset-bottom); overflow: hidden; }
+.nav-scroll-wrapper { display: flex; overflow-x: auto; width: 100%; height: 100%; padding: 0 10px; scrollbar-width: none; -ms-overflow-style: none; align-items: center; gap: 10px; scroll-behavior: smooth; }
 .nav-scroll-wrapper::-webkit-scrollbar { display: none; }
-#bottom-nav button { background: none; border: none; color: var(--text-muted); display: flex; flex-direction: column; align-items: center; font-family: var(--font-main); font-size: 0.75rem; font-weight: bold; gap: 5px; min-width: 60px; padding: 5px 0; cursor: pointer; transition: 0.2s; flex-shrink: 0; }
+#bottom-nav button { background: none; border: none; color: var(--text-muted); display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: var(--font-main); font-size: 0.75rem; font-weight: bold; gap: 5px; min-width: 65px; height: 100%; padding: 5px 0; cursor: pointer; transition: 0.2s; flex-shrink: 0; }
 #bottom-nav button i { font-size: 1.3rem; transition: 0.2s; }
 #bottom-nav button.active { color: var(--gold); }
 #bottom-nav button.active i { transform: translateY(-3px); text-shadow: 0 0 10px var(--gold-glow); }
-#bottom-nav .main-btn { width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-light), var(--primary)); border: 2px solid var(--gold); display: flex; justify-content: center; align-items: center; margin-top: -25px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); min-width: 60px; }
-body.dark #bottom-nav .main-btn { background: #0a5030; }
-#bottom-nav .main-btn i { font-size: 1.7rem; color: var(--gold); }
+
+/* زر السبحة المميز بدون قطع */
+#bottom-nav .gold-btn i { color: var(--gold); }
+#bottom-nav .gold-btn { background: rgba(212, 175, 55, 0.1); border-radius: 12px; }
 
 #scroll-top-btn { position: fixed; bottom: 90px; left: 20px; width: 45px; height: 45px; border-radius: 50%; background: var(--glass-bg); border: 1px solid var(--gold); color: var(--gold); display: flex; justify-content: center; align-items: center; z-index: 90; transition: all 0.3s ease; }
 #scroll-top-btn.hidden { opacity: 0; transform: translateY(20px); pointer-events: none; }
