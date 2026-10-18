@@ -4,18 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#042f1a">
-    <title>ذِكْر | V16 Architecture</title>
-    
+    <title>ذِكْر | Ultimate</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
-    <link rel="stylesheet" href="css/style.css?v=16.0">
+    <link rel="stylesheet" href="css/style.css?v=100.0">
 </head>
 <body>
 
-    <!-- شاشة البداية -->
     <div id="splash">
         <div class="splash-content">
             <div class="bismillah">﷽</div>
@@ -24,14 +21,12 @@
         </div>
     </div>
 
-    <!-- الشريط العلوي -->
     <header id="header">
         <button id="menu-btn" class="icon-btn"><i class="fa-solid fa-bars-staggered"></i></button>
         <div class="brand">ذِكْر</div>
         <button id="theme-btn" class="icon-btn"><i class="fa-solid fa-moon"></i></button>
     </header>
 
-    <!-- القائمة الجانبية (تم إصلاح الهيكل ليكون قابلاً للتمرير) -->
     <aside id="sidebar">
         <div class="sidebar-header">
             <h2>ذِكْر</h2>
@@ -42,7 +37,6 @@
                 <span class="nav-title">القرآن الكريم</span>
                 <a href="#" data-target="quran"><i class="fa-solid fa-book-quran"></i> فهرس السور</a>
             </div>
-            
             <div class="nav-group">
                 <span class="nav-title">أذكار اليوم</span>
                 <a href="#" data-target="morning" class="active"><i class="fa-solid fa-cloud-sun"></i> أذكار الصباح</a>
@@ -50,14 +44,12 @@
                 <a href="#" data-target="sleep"><i class="fa-solid fa-bed"></i> أذكار النوم</a>
                 <a href="#" data-target="wake"><i class="fa-solid fa-sun"></i> أذكار الاستيقاظ</a>
             </div>
-
             <div class="nav-group">
                 <span class="nav-title">الأدوات</span>
                 <a href="#" data-target="duas"><i class="fa-solid fa-hands-praying"></i> الأدعية</a>
-                <a href="#" data-target="tasbih"><i class="fa-solid fa-circle-nodes"></i> السبحة الذكية</a>
+                <a href="#" data-target="tasbih"><i class="fa-solid fa-circle-nodes"></i> السبحة</a>
                 <a href="#" data-target="qibla"><i class="fa-solid fa-compass"></i> القبلة</a>
             </div>
-
             <div class="nav-group">
                 <span class="nav-title">المفضلة والإعدادات</span>
                 <a href="#" data-target="favorites"><i class="fa-solid fa-heart"></i> المفضلة</a>
@@ -67,17 +59,15 @@
     </aside>
     <div id="sidebar-overlay"></div>
 
-    <!-- حاوية المحتوى الرئيسية -->
     <main id="main-content">
         
-        <!-- الصفحة الرئيسية -->
         <section id="page-home" class="page active">
             <div class="hero">
                 <p class="date" id="hijri-date">جاري التحميل...</p>
-                <h2 class="greeting" id="greeting">أهلاً بك</h2>
-                <form id="search-form" class="search-box" onsubmit="event.preventDefault(); executeSearch();">
-                    <input type="text" id="search-input" placeholder="ابحث في الأذكار، الأدعية، القرآن..." autocomplete="off">
-                    <button type="submit" id="search-btn"><i class="fa-solid fa-magnifying-glass"></i></button>
+                <h2 class="greeting">أهلاً بك</h2>
+                <form id="search-form" class="search-box">
+                    <input type="text" id="search-input" placeholder="ابحث في الأذكار..." autocomplete="off">
+                    <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
                 </form>
             </div>
             <div class="grid">
@@ -89,22 +79,15 @@
             <div class="verse-box"><p>﴿ فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُوا لِي وَلَا تَكْفُرُونِ ﴾</p></div>
         </section>
 
-        <!-- صفحة القرآن -->
-        <section id="page-quran" class="page">
-            <h2 class="page-title">فهرس السور</h2>
-            <div class="list" id="list-quran">
-                <p style="text-align:center; color:var(--text-muted); margin-top:20px;">جاري تحميل السور...</p>
-            </div>
-        </section>
-
-        <!-- صفحات الأذكار -->
+        <section id="page-quran" class="page"><h2 class="page-title">فهرس السور</h2><div class="list" id="list-quran"><p class="loading-text"><i class="fa-solid fa-spinner fa-spin"></i> جاري تحميل السور...</p></div></section>
         <section id="page-morning" class="page"><h2 class="page-title">أذكار الصباح</h2><div class="list" id="list-morning"></div></section>
         <section id="page-evening" class="page"><h2 class="page-title">أذكار المساء</h2><div class="list" id="list-evening"></div></section>
         <section id="page-sleep" class="page"><h2 class="page-title">أذكار النوم</h2><div class="list" id="list-sleep"></div></section>
         <section id="page-wake" class="page"><h2 class="page-title">أذكار الاستيقاظ</h2><div class="list" id="list-wake"></div></section>
         <section id="page-duas" class="page"><h2 class="page-title">الأدعية</h2><div class="list" id="list-duas"></div></section>
+        <section id="page-search" class="page"><h2 class="page-title">نتائج البحث</h2><div class="list" id="list-search"></div></section>
+        <section id="page-favorites" class="page"><h2 class="page-title">المفضلة</h2><div class="list" id="list-favorites"><p class="loading-text">لا توجد أذكار في المفضلة.</p></div></section>
 
-        <!-- السبحة -->
         <section id="page-tasbih" class="page">
             <h2 class="page-title">السبحة الذكية</h2>
             <div class="tasbih-container">
@@ -115,16 +98,15 @@
                     <option value="1000">1000 مرة</option>
                     <option value="custom">عدد مخصص...</option>
                 </select>
-                <div class="tasbih-circle ripple" id="tasbih-btn">
+                <div class="tasbih-circle" id="tasbih-btn">
                     <span class="count" id="tasbih-count">0</span>
                     <span class="target" id="tasbih-max">/ 33</span>
                 </div>
                 <h3 class="dhikr-text" id="tasbih-text">سُبْحَانَ اللَّهِ</h3>
-                <button id="reset-tasbih" class="btn-secondary ripple"><i class="fa-solid fa-rotate-right"></i> تصفير</button>
+                <button id="reset-tasbih" class="btn-secondary"><i class="fa-solid fa-rotate-right"></i> تصفير</button>
             </div>
         </section>
 
-        <!-- القبلة -->
         <section id="page-qibla" class="page">
             <h2 class="page-title">اتجاه القبلة</h2>
             <div class="compass-container">
@@ -133,17 +115,10 @@
                     <div class="compass-arrow" id="qibla-arrow"><i class="fa-solid fa-kaaba"></i></div>
                 </div>
                 <h3 id="qibla-angle-text">في انتظار الموقع...</h3>
-                <button id="btn-qibla" class="btn-primary ripple"><i class="fa-solid fa-location-crosshairs"></i> تحديد القبلة</button>
+                <button id="btn-qibla" class="btn-primary"><i class="fa-solid fa-location-crosshairs"></i> تحديد القبلة</button>
             </div>
         </section>
 
-        <!-- المفضلة -->
-        <section id="page-favorites" class="page">
-            <h2 class="page-title">المفضلة</h2>
-            <div class="list" id="list-favorites"><p style="text-align:center; color:var(--text-muted); margin-top:50px;">لا توجد أذكار في المفضلة.</p></div>
-        </section>
-
-        <!-- الإعدادات -->
         <section id="page-settings" class="page">
             <h2 class="page-title">الإعدادات</h2>
             <div class="settings-group">
@@ -156,14 +131,6 @@
                     <div class="set-item">
                         <span><i class="fa-solid fa-text-height"></i> حجم الخط</span>
                         <input type="range" id="set-font" min="14" max="26" value="18">
-                    </div>
-                    <div class="set-item">
-                        <span><i class="fa-solid fa-border-all"></i> شكل البراويز</span>
-                        <select id="set-card-style" class="pro-select-small">
-                            <option value="classic">كلاسيكي</option>
-                            <option value="glass">زجاجي</option>
-                            <option value="minimal">بسيط</option>
-                        </select>
                     </div>
                 </div>
             </div>
@@ -178,32 +145,22 @@
             </div>
         </section>
 
-        <!-- صفحة البحث (مخفية) -->
-        <section id="page-search" class="page">
-            <h2 class="page-title">نتائج البحث</h2>
-            <div class="list" id="list-search"></div>
-        </section>
-
     </main>
 
     <button id="scroll-top-btn" class="icon-btn hidden"><i class="fa-solid fa-arrow-up"></i></button>
 
-    <!-- الشريط السفلي -->
     <nav id="bottom-nav">
-        <button data-target="home" class="active ripple"><i class="fa-solid fa-house"></i><span>الرئيسية</span></button>
-        <button data-target="quran" class="ripple"><i class="fa-solid fa-book-quran"></i><span>القرآن</span></button>
-        <button data-target="tasbih" class="main-btn ripple"><i class="fa-solid fa-circle-nodes"></i></button>
-        <button data-target="duas" class="ripple"><i class="fa-solid fa-hands-praying"></i><span>الأدعية</span></button>
-        <button id="more-btn" class="ripple"><i class="fa-solid fa-bars-staggered"></i><span>المزيد</span></button>
+        <button data-target="home" class="active"><i class="fa-solid fa-house"></i><span>الرئيسية</span></button>
+        <button data-target="quran"><i class="fa-solid fa-book-quran"></i><span>القرآن</span></button>
+        <button data-target="tasbih" class="main-btn"><i class="fa-solid fa-circle-nodes"></i></button>
+        <button data-target="duas"><i class="fa-solid fa-hands-praying"></i><span>الأدعية</span></button>
+        <button id="more-btn"><i class="fa-solid fa-bars-staggered"></i><span>المزيد</span></button>
     </nav>
 
     <script>
         if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
     </script>
-    
-    <!-- الملفات -->
-    <script src="js/adhkar-db.js"></script>
-    <script src="js/quran.js"></script>
-    <script src="js/app.js?v=16.0"></script>
+    <script src="js/data.js?v=100.0"></script>
+    <script src="js/app.js?v=100.0"></script>
 </body>
 </html>
