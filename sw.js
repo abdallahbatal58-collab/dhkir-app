@@ -1,92 +1,102 @@
 /* ============================================
-   ذِكْر | Service Worker (V110 - Moderate & Complete)
+   ذِكْر | Service Worker (V112 - Ultimate & Stable)
    ============================================ */
 
-// غيرنا رقم النسخة عشان نمسح الكاش القديم ونجبر المتصفح ينزل الملفات الجديدة
-const CACHE_NAME = 'dhikr-v110-tajweed-final';
+// اسم الكاش متغير عشان نمسح أي نسخة قديمة وننزل الجديدة
+const CACHE_NAME = 'dhikr-v112-pro-max';
+const API_CACHE_NAME = 'dhikr-api-v112';
 
-// قائمة الملفات اللي التطبيق محتاجها عشان يشتغل أوفلاين
+// الملفات الأساسية اللي لازم تتحفظ عشان التطبيق يفتح أوفلاين
 const ASSETS = [
     './',
     './index.html',
-    './css/style.css?v=110.0',
-    './js/data.js?v=110.0',
-    './js/app.js?v=110.0',
-    // مكتبة Swiper
+    './css/style.css?v=112.0',
+    './js/data.js?v=112.0',
+    './js/app.js?v=112.0',
+    // مكتبة السحب Swiper
     'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css',
     'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js',
-    // الخطوط والأيقونات
+    // خطوط جوجل
     'https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800&family=Scheherazade+New:wght@400;700&display=swap',
+    // أيقونات FontAwesome
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css'
 ];
 
-// 1. التثبيت (Install): تحميل الملفات الأساسية
+// 1. التثبيت (Install): حفظ الملفات الأساسية
 self.addEventListener('install', (e) => {
+    console.log('✅ [Service Worker] Installing...');
     e.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
-            console.log('✅ Pre-caching assets');
-            return cache.addAll(ASSETS);
-        }).catch(err => console.log('⚠️ Cache error:', err))
+            return cache.addAll(ASSETS).catch(err => {
+                console.log('⚠️ [Service Worker] Failed to cache some assets:', err);
+            });
+        })
     );
-    self.skipWaiting(); // تفعيل فوري
+    self.skipWaiting(); // إجبار المتصفح على تفعيل النسخة الجديدة فوراً
 });
 
-// 2. التفعيل (Activate): مسح أي كاش قديم عشان نوفر مساحة
+// 2. التفعيل (Activate): مسح الكاش القديم بالكامل
 self.addEventListener('activate', (e) => {
+    console.log('🚀 [Service Worker] Activating...');
     e.waitUntil(
         caches.keys().then((keys) => {
             return Promise.all(
                 keys.map((key) => {
-                    if (key !== CACHE_NAME) {
-                        console.log('🗑️ Deleting old cache:', key);
+                    if (key !== CACHE_NAME && key !== API_CACHE_NAME) {
+                        console.log('🗑️ [Service Worker] Deleting old cache:', key);
                         return caches.delete(key);
                     }
                 })
             );
         })
     );
-    self.clients.claim();
+    self.clients.claim(); // السيطرة على جميع الصفحات المفتوحة فوراً
 });
 
-// 3. الجلب (Fetch): استراتيجية ذكية للتعامل مع الملفات والـ API
+// 3. الجلب (Fetch): استراتيجية ذكية
 self.addEventListener('fetch', (e) => {
-    // لو الطلب بيروح لموقع الـ API بتاع القرآن (api.alquran.cloud أو api.quran.com)
-    // هنستخدم استراتيجية (Network First) عشان دايماً نجيب أحدث آيات
-    if (e.request.url.includes('api.alquran.cloud') || e.request.url.includes('api.quran.com')) {
+    const request = e.request;
+    const url = new URL(request.url);
+
+    // تجاهل الطلبات اللي مش GET
+    if (request.method !== 'GET') return;
+
+    // أ. لو الطلب بيروح لموقع القرآن (API) -> استخدم Network First
+    // (يعني جرب تجيب من النت الأول، لو مفيش نت هات من الكاش)
+    if (url.hostname.includes('api.alquran.cloud') || url.hostname.includes('api.quran.com')) {
         e.respondWith(
-            fetch(e.request).then((networkResponse) => {
-                // خزن نسخة في الكاش عشان لو قفلت النت تفتح السور اللي قريتها
-                const responseClone = networkResponse.clone();
-                caches.open(CACHE_NAME).then((cache) => {
-                    cache.put(e.request, responseClone);
+            fetch(request).then((networkResponse) => {
+                return caches.open(API_CACHE_NAME).then((cache) => {
+                    cache.put(request, networkResponse.clone());
+                    return networkResponse;
                 });
-                return networkResponse;
             }).catch(() => {
-                // لو مفيش نت، هات من الكاش
-                return caches.match(e.request);
+                return caches.match(request);
             })
         );
         return;
     }
 
-    // لباقي الملفات (HTML, CSS, JS, Fonts)
-    // هنستخدم (Cache First) عشان السرعة الفائقة
+    // ب. لباقي الملفات (HTML, CSS, JS, Fonts, Swiper) -> استخدم Cache First
+    // (يعني هات من الكاش فوراً للسرعة الفائقة)
     e.respondWith(
-        caches.match(e.request).then((cachedResponse) => {
+        caches.match(request).then((cachedResponse) => {
             if (cachedResponse) {
-                return cachedResponse;
+                return cachedResponse; // رجع الملف من الكاش
             }
-            return fetch(e.request).then((networkResponse) => {
-                // تحديث الكاش بالملفات الجديدة
-                if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
-                    const responseToCache = networkResponse.clone();
-                    caches.open(CACHE_NAME).then((cache) => {
-                        cache.put(e.request, responseToCache);
-                    });
+            
+            // لو مش موجود في الكاش، نزله من النت وخزنه
+            return fetch(request).then((networkResponse) => {
+                if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+                    return networkResponse;
                 }
+                const responseToCache = networkResponse.clone();
+                caches.open(CACHE_NAME).then((cache) => {
+                    cache.put(request, responseToCache);
+                });
                 return networkResponse;
             }).catch(() => {
-                // لو النت فصل وملف مش موجود في الكاش، رجع الصفحة الرئيسية
+                // لو النت فصل والملف مش موجود في الكاش، افتح الصفحة الرئيسية
                 return caches.match('./index.html');
             });
         })
