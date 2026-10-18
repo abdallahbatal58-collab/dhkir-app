@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=101.0">
+    <link rel="stylesheet" href="css/style.css?v=105.0">
 </head>
 <body>
 
@@ -79,7 +79,22 @@
             <div class="verse-box"><p>﴿ فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُوا لِي وَلَا تَكْفُرُونِ ﴾</p></div>
         </section>
 
-        <section id="page-quran" class="page"><h2 class="page-title">فهرس السور</h2><div class="list" id="list-quran"><p class="loading-text"><i class="fa-solid fa-spinner fa-spin"></i> جاري تحميل السور...</p></div></section>
+        <!-- فهرس السور -->
+        <section id="page-quran" class="page">
+            <h2 class="page-title">فهرس السور</h2>
+            <div class="list" id="list-quran"><p class="loading-text"><i class="fa-solid fa-spinner fa-spin"></i> جاري تحميل السور...</p></div>
+        </section>
+
+        <!-- قارئ القرآن (صفحة جديدة) -->
+        <section id="page-quran-reader" class="page">
+            <div class="reader-header">
+                <button id="back-to-quran" class="icon-btn" style="color: var(--primary);"><i class="fa-solid fa-arrow-right"></i></button>
+                <h2 id="reader-title">اسم السورة</h2>
+                <div style="width: 40px;"></div> <!-- للتوازن -->
+            </div>
+            <div class="list" id="list-quran-verses"></div>
+        </section>
+
         <section id="page-morning" class="page"><h2 class="page-title">أذكار الصباح</h2><div class="list" id="list-morning"></div></section>
         <section id="page-evening" class="page"><h2 class="page-title">أذكار المساء</h2><div class="list" id="list-evening"></div></section>
         <section id="page-sleep" class="page"><h2 class="page-title">أذكار النوم</h2><div class="list" id="list-sleep"></div></section>
@@ -130,7 +145,6 @@
                     </div>
                     <div class="set-item">
                         <span><i class="fa-solid fa-text-height"></i> حجم الخط</span>
-                        <!-- تم تعديل القيم لتناسب الحجم الطبيعي -->
                         <input type="range" id="set-font" min="16" max="32" value="22">
                     </div>
                 </div>
@@ -161,7 +175,7 @@
     <script>
         if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
     </script>
-    <script src="js/data.js?v=101.0"></script>
-    <script src="js/app.js?v=101.0"></script>
+    <script src="js/data.js?v=105.0"></script>
+    <script src="js/app.js?v=105.0"></script>
 </body>
 </html>
