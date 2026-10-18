@@ -1,8 +1,7 @@
 const state = { currentPage: 'home', isSidebarOpen: false, tasbihCount: 0, tasbihTarget: 33, qiblaBearing: 0, currentRotation: 0 };
 const settings = {
     darkMode: localStorage.getItem('dhikr_dark') === 'true',
-    // القيمة الافتراضية بقت 22 بكسل بدل 1
-    fontScale: localStorage.getItem('dhikr_font') || '22', 
+    fontScale: localStorage.getItem('dhikr_font') || '22',
     resetCounter: localStorage.getItem('dhikr_reset') !== 'false'
 };
 
@@ -19,10 +18,7 @@ function initApp() {
 function applySettings() {
     if (settings.darkMode) { document.body.classList.add('dark'); document.getElementById('theme-btn').innerHTML = '<i class="fa-solid fa-sun"></i>'; if(document.getElementById('set-dark')) document.getElementById('set-dark').checked = true; }
     else { document.body.classList.remove('dark'); document.getElementById('theme-btn').innerHTML = '<i class="fa-solid fa-moon"></i>'; }
-    
-    // تطبيق حجم الخط كـ Pixels مباشرة
     document.documentElement.style.setProperty('--base-font-size', settings.fontScale + 'px');
-    
     if(document.getElementById('set-font')) document.getElementById('set-font').value = settings.fontScale;
     if(document.getElementById('set-reset-counter')) document.getElementById('set-reset-counter').checked = settings.resetCounter;
 }
@@ -30,8 +26,6 @@ function applySettings() {
 function setupSettingsUI() {
     document.getElementById('theme-btn').onclick = () => { settings.darkMode = !settings.darkMode; localStorage.setItem('dhikr_dark', settings.darkMode); applySettings(); };
     if(document.getElementById('set-dark')) document.getElementById('set-dark').onchange = (e) => { settings.darkMode = e.target.checked; localStorage.setItem('dhikr_dark', settings.darkMode); applySettings(); };
-    
-    // تعديل السلايدر
     if(document.getElementById('set-font')) {
         document.getElementById('set-font').oninput = (e) => { 
             settings.fontScale = e.target.value; 
@@ -39,7 +33,6 @@ function setupSettingsUI() {
             document.documentElement.style.setProperty('--base-font-size', settings.fontScale + 'px'); 
         };
     }
-    
     if(document.getElementById('set-reset-counter')) document.getElementById('set-reset-counter').onchange = (e) => { settings.resetCounter = e.target.checked; localStorage.setItem('dhikr_reset', settings.resetCounter); };
 }
 
@@ -62,6 +55,11 @@ function setupNavigation() {
     document.getElementById('menu-btn').onclick = openSidebar;
     document.getElementById('more-btn').onclick = openSidebar;
     document.getElementById('sidebar-overlay').onclick = closeSidebar;
+    
+    // زر العودة من قارئ القرآن
+    document.getElementById('back-to-quran').onclick = () => {
+        navigateTo('quran');
+    };
 }
 
 function openSidebar() { document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebar-overlay').classList.add('show'); state.isSidebarOpen = true; }
@@ -134,6 +132,8 @@ function executeSearch() {
     navigateTo('search');
 }
 
+// ================= محرك القرآن (الجديد والمتكامل) =================
+
 async function loadQuranSurahs() {
     const container = document.getElementById('list-quran');
     try {
@@ -141,15 +141,49 @@ async function loadQuranSurahs() {
         const data = await res.json();
         if (data.code === 200) {
             container.innerHTML = data.data.map(s => `
-                <div class="adhkar-card">
+                <div class="adhkar-card" style="cursor:pointer;" onclick="openSurah(${s.number}, '${s.name}')">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <div><h3 style="color:var(--gold); font-family:'Amiri'; font-size:1.4rem;">${s.name}</h3><p style="color:var(--text-muted); font-size:0.9rem;">${s.numberOfAyahs} آية</p></div>
                         <div style="background:var(--primary); color:var(--gold); width:40px; height:40px; display:flex; justify-content:center; align-items:center; border-radius:50%; font-weight:bold;">${s.number}</div>
                     </div>
                 </div>`).join('');
         }
-    } catch (e) { container.innerHTML = '<p class="loading-text">تأكد من اتصالك بالإنترنت لتحميل القرآن.</p>'; }
+    } catch (e) { container.innerHTML = '<p class="loading-text">تأكد من اتصالك بالإنترنت لتحميل الفهرس.</p>'; }
 }
+
+async function openSurah(number, name) {
+    navigateTo('quran-reader');
+    document.getElementById('reader-title').textContent = name;
+    const container = document.getElementById('list-quran-verses');
+    container.innerHTML = '<p class="loading-text"><i class="fa-solid fa-spinner fa-spin"></i> جاري تحميل الآيات...</p>';
+    
+    try {
+        const res = await fetch(`https://api.alquran.cloud/v1/surah/${number}`);
+        const data = await res.json();
+        if (data.code === 200) {
+            const ayahs = data.data.ayahs;
+            let versesHTML = '';
+            
+            // إضافة البسملة إلا في سورة التوبة (9) وسورة الفاتحة (1) (لأن الفاتحة بها بسملة في الآية الأولى)
+            if (number !== 1 && number !== 9) {
+                versesHTML += `<div class="card-header"><p class="basmala">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p></div>`;
+            }
+
+            versesHTML += ayahs.map(a => `
+                <div class="verse-item">
+                    ${a.text} <span class="verse-number">${a.numberInSurah}</span>
+                </div>
+            `).join('');
+            
+            container.innerHTML = versesHTML;
+            document.getElementById('main-content').scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    } catch (e) {
+        container.innerHTML = '<p class="loading-text">تعذر تحميل الآيات. تأكد من اتصالك بالإنترنت.</p>';
+    }
+}
+
+// ================= نهاية محرك القرآن =================
 
 function setupTasbih() {
     const select = document.getElementById('tasbih-select');
