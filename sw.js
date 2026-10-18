@@ -3,7 +3,7 @@
    ============================================ */
 
 // نسخة جديدة عشان نمسح الكاش القديم
-const CACHE_NAME = 'dhikr-v106-quran-reader';
+const CACHE_NAME = 'dhikr-v107-final-swipe';
 const ASSETS = [
     './', 
     './index.html', 
