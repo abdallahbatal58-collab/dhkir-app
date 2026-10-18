@@ -1,18 +1,18 @@
 /* ============================================
-   ذِكْر | Service Worker (V112 - Ultimate & Stable)
+   ذِكْر | Service Worker (V113 - Final Fix)
    ============================================ */
 
-// اسم الكاش متغير عشان نمسح أي نسخة قديمة وننزل الجديدة
-const CACHE_NAME = 'dhikr-v112-pro-max';
-const API_CACHE_NAME = 'dhikr-api-v112';
+// اسم الكاش متغير عشان نمسح أي نسخة قديمة وننزل الجديدة فوراً
+const CACHE_NAME = 'dhikr-v113-ultimate-fix';
+const API_CACHE_NAME = 'dhikr-api-v113';
 
 // الملفات الأساسية اللي لازم تتحفظ عشان التطبيق يفتح أوفلاين
 const ASSETS = [
     './',
     './index.html',
-    './css/style.css?v=112.0',
-    './js/data.js?v=112.0',
-    './js/app.js?v=112.0',
+    './css/style.css?v=113.0',
+    './js/data.js?v=113.0',
+    './js/app.js?v=113.0',
     // مكتبة السحب Swiper
     'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css',
     'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js',
@@ -24,11 +24,11 @@ const ASSETS = [
 
 // 1. التثبيت (Install): حفظ الملفات الأساسية
 self.addEventListener('install', (e) => {
-    console.log('✅ [Service Worker] Installing...');
+    console.log('✅ [SW] Installing V113...');
     e.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
             return cache.addAll(ASSETS).catch(err => {
-                console.log('⚠️ [Service Worker] Failed to cache some assets:', err);
+                console.log('⚠️ [SW] Cache addAll error:', err);
             });
         })
     );
@@ -37,13 +37,13 @@ self.addEventListener('install', (e) => {
 
 // 2. التفعيل (Activate): مسح الكاش القديم بالكامل
 self.addEventListener('activate', (e) => {
-    console.log('🚀 [Service Worker] Activating...');
+    console.log('🚀 [SW] Activating V113...');
     e.waitUntil(
         caches.keys().then((keys) => {
             return Promise.all(
                 keys.map((key) => {
                     if (key !== CACHE_NAME && key !== API_CACHE_NAME) {
-                        console.log('🗑️ [Service Worker] Deleting old cache:', key);
+                        console.log('🗑️ [SW] Deleting old cache:', key);
                         return caches.delete(key);
                     }
                 })
