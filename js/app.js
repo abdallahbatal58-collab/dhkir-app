@@ -5,7 +5,6 @@ const settings = {
     resetCounter: localStorage.getItem('dhikr_reset') !== 'false'
 };
 
-// ترتيب الصفحات في الـ Swiper
 const pageMap = [
     'home', 'morning', 'evening', 'sleep', 'wake', 'duas', 'tasbih', 'quran', 'qibla', 'settings'
 ];
@@ -26,7 +25,6 @@ function initApp() {
     setupScrollTop(); updateHijriDate(); loadQuranSurahs();
 }
 
-// --- إعداد Swiper ---
 function setupSwiper() {
     swiper = new Swiper('.swiper', {
         direction: 'horizontal',
@@ -48,27 +46,19 @@ function setupSwiper() {
 
 function updateNavState(index) {
     const targetId = pageMap[index];
-    
-    // تحديث أزرار الشريط السفلي
     document.querySelectorAll('#bottom-nav button').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.target === targetId);
     });
-    
-    // تحريك الشريط السفلي عشان يظهر الزر النشط في النص
     const activeBtn = document.querySelector('#bottom-nav button.active');
     if (activeBtn) {
         activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
     }
-
-    // تحديث القائمة الجانبية
     document.querySelectorAll('.nav-group a').forEach(a => {
         a.classList.toggle('active', a.dataset.target === targetId);
     });
-    
     closeSidebar();
 }
 
-// --- التنقل ---
 function navigateTo(pageId) {
     const index = pageMap.indexOf(pageId);
     if (index !== -1 && swiper) {
@@ -77,25 +67,17 @@ function navigateTo(pageId) {
 }
 
 function setupNavigation() {
-    // أزرار القائمة الجانبية
     document.querySelectorAll('.nav-group a').forEach(btn => {
         btn.addEventListener('click', (e) => { e.preventDefault(); navigateTo(btn.dataset.target); });
     });
-    
-    // كروت الرئيسية
     document.querySelectorAll('.card[data-target]').forEach(btn => {
         btn.addEventListener('click', () => navigateTo(btn.dataset.target));
     });
-    
-    // الشريط السفلي
     document.querySelectorAll('#bottom-nav button').forEach(btn => {
         btn.addEventListener('click', () => navigateTo(btn.dataset.target));
     });
-    
     document.getElementById('menu-btn').onclick = openSidebar;
     document.getElementById('sidebar-overlay').onclick = closeSidebar;
-    
-    // غلق الشاشات المنبثقة
     document.getElementById('close-reader').onclick = () => {
         document.getElementById('overlay-quran-reader').classList.remove('active');
     };
@@ -115,7 +97,6 @@ function closeSidebar() {
     state.isSidebarOpen = false; 
 }
 
-// --- الإعدادات ---
 function applySettings() {
     if (settings.darkMode) { 
         document.body.classList.add('dark'); 
@@ -137,7 +118,6 @@ function setupSettingsUI() {
     document.getElementById('set-reset-counter').onchange = (e) => { settings.resetCounter = e.target.checked; localStorage.setItem('dhikr_reset', settings.resetCounter); };
 }
 
-// --- عرض الأذكار ---
 function renderAllAdhkar() {
     ['morning', 'evening', 'sleep', 'wake', 'duas'].forEach(cat => {
         const c = document.getElementById(`list-${cat}`);
@@ -170,7 +150,6 @@ function resetAdhkarCounters() {
     });
 }
 
-// --- البحث ---
 function setupSearch() {
     const form = document.getElementById('search-form');
     if (form) form.addEventListener('submit', (e) => { e.preventDefault(); executeSearch(); });
@@ -185,11 +164,10 @@ function executeSearch() {
     const results = ADHKAR_DATA.filter(i => normalize(i.text).includes(nq));
     const searchContainer = document.getElementById('list-search');
     if(searchContainer) searchContainer.innerHTML = results.length ? results.map(generateCardHTML).join('') : `<div class="loading-text">لا توجد نتائج مطابقة</div>`;
-    
     document.getElementById('overlay-search').classList.add('active');
 }
 
-// --- محرك القرآن (المجود) - تم تصحيحه ليعمل بثبات ---
+// --- محرك القرآن (تم تحسينه ليعمل دائماً) ---
 async function loadQuranSurahs() {
     const container = document.getElementById('list-quran');
     if(!container) return;
@@ -204,8 +182,6 @@ async function loadQuranSurahs() {
                         <div style="background:var(--primary); color:var(--gold); width:40px; height:40px; display:flex; justify-content:center; align-items:center; border-radius:50%; font-weight:bold;">${s.number}</div>
                     </div>
                 </div>`).join('');
-        } else {
-            container.innerHTML = '<p class="loading-text">حدث خطأ في تحميل الفهرس.</p>';
         }
     } catch (e) { 
         container.innerHTML = '<p class="loading-text">تأكد من اتصالك بالإنترنت لتحميل الفهرس.</p>'; 
@@ -226,30 +202,53 @@ async function openSurah(number, name) {
     
     document.getElementById('overlay-quran-reader').classList.add('active');
 
+    let success = false;
+
+    // المحاولة الأولى: Quran.com (Tajweed)
     try {
-        const res = await fetch(`https://api.alquran.cloud/v1/surah/${number}/quran-tajweed`);
+        const res = await fetch(`https://api.quran.com/api/v4/quran/verses/uthmani_tajweed?chapter_number=${number}`);
         const data = await res.json();
         
-        if (data.code === 200) {
-            const ayahs = data.data.ayahs;
+        if (data.verses && data.verses.length > 0) {
             let versesHTML = '';
-            
             if (number !== 1 && number !== 9) {
-                versesHTML += `<div style="text-align:center; margin-bottom: 20px;"><span style="font-family:'Amiri Quran', serif; font-size:calc(var(--base-font-size) + 4px); color:var(--gold);">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</span></div>`;
+                versesHTML += `<div style="text-align:center; margin-bottom: 20px;"><span style="font-family:'Amiri Quran', serif; font-size:calc(var(--base-font-size) + 2px); color:var(--gold);">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</span></div>`;
             }
-
-            versesHTML += ayahs.map(a => {
-                const formattedText = formatTajweed(a.text);
-                return `<span>${formattedText}</span> <span class="verse-number">${a.numberInSurah}</span> `;
+            versesHTML += data.verses.map(v => {
+                const formattedText = formatTajweed(v.text_uthmani_tajweed);
+                const ayahNum = v.verse_key.split(':')[1];
+                return `<span>${formattedText}</span> <span class="verse-number">${ayahNum}</span> `;
             }).join('');
-            
             container.innerHTML = versesHTML;
-        } else {
-            container.innerHTML = '<p class="loading-text">تعذر تحميل الآيات. حاول مرة أخرى.</p>';
+            success = true;
         }
+    } catch (e) { console.log("Quran.com API failed, switching to fallback..."); }
+
+    // المحاولة الثانية: AlQuran Cloud (Fallback)
+    if (!success) {
+        try {
+            const fallbackRes = await fetch(`https://api.alquran.cloud/v1/surah/${number}/quran-tajweed`);
+            const fallbackData = await fallbackRes.json();
+            if (fallbackData.code === 200) {
+                const ayahs = fallbackData.data.ayahs;
+                let versesHTML = '';
+                if (number !== 1 && number !== 9) {
+                    versesHTML += `<div style="text-align:center; margin-bottom: 20px;"><span style="font-family:'Amiri Quran', serif; font-size:calc(var(--base-font-size) + 2px); color:var(--gold);">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</span></div>`;
+                }
+                versesHTML += ayahs.map(a => {
+                    const formattedText = formatTajweed(a.text);
+                    return `<span>${formattedText}</span> <span class="verse-number">${a.numberInSurah}</span> `;
+                }).join('');
+                container.innerHTML = versesHTML;
+                success = true;
+            }
+        } catch (e) { console.log("Fallback API also failed."); }
+    }
+
+    if (!success) {
+        container.innerHTML = '<p class="loading-text">تعذر تحميل الآيات. تأكد من اتصالك بالإنترنت وحاول مرة أخرى.</p>';
+    } else {
         document.getElementById('overlay-quran-reader').scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (e) {
-        container.innerHTML = '<p class="loading-text">تعذر تحميل الآيات. تأكد من اتصالك بالإنترنت.</p>';
     }
 }
 
@@ -290,7 +289,6 @@ function setupQibla() {
     };
 }
 
-// --- أدوات مساعدة ---
 function updateHijriDate() { const d = document.getElementById('hijri-date'); if(d) d.textContent = new Intl.DateTimeFormat('ar-SA-u-ca-islamic').format(new Date()); }
 function setupScrollTop() { 
     const btn = document.getElementById('scroll-top-btn'); if(!btn) return;
