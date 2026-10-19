@@ -1,6 +1,14 @@
 /* ============================================
-   ذِكْر | V116 Ultimate Engine (Chapter Based)
+   ذِكْر | V116 Core Engine (Chapter Based) - GUARANTEED
    ============================================ */
+
+// إخفاء شاشة البداية فوراً حتى لو في خطأ في ملفات تانية
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        const splash = document.getElementById('splash');
+        if(splash) splash.classList.add('hide');
+    }, 1500);
+});
 
 const state = { currentPage: 'home', isSidebarOpen: false, tasbihCount: 0, tasbihTarget: 33, qiblaBearing: 0 };
 const settings = {
@@ -9,23 +17,23 @@ const settings = {
     resetCounter: localStorage.getItem('dhikr_reset') !== 'false'
 };
 
-// استخراج كل الأذكار في مصفوفة واحدة لتسهيل البحث
-const ALL_ADHKAR_FLAT = HISN_ALMUSLIM_DATA.flatMap(chapter => 
-    chapter.adhkar.map(dhikr => ({ ...dhikr, chapterTitle: chapter.chapterTitle }))
-);
-
-const pageMap = [
-    'home', 'morning', 'evening', 'sleep', 'wake', 'duas', 'tasbih', 'quran', 'qibla', 'settings'
-];
-
 let swiper;
 
+// التأكد من وجود البيانات قبل تشغيل المحرك
 document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => { 
-        const splash = document.getElementById('splash');
-        if(splash) splash.classList.add('hide'); 
-        initApp(); 
-    }, 1500);
+    // ننتظر قليلاً حتى يتم تحميل Swiper والبيانات
+    setTimeout(() => {
+        try {
+            if (typeof HISN_ALMUSLIM_DATA !== 'undefined') {
+                initApp();
+            } else {
+                console.error("خطأ: ملف البيانات data.js غير محمل أو به خطأ.");
+                alert("حدث خطأ في تحميل البيانات. يرجى تحديث الصفحة.");
+            }
+        } catch (error) {
+            console.error("خطأ في التشغيل:", error);
+        }
+    }, 500);
 });
 
 function initApp() {
@@ -44,6 +52,8 @@ function initApp() {
 
 // --- إعداد Swiper ---
 function setupSwiper() {
+    if (typeof Swiper === 'undefined') return;
+    
     swiper = new Swiper('.swiper', {
         direction: 'horizontal',
         loop: false,
@@ -51,36 +61,31 @@ function setupSwiper() {
         resistanceRatio: 0.85,
         on: {
             slideChange: function () {
-                updateNavState(this.activeIndex);
-                const currentId = pageMap[this.activeIndex];
-                if (settings.resetCounter && state.currentPage !== currentId) {
-                    resetAdhkarCounters();
-                }
-                state.currentPage = currentId;
+                // تحديث الأزرار السفلية
+                const targetId = ['home', 'morning', 'evening', 'sleep', 'wake', 'duas', 'tasbih', 'quran', 'qibla', 'settings'][this.activeIndex];
+                document.querySelectorAll('#bottom-nav button').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.target === targetId);
+                });
+                // تحريك الشريط السفلي
+                const activeBtn = document.querySelector('#bottom-nav button.active');
+                if (activeBtn) activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                
+                // تحديث القائمة الجانبية
+                document.querySelectorAll('.nav-group a').forEach(a => {
+                    a.classList.toggle('active', a.dataset.target === targetId);
+                });
+                closeSidebar();
             }
         }
     });
 }
 
-function updateNavState(index) {
-    const targetId = pageMap[index];
-    document.querySelectorAll('#bottom-nav button').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.target === targetId);
-    });
-    const activeBtn = document.querySelector('#bottom-nav button.active');
-    if (activeBtn) activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-    
-    document.querySelectorAll('.nav-group a').forEach(a => {
-        a.classList.toggle('active', a.dataset.target === targetId);
-    });
-    closeSidebar();
-}
-
 // --- التنقل ---
 function navigateTo(pageId) {
-    const index = pageMap.indexOf(pageId);
-    if (index !== -1 && swiper) {
-        swiper.slideTo(index);
+    if (!swiper) return;
+    const pageIndex = ['home', 'morning', 'evening', 'sleep', 'wake', 'duas', 'tasbih', 'quran', 'qibla', 'settings'].indexOf(pageId);
+    if (pageIndex !== -1) {
+        swiper.slideTo(pageIndex);
     }
 }
 
@@ -94,19 +99,22 @@ function setupNavigation() {
     document.querySelectorAll('#bottom-nav button').forEach(btn => {
         btn.addEventListener('click', () => navigateTo(btn.dataset.target));
     });
-    document.getElementById('menu-btn').onclick = openSidebar;
-    document.getElementById('sidebar-overlay').onclick = closeSidebar;
+    
+    const menuBtn = document.getElementById('menu-btn');
+    if(menuBtn) menuBtn.onclick = openSidebar;
+    
+    const overlay = document.getElementById('sidebar-overlay');
+    if(overlay) overlay.onclick = closeSidebar;
     
     // إغلاق الشاشات المنبثقة
-    document.getElementById('close-reader').onclick = () => {
-        document.getElementById('overlay-quran-reader').classList.remove('active');
-    };
-    document.getElementById('close-search').onclick = () => {
-        document.getElementById('overlay-search').classList.remove('active');
-    };
-    document.getElementById('close-chapter').onclick = () => {
-        document.getElementById('overlay-chapter').classList.remove('active');
-    };
+    const closeReader = document.getElementById('close-reader');
+    if(closeReader) closeReader.onclick = () => document.getElementById('overlay-quran-reader').classList.remove('active');
+    
+    const closeSearch = document.getElementById('close-search');
+    if(closeSearch) closeSearch.onclick = () => document.getElementById('overlay-search').classList.remove('active');
+    
+    const closeChapter = document.getElementById('close-chapter');
+    if(closeChapter) closeChapter.onclick = () => document.getElementById('overlay-chapter').classList.remove('active');
 }
 
 function openSidebar() { 
@@ -124,49 +132,57 @@ function closeSidebar() {
 function applySettings() {
     if (settings.darkMode) { 
         document.body.classList.add('dark'); 
-        document.getElementById('theme-btn').innerHTML = '<i class="fa-solid fa-sun"></i>'; 
-        document.getElementById('set-dark').checked = true; 
+        const btn = document.getElementById('theme-btn');
+        if(btn) btn.innerHTML = '<i class="fa-solid fa-sun"></i>'; 
+        const toggle = document.getElementById('set-dark');
+        if(toggle) toggle.checked = true; 
     } else { 
         document.body.classList.remove('dark'); 
-        document.getElementById('theme-btn').innerHTML = '<i class="fa-solid fa-moon"></i>'; 
+        const btn = document.getElementById('theme-btn');
+        if(btn) btn.innerHTML = '<i class="fa-solid fa-moon"></i>'; 
     }
     document.documentElement.style.setProperty('--base-font-size', settings.fontScale + 'px');
-    document.getElementById('set-font').value = settings.fontScale;
-    document.getElementById('set-reset-counter').checked = settings.resetCounter;
+    const font = document.getElementById('set-font');
+    if(font) font.value = settings.fontScale;
+    const reset = document.getElementById('set-reset-counter');
+    if(reset) reset.checked = settings.resetCounter;
 }
 
 function setupSettingsUI() {
-    document.getElementById('theme-btn').onclick = () => { settings.darkMode = !settings.darkMode; localStorage.setItem('dhikr_dark', settings.darkMode); applySettings(); };
-    document.getElementById('set-dark').onchange = (e) => { settings.darkMode = e.target.checked; localStorage.setItem('dhikr_dark', settings.darkMode); applySettings(); };
-    document.getElementById('set-font').oninput = (e) => { settings.fontScale = e.target.value; localStorage.setItem('dhikr_font', settings.fontScale); document.documentElement.style.setProperty('--base-font-size', settings.fontScale + 'px'); };
-    document.getElementById('set-reset-counter').onchange = (e) => { settings.resetCounter = e.target.checked; localStorage.setItem('dhikr_reset', settings.resetCounter); };
+    const themeBtn = document.getElementById('theme-btn');
+    if(themeBtn) themeBtn.onclick = () => { settings.darkMode = !settings.darkMode; localStorage.setItem('dhikr_dark', settings.darkMode); applySettings(); };
+    
+    const setDark = document.getElementById('set-dark');
+    if(setDark) setDark.onchange = (e) => { settings.darkMode = e.target.checked; localStorage.setItem('dhikr_dark', settings.darkMode); applySettings(); };
+    
+    const setFont = document.getElementById('set-font');
+    if(setFont) setFont.oninput = (e) => { settings.fontScale = e.target.value; localStorage.setItem('dhikr_font', settings.fontScale); document.documentElement.style.setProperty('--base-font-size', settings.fontScale + 'px'); };
+    
+    const setReset = document.getElementById('set-reset-counter');
+    if(setReset) setReset.onchange = (e) => { settings.resetCounter = e.target.checked; localStorage.setItem('dhikr_reset', settings.resetCounter); };
 }
 
 // ==========================================
 // --- عرض فهارس الأبواب (Chapter Rendering) ---
 // ==========================================
 function renderChapterIndexes() {
-    // توزيع الأبواب على الصفحات بناءً على الكلمات المفتاحية
     renderCategory("الصباح", "list-morning");
     renderCategory("المساء", "list-evening");
     renderCategory("النوم", "list-sleep");
     renderCategory("الاستيقاظ", "list-wake");
     
     // صفحة الأدعية والأبواب العامة
-    renderCategory("دعاء", "list-duas", true); 
-    renderCategory("أدعية", "list-duas", true); 
-    // إضافة باقي الأبواب في صفحة الأدعية كمرجع شامل
-    const remainingChapters = HISN_ALMUSLIM_DATA.filter(ch => 
-        !ch.chapterTitle.includes("الصباح") && 
-        !ch.chapterTitle.includes("المساء") && 
-        !ch.chapterTitle.includes("النوم") && 
-        !ch.chapterTitle.includes("الاستيقاظ")
-    );
-    
     const duasContainer = document.getElementById('list-duas');
     if(duasContainer) {
-        // نضيف الأبواب المتبقية في نهاية صفحة الأدعية
-        const extraHTML = remainingChapters.map(ch => `
+        // نجيب الأبواب اللي ملهاش علاقة بالصباح والمساء والنوم والاستيقاظ
+        const remainingChapters = HISN_ALMUSLIM_DATA.filter(ch => 
+            !ch.chapterTitle.includes("الصباح") && 
+            !ch.chapterTitle.includes("المساء") && 
+            !ch.chapterTitle.includes("النوم") && 
+            !ch.chapterTitle.includes("الاستيقاظ")
+        );
+        
+        duasContainer.innerHTML = remainingChapters.map(ch => `
             <div class="adhkar-card" style="cursor:pointer;" onclick="openChapter('${ch.chapterId}')">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <h3 style="color:var(--primary); font-family:'Amiri'; font-size:1.3rem;">${ch.chapterTitle}</h3>
@@ -174,17 +190,16 @@ function renderChapterIndexes() {
                 </div>
             </div>
         `).join('');
-        duasContainer.innerHTML += extraHTML;
     }
 }
 
-function renderCategory(keyword, containerId, append = false) {
+function renderCategory(keyword, containerId) {
     const container = document.getElementById(containerId);
     if(!container) return;
 
     const filteredChapters = HISN_ALMUSLIM_DATA.filter(ch => ch.chapterTitle.includes(keyword));
     
-    const html = filteredChapters.map(ch => `
+    container.innerHTML = filteredChapters.map(ch => `
         <div class="adhkar-card" style="cursor:pointer;" onclick="openChapter('${ch.chapterId}')">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h3 style="color:var(--primary); font-family:'Amiri'; font-size:1.3rem;">${ch.chapterTitle}</h3>
@@ -192,16 +207,11 @@ function renderCategory(keyword, containerId, append = false) {
             </div>
         </div>
     `).join('');
-
-    if (append) {
-        container.innerHTML += html;
-    } else {
-        container.innerHTML = html;
-    }
 }
 
 // فتح شاشة الباب
 window.openChapter = (chapterId) => {
+    if(typeof HISN_ALMUSLIM_DATA === 'undefined') return;
     const chapter = HISN_ALMUSLIM_DATA.find(ch => ch.chapterId === chapterId);
     if (!chapter) return;
 
@@ -237,14 +247,6 @@ window.incrementDhikr = (btn, id, max) => {
     }
 };
 
-function resetAdhkarCounters() {
-    ALL_ADHKAR_FLAT.forEach(i => {
-        localStorage.setItem(`count_${i.id}`, 0);
-        const b = document.querySelector(`#card-${i.id} .btn-dhikr`);
-        if(b) { b.classList.remove('done'); b.textContent = `التكرار (0/${i.count || 1})`; }
-    });
-}
-
 // --- البحث الشامل ---
 function setupSearch() {
     const form = document.getElementById('search-form');
@@ -254,9 +256,16 @@ function setupSearch() {
 function normalize(text) { return text ? text.replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/[\u064B-\u065F]/g, '').trim() : ''; }
 
 function executeSearch() {
+    if(typeof HISN_ALMUSLIM_DATA === 'undefined') return;
+    
     const q = document.getElementById('search-input').value.trim();
     if (!q) return;
     const nq = normalize(q);
+    
+    // تجميع كل الأذكار في مصفوفة واحدة للبحث
+    const ALL_ADHKAR_FLAT = HISN_ALMUSLIM_DATA.flatMap(chapter => 
+        chapter.adhkar.map(dhikr => ({ ...dhikr, chapterTitle: chapter.chapterTitle }))
+    );
     
     const results = ALL_ADHKAR_FLAT.filter(i => 
         normalize(i.text).includes(nq) || 
