@@ -46,6 +46,20 @@
       "description": "قراءة القرآن الكريم",
       "url": "./?page=quran",
       "icons": [{ "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "المفضلة",
+      "short_name": "المفضلة",
+      "description": "أذكارك المفضلة",
+      "url": "./?page=favorites",
+      "icons": [{ "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "تقدمي",
+      "short_name": "تقدمي",
+      "description": "إحصائياتك",
+      "url": "./?page=stats",
+      "icons": [{ "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
     }
   ]
 }
