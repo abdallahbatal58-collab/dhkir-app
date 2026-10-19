@@ -1,17 +1,15 @@
 /* ============================================
-   ذِكْر | Service Worker (V116 - Chapters Edition)
+   ذِكْر | Service Worker (V118 - Ultimate Fixed)
    ============================================ */
 
-// اسم الكاش متغير عشان نمسح أي نسخة قديمة وننزل الجديدة فوراً
-const CACHE_NAME = 'dhikr-v116-chapters-final';
-const API_CACHE_NAME = 'dhikr-api-v116';
+const CACHE_NAME = 'dhikr-v118-ultimate-fixed';
+const API_CACHE_NAME = 'dhikr-api-v118';
 
-// الملفات الأساسية اللي لازم تتحفظ عشان التطبيق يفتح أوفلاين
 const ASSETS = [
     './',
     './index.html',
     './css/style.css?v=116.0',
-    './js/data.js?v=116.0',
+    './js/data.js?v=117.0',
     './js/app.js?v=116.0',
     // مكتبة السحب Swiper
     'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css',
@@ -22,9 +20,9 @@ const ASSETS = [
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css'
 ];
 
-// 1. التثبيت (Install): حفظ الملفات الأساسية
+// 1. التثبيت (Install)
 self.addEventListener('install', (e) => {
-    console.log('✅ [SW] Installing V116...');
+    console.log('✅ [SW] Installing V118...');
     e.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
             return cache.addAll(ASSETS).catch(err => {
@@ -32,12 +30,12 @@ self.addEventListener('install', (e) => {
             });
         })
     );
-    self.skipWaiting(); // إجبار المتصفح على تفعيل النسخة الجديدة فوراً
+    self.skipWaiting();
 });
 
-// 2. التفعيل (Activate): مسح الكاش القديم بالكامل
+// 2. التفعيل (Activate)
 self.addEventListener('activate', (e) => {
-    console.log('🚀 [SW] Activating V116...');
+    console.log('🚀 [SW] Activating V118...');
     e.waitUntil(
         caches.keys().then((keys) => {
             return Promise.all(
@@ -50,19 +48,17 @@ self.addEventListener('activate', (e) => {
             );
         })
     );
-    self.clients.claim(); // السيطرة على جميع الصفحات المفتوحة فوراً
+    self.clients.claim();
 });
 
-// 3. الجلب (Fetch): استراتيجية ذكية
+// 3. الجلب (Fetch)
 self.addEventListener('fetch', (e) => {
     const request = e.request;
     const url = new URL(request.url);
 
-    // تجاهل الطلبات اللي مش GET
     if (request.method !== 'GET') return;
 
-    // أ. لو الطلب بيروح لموقع القرآن (API) -> استخدم Network First
-    // (يعني جرب تجيب من النت الأول، لو مفيش نت هات من الكاش)
+    // أ. جلب من API (Network First)
     if (url.hostname.includes('api.alquran.cloud') || url.hostname.includes('api.quran.com')) {
         e.respondWith(
             fetch(request).then((networkResponse) => {
@@ -77,15 +73,13 @@ self.addEventListener('fetch', (e) => {
         return;
     }
 
-    // ب. لباقي الملفات (HTML, CSS, JS, Fonts, Swiper) -> استخدم Cache First
-    // (يعني هات من الكاش فوراً للسرعة الفائقة)
+    // ب. جلب الملفات الأساسية (Cache First)
     e.respondWith(
         caches.match(request).then((cachedResponse) => {
             if (cachedResponse) {
-                return cachedResponse; // رجع الملف من الكاش
+                return cachedResponse;
             }
             
-            // لو مش موجود في الكاش، نزله من النت وخزنه
             return fetch(request).then((networkResponse) => {
                 if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
                     return networkResponse;
@@ -96,7 +90,6 @@ self.addEventListener('fetch', (e) => {
                 });
                 return networkResponse;
             }).catch(() => {
-                // لو النت فصل والملف مش موجود في الكاش، افتح الصفحة الرئيسية
                 return caches.match('./index.html');
             });
         })
