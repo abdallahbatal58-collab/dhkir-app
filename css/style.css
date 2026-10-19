@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   ذِكْر — Design System v3.1.0
+   ذِكْر — Design System v4.0.0
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
@@ -13,7 +13,7 @@
 
     --bg:#f5f1e8; --bg-elevated:#fbf9f4; --bg-sunken:#ebe4d5;
     --surface:#ffffff; --surface-hover:#faf7f0; --surface-pressed:#f2ede1;
-    --glass: rgba(251,249,244,0.85);
+    --glass: rgba(251,249,244,0.95); /* لون صلب تقريباً لتحسين الأداء */
     --glass-border: rgba(193,154,91,0.18);
 
     --primary:#0a3d2a; --primary-hover:#0f5132; --primary-soft:#dcece1; --on-primary:#fbf9f4;
@@ -23,10 +23,9 @@
     --text:#0f1f1a; --text-secondary:#556760; --text-muted:#8a9792; --text-inverse:#fbf9f4;
     --border:#e5dfd3; --border-strong:#d4cbb8; --border-accent:rgba(193,154,91,0.35);
 
-    --shadow-sm:0 1px 3px rgba(15,31,26,0.06),0 1px 2px rgba(15,31,26,0.04);
-    --shadow-md:0 4px 12px rgba(15,31,26,0.07),0 2px 4px rgba(15,31,26,0.04);
-    --shadow-lg:0 12px 28px rgba(15,31,26,0.09),0 4px 8px rgba(15,31,26,0.04);
-    --shadow-gold:0 8px 28px rgba(193,154,91,0.28);
+    --shadow-sm:0 1px 3px rgba(15,31,26,0.06);
+    --shadow-md:0 4px 12px rgba(15,31,26,0.07);
+    --shadow-lg:0 12px 28px rgba(15,31,26,0.09);
 
     --r-xs:6px; --r-sm:10px; --r-md:14px; --r-lg:18px; --r-xl:22px; --r-2xl:30px; --r-full:9999px;
     --s-1:4px; --s-2:8px; --s-3:12px; --s-4:16px; --s-5:20px; --s-6:24px; --s-8:32px; --s-10:40px; --s-12:48px;
@@ -48,14 +47,14 @@
 [data-theme="dark"] {
     --bg:#050e0a; --bg-elevated:#0a1811; --bg-sunken:#020906;
     --surface:#0f2219; --surface-hover:#15301f; --surface-pressed:#1a3a27;
-    --glass: rgba(10,24,17,0.85);
+    --glass: rgba(10,24,17,0.95);
     --glass-border: rgba(212,175,55,0.18);
     --primary:#d4af37; --primary-hover:#e6c860; --primary-soft:#16281e; --on-primary:#050e0a;
     --accent:#d4af37; --accent-bright:#e6c860; --accent-soft:rgba(212,175,55,0.14); --on-accent:#050e0a;
     --text:#f2ede1; --text-secondary:#b0b8b2; --text-muted:#77837d; --text-inverse:#050e0a;
     --border:#1e2d27; --border-strong:#2a3d35; --border-accent:rgba(212,175,55,0.3);
     --shadow-sm:0 1px 3px rgba(0,0,0,0.5); --shadow-md:0 4px 12px rgba(0,0,0,0.5);
-    --shadow-lg:0 12px 28px rgba(0,0,0,0.6); --shadow-gold:0 8px 28px rgba(212,175,55,0.35);
+    --shadow-lg:0 12px 28px rgba(0,0,0,0.6);
 }
 
 /* ---- RESET ---- */
@@ -97,8 +96,6 @@ a{color:inherit;text-decoration:none}
     padding-top: env(safe-area-inset-top);
     height: calc(var(--header-height) + env(safe-area-inset-top));
     background: var(--glass);
-    backdrop-filter: blur(12px); /* تخفيف البلور لتحسين الأداء */
-    -webkit-backdrop-filter: blur(12px);
     display:flex; justify-content:space-between; align-items:center;
     border-bottom:1px solid var(--glass-border); z-index:100;
 }
@@ -116,7 +113,6 @@ a{color:inherit;text-decoration:none}
     padding: var(--s-5) var(--s-4) var(--s-8);
     overflow-y:auto; overflow-x:hidden; height:100%;
     -webkit-overflow-scrolling:touch;
-    scrollbar-width:thin; scrollbar-color: var(--border-strong) transparent;
 }
 .page-title{
     font-family:var(--font-display); font-size:var(--text-3xl); font-weight:700;
@@ -143,7 +139,7 @@ a{color:inherit;text-decoration:none}
 .date{font-size:var(--text-sm); color:var(--c-gold-400); margin-bottom:var(--s-1); font-weight:600;}
 .greeting{font-family:var(--font-display); font-size:var(--text-4xl); color:var(--c-gold-500); margin-bottom:var(--s-4);}
 
-.prayer-header { font-size: var(--text-xs); color: rgba(255,255,255,0.7); margin-bottom: var(--s-2); }
+.prayer-header { font-size: var(--text-xs); color: rgba(255,255,255,0.8); margin-bottom: var(--s-2); font-weight: 600; }
 .prayer-strip{
     display:flex; justify-content:space-around; gap:var(--s-1);
     margin: 0 0 var(--s-5) 0;
@@ -152,9 +148,9 @@ a{color:inherit;text-decoration:none}
     border-radius: var(--r-md);
 }
 .prayer-item{display:flex; flex-direction:column; align-items:center; gap:2px; color: var(--c-ivory-100); flex:1;}
-.prayer-item .label{ font-size:0.65rem; opacity:0.8; font-weight:600; }
+.prayer-item .label{ font-size:0.65rem; opacity:0.9; font-weight:600; }
 .prayer-item .time{ font-size:0.8rem; font-weight:700; color:var(--c-gold-400); }
-.prayer-item.active .time{ color:var(--c-gold-500); text-shadow:0 0 8px rgba(212,175,55,0.6); }
+.prayer-item.active .time{ color:var(--c-gold-500); text-shadow:0 0 8px rgba(212,175,55,0.6); font-size: 0.9rem; }
 
 .search-box{ position:relative; display:flex; max-width:520px; margin:0 auto; }
 .search-box input{
@@ -200,7 +196,7 @@ a{color:inherit;text-decoration:none}
 .continue-body .label{ font-size: var(--text-xs); color: var(--text-muted); font-weight:600; }
 .continue-body .title{ font-family: var(--font-display); font-size: var(--text-lg); color: var(--primary); font-weight:700; }
 
-/* ---- VERSE BOX (تم إصلاح تداخل الأقواس) ---- */
+/* ---- VERSE BOX (تم إصلاح التداخل) ---- */
 .verse-box{
     background:var(--surface); padding:var(--s-5) var(--s-4);
     border-radius:var(--r-xl); text-align:center;
@@ -210,9 +206,13 @@ a{color:inherit;text-decoration:none}
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: var(--s-2);
 }
-.verse-box p::before { content: '﴿'; color: var(--accent); margin-left: 5px; }
-.verse-box p::after { content: '﴾'; color: var(--accent); margin-right: 5px; }
+.verse-box .bracket {
+    color: var(--accent);
+    font-size: var(--text-2xl);
+    opacity: 0.8;
+}
 [data-theme="dark"] .verse-box{ color:var(--c-gold-500); }
 
 /* ---- ADHKAR CARDS ---- */
@@ -302,13 +302,11 @@ a{color:inherit;text-decoration:none}
 input[type="range"]{-webkit-appearance:none; width:100px; height:4px; border-radius:2px; background: var(--border-strong);}
 input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none; width:16px; height:16px; border-radius:50%; background:var(--accent);}
 
-/* ---- BOTTOM NAV (قابل للتمرير) ---- */
+/* ---- BOTTOM NAV (تم تحسينه) ---- */
 #bottom-nav{
     flex-shrink:0; height: calc(var(--nav-height) + env(safe-area-inset-bottom));
     padding-bottom: env(safe-area-inset-bottom);
     background: var(--glass);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
     border-top:1px solid var(--glass-border);
     z-index:100; overflow:hidden;
 }
@@ -360,11 +358,12 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none; width:16px; h
 /* Mushaf Styling */
 .mushaf-container{
     background: #fdfbf5; /* لون ورق المصحف */
-    border: 1px solid var(--accent);
+    border: 2px solid var(--accent);
     border-radius:var(--r-md);
-    padding:var(--s-5) var(--s-3);
+    padding:var(--s-6) var(--s-4);
     min-height:80vh;
     overflow-x: hidden;
+    box-shadow: inset 0 0 20px rgba(193,154,91,0.1);
 }
 [data-theme="dark"] .mushaf-container{ background:#0a0a0a; border-color:var(--c-gold-700); }
 .mushaf-text{
