@@ -193,11 +193,12 @@ function renderAllAdhkar() {
 }
 
 function generateCardHTML(item) {
-    // إظهار الاستعاذة فقط في الأذكار القرآنية وليس الأدعية
+    // إظهار البسملة والاستعاذة فقط في الآيات والسور، وليس الأدعية
     let header = '';
-    if (item.category !== 'duas') {
-        if (item.type === 'surah') header = `<p class="basmala">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>`;
-        else if (item.type === 'ayah') header = `<p class="istiadha">أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ</p>`;
+    if (item.type === 'surah') {
+        header = `<p class="basmala">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>`;
+    } else if (item.type === 'ayah') {
+        header = `<p class="istiadha">أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ</p>`;
     }
 
     const btn = item.count > 1
@@ -455,10 +456,9 @@ async function openSurah(number, name) {
                 html += `<div style="text-align:center;margin-bottom:24px"><span style="font-family:'Amiri Quran',serif;font-size:calc(var(--quran-size) + 4px);color:var(--accent)">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</span></div>`;
             }
             html += data.verses.map(v => {
-                // إزالة الرقم المضمن في نص الـ API لتجنب التكرار
+                // إزالة الرقم المضمن في نص الـ API لتجنب التكرار (أرقام عربية وإنجليزية ورموز)
                 let t = formatTajweed(v.text_uthmani_tajweed || '');
-                // التعبير النمطي لإزالة الأرقام العربية الموجودة بين الأقواس أو في نهاية الآية
-                t = t.replace(/[٠-٩]+/g, '').trim(); 
+                t = t.replace(/[٠-٩0-9۰-۹۝\[\]\(\)]+/g, '').trim(); 
                 
                 const n = v.verse_key.split(':')[1];
                 return `<span>${t}</span> <span class="verse-number">${n}</span> `;
@@ -479,7 +479,7 @@ async function openSurah(number, name) {
                 }
                 html += data.data.ayahs.map(a => {
                     let t = formatTajweed(a.text);
-                    t = t.replace(/[٠-٩]+/g, '').trim();
+                    t = t.replace(/[٠-٩0-9۰-۹۝\[\]\(\)]+/g, '').trim();
                     return `<span>${t}</span> <span class="verse-number">${a.numberInSurah}</span> `;
                 }).join('');
                 container.innerHTML = html;
@@ -513,14 +513,24 @@ async function loadPrayerTimes() {
             try {
                 const lat = pos.coords.latitude;
                 const lng = pos.coords.longitude;
-                // جلب المواقيت عن طريق الإحداثيات
-                const res = await fetch(`https://api.aladhan.com/v1/timings/${d}?latitude=${lat}&longitude=${lng}&method=4`);
+                
+                // جلب اسم المدينة
+                try {
+                    const geoRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=ar`);
+                    const geoData = await geoRes.json();
+                    const city = geoData.city || geoData.locality || geoData.principalSubdivision || 'موقعك';
+                    document.getElementById('prayer-location').textContent = `المواقيت حسب: ${city}`;
+                } catch (e) {
+                    document.getElementById('prayer-location').textContent = `المواقيت حسب موقعك الحالي`;
+                }
+
+                // جلب المواقيت (Method=5 هي طريقة الهيئة المصرية العامة للمساحة، وهي الأقرب لمصر)
+                const res = await fetch(`https://api.aladhan.com/v1/timings/${d}?latitude=${lat}&longitude=${lng}&method=5`);
                 const data = await res.json();
                 if (data.code === 200) {
                     localStorage.setItem('dhikr_prayer_cache', JSON.stringify(data.data.timings));
                     localStorage.setItem('dhikr_prayer_date', today);
                     renderPrayerTimes(data.data.timings);
-                    document.getElementById('prayer-location').textContent = `المواقيت حسب موقعك الحالي`;
                 }
             } catch (e) { console.error("API Error", e); }
         }, async (err) => {
@@ -531,7 +541,7 @@ async function loadPrayerTimes() {
                 const data = await res.json();
                 if (data.code === 200) renderPrayerTimes(data.data.timings);
             } catch (e) {}
-        }, { timeout: 5000 });
+        }, { timeout: 8000 });
     }
 }
 
