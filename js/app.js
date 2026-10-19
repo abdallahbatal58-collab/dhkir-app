@@ -323,7 +323,7 @@ function renderSurahList(surahs) {
                     <h3 style="color:var(--accent);font-family:'Amiri Quran';font-size:1.5rem;margin-bottom:4px">${s.name}</h3>
                     <p style="color:var(--text-muted);font-size:0.85rem">${s.numberOfAyahs} آية · ${s.revelationType === 'Meccan' ? 'مكية' : 'مدنية'}</p>
                 </div>
-                <div style="background:var(--primary);color:var(--accent);width:44px;height:44px;display:flex;justify-content:center;align-items:center;border-radius:50%;font-weight:800;font-size:1rem;border:1.5px solid var(--accent)">${s.number}</div>
+                <div class="surah-number-circle">${s.number}</div>
             </div>
         </button>
     `).join('');
