@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <meta name="description" content="تطبيق ذِكْر — أذكار الصباح والمساء، سبحة إلكترونية، اتجاه القبلة، القرآن الكريم، والأدعية النبوية.">
     <meta name="theme-color" content="#0a3d2a" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#07120e" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#050e0a" media="(prefers-color-scheme: dark)">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ذِكْر">
@@ -22,7 +22,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
 
-    <link rel="stylesheet" href="css/style.css?v=2.0.0">
+    <link rel="stylesheet" href="css/style.css?v=3.0.0">
 </head>
 <body>
 
@@ -50,6 +50,11 @@
     <symbol id="i-location" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></symbol>
     <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
     <symbol id="i-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></symbol>
+    <symbol id="i-mosque" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c-1 2-3 3-3 6h6c0-3-2-4-3-6z"/><path d="M4 22V12l8-4 8 4v10"/><path d="M9 22v-6h6v6"/></symbol>
+    <symbol id="i-utensils" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></symbol>
+    <symbol id="i-plane" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
 </svg>
 
 <!-- ═════ Splash ═════ -->
@@ -79,15 +84,25 @@
 
             <section id="page-home" class="swiper-slide page">
                 <div class="hero">
-                    <p class="date" id="hijri-date">جاري التحميل...</p>
-                    <h2 class="greeting">أهلاً بك</h2>
-                    <form id="search-form" class="search-box">
-                        <input type="text" id="search-input" placeholder="ابحث في الأذكار والأدعية..." autocomplete="off">
-                        <button type="submit" aria-label="بحث">
-                            <svg class="icon"><use href="#i-search"/></svg>
-                        </button>
-                    </form>
+                    <div class="hero-content">
+                        <p class="date" id="hijri-date">جاري التحميل...</p>
+                        <h2 class="greeting">أهلاً بك</h2>
+                        <div class="prayer-strip" id="prayer-strip">
+                            <div class="prayer-item"><span class="label">الفجر</span><span class="time" data-prayer="Fajr">—</span></div>
+                            <div class="prayer-item"><span class="label">الظهر</span><span class="time" data-prayer="Dhuhr">—</span></div>
+                            <div class="prayer-item"><span class="label">العصر</span><span class="time" data-prayer="Asr">—</span></div>
+                            <div class="prayer-item"><span class="label">المغرب</span><span class="time" data-prayer="Maghrib">—</span></div>
+                            <div class="prayer-item"><span class="label">العشاء</span><span class="time" data-prayer="Isha">—</span></div>
+                        </div>
+                        <form id="search-form" class="search-box" role="search">
+                            <input type="text" id="search-input" placeholder="ابحث في الأذكار والأدعية..." autocomplete="off" aria-label="بحث">
+                            <button type="submit" aria-label="بحث">
+                                <svg class="icon"><use href="#i-search"/></svg>
+                            </button>
+                        </form>
+                    </div>
                 </div>
+
                 <div class="grid">
                     <button class="card ripple" data-target="morning">
                         <div class="card-icon-wrap"><svg class="icon"><use href="#i-sunrise"/></svg></div>
@@ -106,8 +121,18 @@
                         <h3>القرآن</h3>
                     </button>
                 </div>
+
+                <button class="continue-card" id="continue-reading" hidden>
+                    <div class="continue-icon"><svg class="icon"><use href="#i-book"/></svg></div>
+                    <div class="continue-body">
+                        <div class="label">متابعة القراءة</div>
+                        <div class="title" id="continue-title">—</div>
+                    </div>
+                    <svg class="icon icon-muted"><use href="#i-arrow-right"/></svg>
+                </button>
+
                 <div class="verse-box">
-                    <p>﴿ فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُوا لِي وَلَا تَكْفُرُونِ ﴾</p>
+                    <p>فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُوا لِي وَلَا تَكْفُرُونِ</p>
                 </div>
             </section>
 
@@ -116,22 +141,31 @@
             <section id="page-sleep" class="swiper-slide page"><h2 class="page-title">أذكار النوم</h2><div class="list" id="list-sleep"></div></section>
             <section id="page-wake" class="swiper-slide page"><h2 class="page-title">أذكار الاستيقاظ</h2><div class="list" id="list-wake"></div></section>
             <section id="page-duas" class="swiper-slide page"><h2 class="page-title">الأدعية</h2><div class="list" id="list-duas"></div></section>
+            <section id="page-favorites" class="swiper-slide page"><h2 class="page-title">المفضلة</h2><div class="list" id="list-favorites"></div></section>
+            <section id="page-stats" class="swiper-slide page"><h2 class="page-title">إحصائياتك</h2><div id="stats-container"></div></section>
+            <section id="page-asmah" class="swiper-slide page"><h2 class="page-title">أسماء الله الحسنى</h2><div class="asma-grid" id="asma-grid"></div></section>
 
             <section id="page-tasbih" class="swiper-slide page">
                 <h2 class="page-title">السبحة الذكية</h2>
                 <div class="tasbih-container">
-                    <select id="tasbih-select" class="pro-select"></select>
-                    <select id="tasbih-target" class="pro-select">
+                    <select id="tasbih-select" class="pro-select" aria-label="اختر الذكر"></select>
+                    <select id="tasbih-target" class="pro-select" aria-label="اختر الهدف">
                         <option value="33">33 مرة</option>
                         <option value="100">100 مرة</option>
                         <option value="500">500 مرة</option>
                         <option value="1000">1000 مرة</option>
                         <option value="custom">عدد مخصص...</option>
                     </select>
-                    <button class="tasbih-circle" id="tasbih-btn" aria-label="اذكر">
-                        <span class="count" id="tasbih-count">0</span>
-                        <span class="target" id="tasbih-max">/ 33</span>
-                    </button>
+                    <div class="tasbih-circle-wrap">
+                        <svg class="tasbih-ring" viewBox="0 0 240 240">
+                            <circle class="tasbih-ring-bg" cx="120" cy="120" r="112"/>
+                            <circle class="tasbih-ring-progress" id="tasbih-progress" cx="120" cy="120" r="112" stroke-dasharray="703.7" stroke-dashoffset="703.7"/>
+                        </svg>
+                        <button class="tasbih-circle" id="tasbih-btn" aria-label="اذكر">
+                            <span class="count" id="tasbih-count">0</span>
+                            <span class="target" id="tasbih-max">/ 33</span>
+                        </button>
+                    </div>
                     <h3 class="dhikr-text" id="tasbih-text">سُبْحَانَ اللَّهِ</h3>
                     <button id="reset-tasbih" class="btn-secondary">
                         <svg class="icon"><use href="#i-refresh"/></svg>
@@ -151,12 +185,13 @@
                 <h2 class="page-title">اتجاه القبلة</h2>
                 <div class="compass-container">
                     <div class="compass-wrapper">
-                        <div class="compass-ring"></div>
+                        <div class="compass-ring" id="compass-ring"></div>
                         <div class="compass-arrow" id="qibla-arrow">
                             <svg class="icon"><use href="#i-kaaba"/></svg>
                         </div>
                     </div>
                     <h3 id="qibla-angle-text">في انتظار الموقع...</h3>
+                    <p class="qibla-hint">ضع الهاتف على سطح مستوٍ بعيداً عن المعادن. وجّه السهم نحو الأعلى ثم حرّك الهاتف حتى يشير السهم نحو الكعبة.</p>
                     <button id="btn-qibla" class="btn-primary">
                         <svg class="icon"><use href="#i-location"/></svg>
                         <span>تحديد القبلة</span>
@@ -178,6 +213,10 @@
                             <span class="set-label"><svg class="icon"><use href="#i-book"/></svg> حجم خط القرآن</span>
                             <input type="range" id="set-font" min="18" max="40" step="2" value="24">
                         </div>
+                        <div class="set-item">
+                            <span class="set-label"><svg class="icon"><use href="#i-hands"/></svg> حجم خط الأذكار</span>
+                            <input type="range" id="set-adhkar-font" min="16" max="32" step="2" value="20">
+                        </div>
                     </div>
                 </div>
 
@@ -198,6 +237,10 @@
                             <span class="set-label"><svg class="icon"><use href="#i-download"/></svg> تثبيت التطبيق</span>
                             <svg class="icon icon-muted"><use href="#i-arrow-right"/></svg>
                         </button>
+                        <button class="set-item set-btn" id="share-app-btn">
+                            <span class="set-label"><svg class="icon"><use href="#i-share"/></svg> مشاركة التطبيق</span>
+                            <svg class="icon icon-muted"><use href="#i-arrow-right"/></svg>
+                        </button>
                         <button class="set-item set-btn" id="reset-all-btn">
                             <span class="set-label"><svg class="icon"><use href="#i-refresh"/></svg> تصفير كل شيء</span>
                             <svg class="icon icon-muted"><use href="#i-arrow-right"/></svg>
@@ -205,7 +248,7 @@
                     </div>
                 </div>
 
-                <p class="app-version">الإصدار 2.0.0</p>
+                <p class="app-version">الإصدار 3.0.0</p>
             </section>
 
         </div>
@@ -215,14 +258,9 @@
         <div class="nav-scroll-wrapper">
             <button data-target="home" class="active"><svg class="icon"><use href="#i-home"/></svg><span>الرئيسية</span></button>
             <button data-target="morning"><svg class="icon"><use href="#i-sunrise"/></svg><span>الصباح</span></button>
-            <button data-target="evening"><svg class="icon"><use href="#i-moon"/></svg><span>المساء</span></button>
-            <button data-target="sleep"><svg class="icon"><use href="#i-bed"/></svg><span>النوم</span></button>
-            <button data-target="wake"><svg class="icon"><use href="#i-sunrise"/></svg><span>الاستيقاظ</span></button>
-            <button data-target="duas"><svg class="icon"><use href="#i-hands"/></svg><span>الأدعية</span></button>
-            <button data-target="tasbih"><svg class="icon"><use href="#i-tasbih"/></svg><span>السبحة</span></button>
             <button data-target="quran"><svg class="icon"><use href="#i-book"/></svg><span>القرآن</span></button>
-            <button data-target="qibla"><svg class="icon"><use href="#i-compass"/></svg><span>القبلة</span></button>
-            <button data-target="settings"><svg class="icon"><use href="#i-settings"/></svg><span>الإعدادات</span></button>
+            <button data-target="favorites"><svg class="icon"><use href="#i-star"/></svg><span>المفضلة</span></button>
+            <button data-target="stats"><svg class="icon"><use href="#i-chart"/></svg><span>تقدمي</span></button>
         </div>
     </nav>
 </div>
@@ -231,12 +269,13 @@
 <aside id="sidebar" aria-hidden="true">
     <div class="sidebar-header">
         <h2>ذِكْر</h2>
-        <p>﴿ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ ﴾</p>
+        <p>أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ</p>
     </div>
     <div class="sidebar-scroll">
         <div class="nav-group">
             <span class="nav-title">القرآن الكريم</span>
             <a href="#" data-target="quran"><svg class="icon"><use href="#i-book"/></svg> فهرس السور</a>
+            <a href="#" data-target="asmah"><svg class="icon"><use href="#i-star"/></svg> أسماء الله الحسنى</a>
         </div>
         <div class="nav-group">
             <span class="nav-title">أذكار اليوم</span>
@@ -250,6 +289,8 @@
             <a href="#" data-target="duas"><svg class="icon"><use href="#i-hands"/></svg> الأدعية</a>
             <a href="#" data-target="tasbih"><svg class="icon"><use href="#i-tasbih"/></svg> السبحة</a>
             <a href="#" data-target="qibla"><svg class="icon"><use href="#i-compass"/></svg> القبلة</a>
+            <a href="#" data-target="favorites"><svg class="icon"><use href="#i-star"/></svg> المفضلة</a>
+            <a href="#" data-target="stats"><svg class="icon"><use href="#i-chart"/></svg> إحصائياتي</a>
         </div>
         <div class="nav-group">
             <span class="nav-title">الإعدادات</span>
@@ -266,7 +307,7 @@
             <svg class="icon"><use href="#i-arrow-right"/></svg>
         </button>
         <h2 id="reader-title">اسم السورة</h2>
-        <div style="width:40px"></div>
+        <div style="width:42px"></div>
     </div>
     <div class="mushaf-container">
         <div id="list-quran-verses" class="mushaf-text"></div>
@@ -279,8 +320,8 @@
         <button id="close-search" class="icon-btn" aria-label="رجوع">
             <svg class="icon"><use href="#i-arrow-right"/></svg>
         </button>
-        <h2 class="page-title" style="margin:0">نتائج البحث</h2>
-        <div style="width:40px"></div>
+        <h2 class="page-title" style="margin:0;padding:0">نتائج البحث</h2>
+        <div style="width:42px"></div>
     </div>
     <div class="list" id="list-search"></div>
 </div>
@@ -301,21 +342,18 @@ if ('serviceWorker' in navigator) {
                 if (!w) return;
                 w.addEventListener('statechange', () => {
                     if (w.state === 'installed' && navigator.serviceWorker.controller) {
-                        showUpdateToast();
+                        const t = document.getElementById('toast');
+                        t.textContent = 'تحديث جديد متوفر — أعد تحميل الصفحة';
+                        t.classList.add('show');
+                        setTimeout(() => t.classList.remove('show'), 5000);
                     }
                 });
             });
         });
     });
 }
-function showUpdateToast() {
-    const t = document.getElementById('toast');
-    t.textContent = 'تحديث جديد متوفر — أعد تحميل الصفحة';
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 5000);
-}
 </script>
-<script src="js/data.js?v=2.0.0"></script>
-<script src="js/app.js?v=2.0.0"></script>
+<script src="js/data.js?v=3.0.0"></script>
+<script src="js/app.js?v=3.0.0"></script>
 </body>
 </html>
