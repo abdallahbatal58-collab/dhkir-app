@@ -1,19 +1,20 @@
 /* ═══════════════════════════════════════════════════════════════
-   ذِكْر | Service Worker v3.0.0
+   ذِكْر | Service Worker v3.1.0
    ═══════════════════════════════════════════════════════════════ */
 
-const CACHE_STATIC = 'dhikr-static-v3.0.0';
-const CACHE_API = 'dhikr-api-v3.0.0';
+// تم تغيير أرقام الإصدارات هنا لإجبار المتصفح على مسح الكاش القديم
+const CACHE_STATIC = 'dhikr-static-v3.1.0';
+const CACHE_API = 'dhikr-api-v3.1.0';
 const CACHE_MAX_ITEMS = 80;
-const CACHE_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 21; // 21 يوم
 
+// تم تحديث روابط الملفات لتتطابق مع index.html الجديد
 const PRECACHE = [
     './',
     './index.html',
     './manifest.json',
-    './css/style.css?v=3.0.0',
-    './js/data.js?v=3.0.0',
-    './js/app.js?v=3.0.0',
+    './css/style.css?v=3.1.0',
+    './js/data.js?v=3.1.0',
+    './js/app.js?v=3.1.0',
     './icons/icon.svg',
     './icons/maskable.svg',
     'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css',
@@ -35,6 +36,7 @@ self.addEventListener('activate', (e) => {
     e.waitUntil(
         caches.keys().then(keys =>
             Promise.all(keys.map(k => {
+                // مسح أي كاش قديم لا يطابق الإصدار الحالي
                 if (k !== CACHE_STATIC && k !== CACHE_API) return caches.delete(k);
             }))
         ).then(() => self.clients.claim())
@@ -73,7 +75,7 @@ self.addEventListener('fetch', (e) => {
         return;
     }
 
-    // HTML: Network First
+    // HTML: Network First (لتحديثات فورية)
     if (req.mode === 'navigate' || req.destination === 'document') {
         e.respondWith(
             fetch(req).then(res => {
@@ -85,7 +87,7 @@ self.addEventListener('fetch', (e) => {
         return;
     }
 
-    // الباقي: Cache First
+    // الباقي (CSS, JS, Fonts): Cache First
     e.respondWith(
         caches.match(req).then(cached => {
             if (cached) return cached;
