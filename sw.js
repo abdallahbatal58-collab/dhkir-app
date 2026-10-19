@@ -2,7 +2,7 @@
    ذِكْر | Service Worker (V118 - Ultimate Fixed)
    ============================================ */
 
-const CACHE_NAME = 'dhikr-v118-ultimate-fixed';
+const CACHE_NAME = 'dhikr-v119-final
 const API_CACHE_NAME = 'dhikr-api-v118';
 
 const ASSETS = [
