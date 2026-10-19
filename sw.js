@@ -1,104 +1,110 @@
-/* ============================================
-   ذِكْر | Service Worker (V113 - Final Fix)
-   ============================================ */
+/* ═════════════════════════════════════════
+   ذِكْر | Service Worker v2.0.0
+   ═════════════════════════════════════════ */
 
-// اسم الكاش متغير عشان نمسح أي نسخة قديمة وننزل الجديدة فوراً
-const CACHE_NAME = 'dhikr-v114-massive';
-const API_CACHE_NAME = 'dhikr-api-v113';
+const CACHE_STATIC = 'dhikr-static-v2.0.0';
+const CACHE_API = 'dhikr-api-v2.0.0';
+const CACHE_MAX_ITEMS = 60;
+const CACHE_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 14; // 14 يوم
 
-// الملفات الأساسية اللي لازم تتحفظ عشان التطبيق يفتح أوفلاين
-const ASSETS = [
+const PRECACHE = [
     './',
     './index.html',
-    './css/style.css?v=113.0',
-    './js/data.js?v=113.0',
-    './js/app.js?v=113.0',
-    // مكتبة السحب Swiper
+    './manifest.json',
+    './css/style.css?v=2.0.0',
+    './js/data.js?v=2.0.0',
+    './js/app.js?v=2.0.0',
+    './icons/icon.svg',
+    './icons/maskable.svg',
     'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css',
     'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js',
-    // خطوط جوجل
-    'https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800&family=Scheherazade+New:wght@400;700&display=swap',
-    // أيقونات FontAwesome
-    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css'
+    'https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800&family=Scheherazade+New:wght@400;700&display=swap'
 ];
 
-// 1. التثبيت (Install): حفظ الملفات الأساسية
 self.addEventListener('install', (e) => {
-    console.log('✅ [SW] Installing V113...');
     e.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => {
-            return cache.addAll(ASSETS).catch(err => {
-                console.log('⚠️ [SW] Cache addAll error:', err);
-            });
-        })
+        caches.open(CACHE_STATIC).then(cache =>
+            Promise.all(PRECACHE.map(url =>
+                cache.add(url).catch(err => console.warn('[SW] Failed precache:', url, err))
+            ))
+        ).then(() => self.skipWaiting())
     );
-    self.skipWaiting(); // إجبار المتصفح على تفعيل النسخة الجديدة فوراً
 });
 
-// 2. التفعيل (Activate): مسح الكاش القديم بالكامل
 self.addEventListener('activate', (e) => {
-    console.log('🚀 [SW] Activating V113...');
     e.waitUntil(
-        caches.keys().then((keys) => {
-            return Promise.all(
-                keys.map((key) => {
-                    if (key !== CACHE_NAME && key !== API_CACHE_NAME) {
-                        console.log('🗑️ [SW] Deleting old cache:', key);
-                        return caches.delete(key);
-                    }
-                })
-            );
-        })
+        caches.keys().then(keys =>
+            Promise.all(keys.map(k => {
+                if (k !== CACHE_STATIC && k !== CACHE_API) return caches.delete(k);
+            }))
+        ).then(() => self.clients.claim())
     );
-    self.clients.claim(); // السيطرة على جميع الصفحات المفتوحة فوراً
 });
 
-// 3. الجلب (Fetch): استراتيجية ذكية
+self.addEventListener('message', (e) => {
+    if (e.data && e.data.type === 'SKIP_WAITING') self.skipWaiting();
+});
+
 self.addEventListener('fetch', (e) => {
-    const request = e.request;
-    const url = new URL(request.url);
+    const req = e.request;
+    if (req.method !== 'GET') return;
 
-    // تجاهل الطلبات اللي مش GET
-    if (request.method !== 'GET') return;
+    const url = new URL(req.url);
 
-    // أ. لو الطلب بيروح لموقع القرآن (API) -> استخدم Network First
-    // (يعني جرب تجيب من النت الأول، لو مفيش نت هات من الكاش)
-    if (url.hostname.includes('api.alquran.cloud') || url.hostname.includes('api.quran.com')) {
+    // API القرآن: Network First + cache fallback
+    if (url.hostname === 'api.alquran.cloud' || url.hostname === 'api.quran.com') {
         e.respondWith(
-            fetch(request).then((networkResponse) => {
-                return caches.open(API_CACHE_NAME).then((cache) => {
-                    cache.put(request, networkResponse.clone());
-                    return networkResponse;
-                });
-            }).catch(() => {
-                return caches.match(request);
-            })
+            fetch(req).then(res => {
+                if (res && res.status === 200) {
+                    const clone = res.clone();
+                    caches.open(CACHE_API).then(cache => {
+                        cache.put(req, clone);
+                        trimCache(CACHE_API, CACHE_MAX_ITEMS);
+                    });
+                }
+                return res;
+            }).catch(() => caches.match(req).then(c => c || new Response(
+                JSON.stringify({ error: 'offline' }),
+                { headers: { 'Content-Type': 'application/json' }, status: 503 }
+            )))
         );
         return;
     }
 
-    // ب. لباقي الملفات (HTML, CSS, JS, Fonts, Swiper) -> استخدم Cache First
-    // (يعني هات من الكاش فوراً للسرعة الفائقة)
+    // HTML: Network First (لتحديثات فورية)
+    if (req.mode === 'navigate' || req.destination === 'document') {
+        e.respondWith(
+            fetch(req).then(res => {
+                const clone = res.clone();
+                caches.open(CACHE_STATIC).then(c => c.put(req, clone));
+                return res;
+            }).catch(() => caches.match(req).then(c => c || caches.match('./index.html')))
+        );
+        return;
+    }
+
+    // الباقي: Cache First
     e.respondWith(
-        caches.match(request).then((cachedResponse) => {
-            if (cachedResponse) {
-                return cachedResponse; // رجع الملف من الكاش
-            }
-            
-            // لو مش موجود في الكاش، نزله من النت وخزنه
-            return fetch(request).then((networkResponse) => {
-                if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-                    return networkResponse;
+        caches.match(req).then(cached => {
+            if (cached) return cached;
+            return fetch(req).then(res => {
+                if (res && res.status === 200 && (res.type === 'basic' || res.type === 'cors')) {
+                    const clone = res.clone();
+                    caches.open(CACHE_STATIC).then(c => {
+                        c.put(req, clone);
+                        trimCache(CACHE_STATIC, CACHE_MAX_ITEMS);
+                    });
                 }
-                const responseToCache = networkResponse.clone();
-                caches.open(CACHE_NAME).then((cache) => {
-                    cache.put(request, responseToCache);
-                });
-                return networkResponse;
-            }).catch(() => {
-                // لو النت فصل والملف مش موجود في الكاش، افتح الصفحة الرئيسية
-                return caches.match('./index.html');
-            });
+                return res;
+            }).catch(() => caches.match('./index.html'));
         })
     );
 });
+
+async function trimCache(name, max) {
+    const cache = await caches.open(name);
+    const keys = await cache.keys();
+    if (keys.length > max) {
+        await Promise.all(keys.slice(0, keys.length - max).map(k => cache.delete(k)));
+    }
+}
