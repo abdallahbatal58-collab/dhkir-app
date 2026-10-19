@@ -1,18 +1,18 @@
 /* ============================================
-   ذِكْر | Service Worker (V113 - Final Fix)
+   ذِكْر | Service Worker (V116 - Chapters Edition)
    ============================================ */
 
 // اسم الكاش متغير عشان نمسح أي نسخة قديمة وننزل الجديدة فوراً
-const CACHE_NAME = 'dhikr-v113-ultimate-fix';
-const API_CACHE_NAME = 'dhikr-api-v113';
+const CACHE_NAME = 'dhikr-v116-chapters-final';
+const API_CACHE_NAME = 'dhikr-api-v116';
 
 // الملفات الأساسية اللي لازم تتحفظ عشان التطبيق يفتح أوفلاين
 const ASSETS = [
     './',
     './index.html',
-    './css/style.css?v=113.0',
-    './js/data.js?v=113.0',
-    './js/app.js?v=113.0',
+    './css/style.css?v=116.0',
+    './js/data.js?v=116.0',
+    './js/app.js?v=116.0',
     // مكتبة السحب Swiper
     'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css',
     'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js',
@@ -24,7 +24,7 @@ const ASSETS = [
 
 // 1. التثبيت (Install): حفظ الملفات الأساسية
 self.addEventListener('install', (e) => {
-    console.log('✅ [SW] Installing V113...');
+    console.log('✅ [SW] Installing V116...');
     e.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
             return cache.addAll(ASSETS).catch(err => {
@@ -37,7 +37,7 @@ self.addEventListener('install', (e) => {
 
 // 2. التفعيل (Activate): مسح الكاش القديم بالكامل
 self.addEventListener('activate', (e) => {
-    console.log('🚀 [SW] Activating V113...');
+    console.log('🚀 [SW] Activating V116...');
     e.waitUntil(
         caches.keys().then((keys) => {
             return Promise.all(
