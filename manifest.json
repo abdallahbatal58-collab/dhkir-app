@@ -1,5 +1,5 @@
 {
-  "id": "/",
+  "id": "./",
   "name": "ذِكْر | أذكار وأدعية",
   "short_name": "ذِكْر",
   "description": "تطبيق إسلامي شامل: أذكار الصباح والمساء، سبحة إلكترونية، اتجاه القبلة، أدعية من الكتاب والسنة، والقرآن الكريم.",
@@ -15,51 +15,15 @@
   "categories": ["lifestyle", "education"],
   "prefer_related_applications": false,
   "icons": [
-    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
-    { "src": "icons/maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
   ],
   "shortcuts": [
-    {
-      "name": "أذكار الصباح",
-      "short_name": "الصباح",
-      "description": "قراءة أذكار الصباح",
-      "url": "./?page=morning",
-      "icons": [{ "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
-    },
-    {
-      "name": "أذكار المساء",
-      "short_name": "المساء",
-      "description": "قراءة أذكار المساء",
-      "url": "./?page=evening",
-      "icons": [{ "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
-    },
-    {
-      "name": "السبحة الذكية",
-      "short_name": "السبحة",
-      "description": "فتح السبحة الإلكترونية",
-      "url": "./?page=tasbih",
-      "icons": [{ "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
-    },
-    {
-      "name": "القرآن الكريم",
-      "short_name": "القرآن",
-      "description": "قراءة القرآن الكريم",
-      "url": "./?page=quran",
-      "icons": [{ "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
-    },
-    {
-      "name": "المفضلة",
-      "short_name": "المفضلة",
-      "description": "أذكارك المفضلة",
-      "url": "./?page=favorites",
-      "icons": [{ "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
-    },
-    {
-      "name": "تقدمي",
-      "short_name": "تقدمي",
-      "description": "إحصائياتك",
-      "url": "./?page=stats",
-      "icons": [{ "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
-    }
+    { "name": "أذكار الصباح", "short_name": "الصباح", "description": "قراءة أذكار الصباح", "url": "./?page=morning", "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }] },
+    { "name": "أذكار المساء", "short_name": "المساء", "description": "قراءة أذكار المساء", "url": "./?page=evening", "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }] },
+    { "name": "السبحة الذكية", "short_name": "السبحة", "description": "فتح السبحة الإلكترونية", "url": "./?page=tasbih", "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }] },
+    { "name": "القرآن الكريم", "short_name": "القرآن", "description": "قراءة القرآن الكريم", "url": "./?page=quran", "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }] },
+    { "name": "المفضلة", "short_name": "المفضلة", "description": "أذكارك المفضلة", "url": "./?page=favorites", "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }] },
+    { "name": "تقدمي", "short_name": "تقدمي", "description": "إحصائياتك", "url": "./?page=stats", "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }] }
   ]
 }
