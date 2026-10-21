@@ -1,9 +1,9 @@
 /* ═══════════════════════════════════════════════════════════════
-   ذِكْر | Service Worker v4.0.0
+   ذِكْر | Service Worker v4.1.0
    ═══════════════════════════════════════════════════════════════ */
 
-const CACHE_STATIC = 'dhikr-static-v4.0.0';
-const CACHE_API = 'dhikr-api-v4.0.0';
+const CACHE_STATIC = 'dhikr-static-v4.1.0';
+const CACHE_API = 'dhikr-api-v4.1.0';
 const CACHE_MAX_ITEMS = 80;
 
 const PRECACHE = [
@@ -13,8 +13,8 @@ const PRECACHE = [
     './css/style.css?v=4.0.0',
     './js/data.js?v=4.0.0',
     './js/app.js?v=4.0.0',
-    './icons/icon.svg',
-    './icons/maskable.svg',
+    './icon.svg',
+    './maskable.svg',
     'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css',
     'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js',
     'https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800&family=Scheherazade+New:wght@400;700&display=swap'
@@ -50,7 +50,7 @@ self.addEventListener('fetch', (e) => {
 
     const url = new URL(req.url);
 
-    // API
+    // ── API: Network First with JSON fallback ──
     if (url.hostname === 'api.alquran.cloud' ||
         url.hostname === 'api.quran.com' ||
         url.hostname === 'api.aladhan.com' ||
@@ -73,7 +73,7 @@ self.addEventListener('fetch', (e) => {
         return;
     }
 
-    // HTML
+    // ── HTML: Network First with offline fallback ──
     if (req.mode === 'navigate' || req.destination === 'document') {
         e.respondWith(
             fetch(req).then(res => {
@@ -85,7 +85,7 @@ self.addEventListener('fetch', (e) => {
         return;
     }
 
-    // Static (Cache First)
+    // ── Static (CSS/JS/fonts/images): Cache First ──
     e.respondWith(
         caches.match(req).then(cached => {
             if (cached) return cached;
@@ -98,7 +98,14 @@ self.addEventListener('fetch', (e) => {
                     });
                 }
                 return res;
-            }).catch(() => caches.match('./index.html'));
+            }).catch(() => {
+                // إصلاح: إرجاع خطأ مناسب للـ CSS/JS بدلاً من HTML
+                return new Response('/* offline */', {
+                    status: 503,
+                    statusText: 'Service Unavailable',
+                    headers: { 'Content-Type': 'text/plain' }
+                });
+            });
         })
     );
 });
