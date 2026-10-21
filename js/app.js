@@ -43,7 +43,6 @@ function initApp() {
     setupScrollTop();
     setupPWA();
     setupQuranZoom();
-    // إصلاح: ربط مُستمع النقر مرة واحدة على document ليشمل النتائج في overlay-search
     document.addEventListener('click', handleCardClick);
     renderAllAdhkar();
     renderFavorites();
@@ -70,15 +69,12 @@ function applyFontScales() {
     document.documentElement.style.setProperty('--adhkar-size', settings.adhkarScale + 'px');
     document.getElementById('set-font').value = settings.fontScale;
     document.getElementById('set-adhkar-font').value = settings.adhkarScale;
-    // ملاحظة: لا نُعدّل state.quranZoom هنا — يُحدَّث فقط عند تغيير شريط القرآن
 }
 
 /* ═══════════════════ Swiper & Navigation ═══════════════════ */
 function setupSwiper() {
-    // إصلاح: حماية من فشل تحميل Swiper من CDN
     if (typeof Swiper === 'undefined') {
         console.error('[ذِكْر] Swiper library not loaded. Navigation disabled.');
-        // Fallback: عرض كل الشرائح متتالية
         document.querySelectorAll('.swiper-slide').forEach(s => {
             s.style.display = 'block';
             s.style.height = 'auto';
@@ -122,13 +118,13 @@ function updateNavState(pageId) {
         if (active) activeBtn = btn;
     });
 
-    // إصلاح: استخدام getBoundingClientRect لحساب التمرير بدقة
-    if (activeBtn && navWrapper) {
-        const navRect = navWrapper.getBoundingClientRect();
-        const btnRect = activeBtn.getBoundingClientRect();
-        const targetScroll = navWrapper.scrollLeft + (btnRect.left - navRect.left)
-            - (navWrapper.clientWidth / 2) + (btnRect.width / 2);
-        navWrapper.scrollTo({ left: Math.max(0, targetScroll), behavior: 'smooth' });
+    // إصلاح: تمرير الشريط السفلي للزر النشط بدقة باستخدام scrollIntoView
+    if (activeBtn) {
+        activeBtn.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest',
+            inline: 'center'
+        });
     }
 
     document.querySelectorAll('.nav-group a').forEach(a => {
@@ -143,7 +139,6 @@ function navigateTo(pageId) {
     if (swiper) {
         swiper.slideTo(idx);
     } else {
-        // Fallback
         document.querySelectorAll('.swiper-slide').forEach(s => s.style.display = 'none');
         const target = document.getElementById(`page-${pageId}`);
         if (target) target.style.display = 'block';
@@ -219,7 +214,6 @@ function renderAllAdhkar() {
         el.innerHTML = items.length ? items.map(generateCardHTML).join('') :
             `<div class="empty-state"><svg class="icon"><use href="#i-hands"/></svg><h3>لا توجد أذكار</h3><p>سيتم إضافتها قريباً</p></div>`;
     });
-    // المُستمع مُربوط في initApp على document
 }
 
 function generateCardHTML(item) {
@@ -298,7 +292,6 @@ async function copyDhikr(id) {
         await navigator.clipboard.writeText(text);
         showToast('تم النسخ ✓');
     } catch {
-        // fallback
         const ta = document.createElement('textarea');
         ta.value = text; document.body.appendChild(ta);
         ta.select();
@@ -399,7 +392,13 @@ function renderStats() {
 function renderAsma() {
     const el = document.getElementById('asma-grid');
     if (!el) return;
-    el.innerHTML = ASMA_UL_HUSNA.map((name, i) => `<div class="asma-item"><div style="font-size:0.65rem;color:var(--text-muted);font-family:var(--font-body);margin-bottom:4px">${i + 1}</div>${name}</div>`).join('');
+    
+    el.innerHTML = ASMA_UL_HUSNA.map(item => `
+        <div class="asma-card">
+            <div class="asma-name">${item.name}</div>
+            <div class="asma-meaning">${item.meaning}</div>
+        </div>
+    `).join('');
 }
 
 /* ═══════════════════ Search ═══════════════════ */
@@ -476,7 +475,6 @@ function renderSurahList(surahs) {
     });
 }
 
-// إصلاح: regex أكثر مرونة يدعم class="..." و class=...
 function formatTajweed(text) {
     return (text || '')
         .replace(/<tajweed\s+class=["']?([a-z_]+)["']?>/g, '<span class="$1">')
@@ -671,7 +669,6 @@ function setupQibla() {
     const btn = document.getElementById('btn-qibla');
     if (!btn) return;
     btn.onclick = () => {
-        // إصلاح: فحص دعم geolocation
         if (!navigator.geolocation) {
             showToast('جهازك لا يدعم تحديد الموقع');
             return;
@@ -708,7 +705,7 @@ function setupSettingsUI() {
     document.getElementById('set-font').oninput = e => {
         settings.fontScale = parseInt(e.target.value, 10);
         localStorage.setItem('dhikr_font', settings.fontScale);
-        state.quranZoom = settings.fontScale; // إصلاح: نُحدّث zoom فقط عند تغيير شريط القرآن
+        state.quranZoom = settings.fontScale; 
         applyFontScales();
     };
     document.getElementById('set-adhkar-font').oninput = e => {
@@ -733,7 +730,6 @@ function setupPWA() {
     const installBtn = document.getElementById('install-btn');
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
-    // إصلاح: إظهار زر التثبيت على iOS مع تعليمات يدوية
     if (isIOS) {
         installBtn.hidden = false;
         installBtn.onclick = () => {
