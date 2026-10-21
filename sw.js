@@ -10,9 +10,9 @@ const PRECACHE = [
     './',
     './index.html',
     './manifest.json',
-    './css/style.css?v=4.0.0',
-    './js/data.js?v=4.0.0',
-    './js/app.js?v=4.0.0',
+    './css/style.css?v=4.1.0',
+    './js/data.js?v=4.1.0',
+    './js/app.js?v=4.1.0',
     './icon.svg',
     './maskable.svg',
     'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css',
@@ -50,7 +50,6 @@ self.addEventListener('fetch', (e) => {
 
     const url = new URL(req.url);
 
-    // ── API: Network First with JSON fallback ──
     if (url.hostname === 'api.alquran.cloud' ||
         url.hostname === 'api.quran.com' ||
         url.hostname === 'api.aladhan.com' ||
@@ -73,7 +72,6 @@ self.addEventListener('fetch', (e) => {
         return;
     }
 
-    // ── HTML: Network First with offline fallback ──
     if (req.mode === 'navigate' || req.destination === 'document') {
         e.respondWith(
             fetch(req).then(res => {
@@ -85,7 +83,6 @@ self.addEventListener('fetch', (e) => {
         return;
     }
 
-    // ── Static (CSS/JS/fonts/images): Cache First ──
     e.respondWith(
         caches.match(req).then(cached => {
             if (cached) return cached;
@@ -99,7 +96,6 @@ self.addEventListener('fetch', (e) => {
                 }
                 return res;
             }).catch(() => {
-                // إصلاح: إرجاع خطأ مناسب للـ CSS/JS بدلاً من HTML
                 return new Response('/* offline */', {
                     status: 503,
                     statusText: 'Service Unavailable',
