@@ -43,6 +43,8 @@ function initApp() {
     setupScrollTop();
     setupPWA();
     setupQuranZoom();
+    // إصلاح: ربط مُستمع النقر مرة واحدة على document ليشمل النتائج في overlay-search
+    document.addEventListener('click', handleCardClick);
     renderAllAdhkar();
     renderFavorites();
     renderStats();
@@ -68,11 +70,23 @@ function applyFontScales() {
     document.documentElement.style.setProperty('--adhkar-size', settings.adhkarScale + 'px');
     document.getElementById('set-font').value = settings.fontScale;
     document.getElementById('set-adhkar-font').value = settings.adhkarScale;
-    state.quranZoom = settings.fontScale;
+    // ملاحظة: لا نُعدّل state.quranZoom هنا — يُحدَّث فقط عند تغيير شريط القرآن
 }
 
 /* ═══════════════════ Swiper & Navigation ═══════════════════ */
 function setupSwiper() {
+    // إصلاح: حماية من فشل تحميل Swiper من CDN
+    if (typeof Swiper === 'undefined') {
+        console.error('[ذِكْر] Swiper library not loaded. Navigation disabled.');
+        // Fallback: عرض كل الشرائح متتالية
+        document.querySelectorAll('.swiper-slide').forEach(s => {
+            s.style.display = 'block';
+            s.style.height = 'auto';
+        });
+        document.getElementById('main-content').style.overflowY = 'auto';
+        document.getElementById('main-content').style.height = '100%';
+        return;
+    }
     swiper = new Swiper('#main-content', {
         speed: 250,
         resistanceRatio: 0.85,
@@ -108,10 +122,13 @@ function updateNavState(pageId) {
         if (active) activeBtn = btn;
     });
 
-    // التمرير التلقائي للزر النشط في الشريط السفلي
+    // إصلاح: استخدام getBoundingClientRect لحساب التمرير بدقة
     if (activeBtn && navWrapper) {
-        const scrollLeft = activeBtn.offsetLeft - (navWrapper.offsetWidth / 2) + (activeBtn.offsetWidth / 2);
-        navWrapper.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+        const navRect = navWrapper.getBoundingClientRect();
+        const btnRect = activeBtn.getBoundingClientRect();
+        const targetScroll = navWrapper.scrollLeft + (btnRect.left - navRect.left)
+            - (navWrapper.clientWidth / 2) + (btnRect.width / 2);
+        navWrapper.scrollTo({ left: Math.max(0, targetScroll), behavior: 'smooth' });
     }
 
     document.querySelectorAll('.nav-group a').forEach(a => {
@@ -122,7 +139,18 @@ function updateNavState(pageId) {
 
 function navigateTo(pageId) {
     const idx = pageMap.indexOf(pageId);
-    if (idx !== -1 && swiper) swiper.slideTo(idx);
+    if (idx === -1) return;
+    if (swiper) {
+        swiper.slideTo(idx);
+    } else {
+        // Fallback
+        document.querySelectorAll('.swiper-slide').forEach(s => s.style.display = 'none');
+        const target = document.getElementById(`page-${pageId}`);
+        if (target) target.style.display = 'block';
+        state.currentPage = pageId;
+        updateNavState(pageId);
+        updateUrlParam(pageId);
+    }
 }
 
 function setupNavigation() {
@@ -143,7 +171,10 @@ function setupNavigation() {
     };
     document.getElementById('sidebar-overlay').onclick = closeSidebar;
     document.getElementById('close-reader').onclick = () => document.getElementById('overlay-quran-reader').classList.remove('active');
-    document.getElementById('close-search').onclick = () => { document.getElementById('overlay-search').classList.remove('active'); document.getElementById('search-input').value = ''; };
+    document.getElementById('close-search').onclick = () => {
+        document.getElementById('overlay-search').classList.remove('active');
+        document.getElementById('search-input').value = '';
+    };
     document.getElementById('theme-btn').onclick = toggleTheme;
 
     document.getElementById('continue-reading')?.addEventListener('click', () => {
@@ -188,12 +219,10 @@ function renderAllAdhkar() {
         el.innerHTML = items.length ? items.map(generateCardHTML).join('') :
             `<div class="empty-state"><svg class="icon"><use href="#i-hands"/></svg><h3>لا توجد أذكار</h3><p>سيتم إضافتها قريباً</p></div>`;
     });
-
-    document.getElementById('main-content')?.addEventListener('click', handleCardClick);
+    // المُستمع مُربوط في initApp على document
 }
 
 function generateCardHTML(item) {
-    // إظهار البسملة والاستعاذة فقط في الآيات والسور، وليس الأدعية
     let header = '';
     if (item.type === 'surah') {
         header = `<p class="basmala">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>`;
@@ -264,16 +293,31 @@ function resetAdhkarCounters(category) {
 async function copyDhikr(id) {
     const item = ADHKAR_DATA.find(x => x.id === id);
     if (!item) return;
-    try { await navigator.clipboard.writeText(`${item.text}\n\n${item.source || ''}\n\n— من تطبيق ذِكْر`); showToast('تم النسخ ✓'); }
-    catch { showToast('تعذر النسخ'); }
+    const text = `${item.text}\n\n${item.source || ''}\n\n— من تطبيق ذِكْر`;
+    try {
+        await navigator.clipboard.writeText(text);
+        showToast('تم النسخ ✓');
+    } catch {
+        // fallback
+        const ta = document.createElement('textarea');
+        ta.value = text; document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); showToast('تم النسخ ✓'); }
+        catch { showToast('تعذر النسخ'); }
+        document.body.removeChild(ta);
+    }
 }
 
 async function shareDhikr(id) {
     const item = ADHKAR_DATA.find(x => x.id === id);
     if (!item) return;
     const text = `${item.text}\n\n${item.source || ''}\n\n— من تطبيق ذِكْر`;
-    if (navigator.share) { try { await navigator.share({ title: 'ذِكْر', text }); } catch {} }
-    else { try { await navigator.clipboard.writeText(text); showToast('تم النسخ للمشاركة'); } catch {} }
+    if (navigator.share) {
+        try { await navigator.share({ title: 'ذِكْر', text }); } catch {}
+    } else {
+        try { await navigator.clipboard.writeText(text); showToast('تم النسخ للمشاركة'); }
+        catch { showToast('تعذر النسخ'); }
+    }
 }
 
 /* ═══════════════════ Favorites & Stats ═══════════════════ */
@@ -432,8 +476,11 @@ function renderSurahList(surahs) {
     });
 }
 
+// إصلاح: regex أكثر مرونة يدعم class="..." و class=...
 function formatTajweed(text) {
-    return (text || '').replace(/<tajweed class=([a-z_]+)>/g, '<span class="$1">').replace(/<\/tajweed>/g, '</span>');
+    return (text || '')
+        .replace(/<tajweed\s+class=["']?([a-z_]+)["']?>/g, '<span class="$1">')
+        .replace(/<\/tajweed>/g, '</span>');
 }
 
 async function openSurah(number, name) {
@@ -456,10 +503,8 @@ async function openSurah(number, name) {
                 html += `<div style="text-align:center;margin-bottom:24px"><span style="font-family:'Amiri Quran',serif;font-size:calc(var(--quran-size) + 4px);color:var(--accent)">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</span></div>`;
             }
             html += data.verses.map(v => {
-                // إزالة الرقم المضمن في نص الـ API لتجنب التكرار (أرقام عربية وإنجليزية ورموز)
                 let t = formatTajweed(v.text_uthmani_tajweed || '');
-                t = t.replace(/[٠-٩0-9۰-۹۝\[\]\(\)]+/g, '').trim(); 
-                
+                t = t.replace(/[٠-٩0-9۰-۹۝\[\]\(\)]+/g, '').trim();
                 const n = v.verse_key.split(':')[1];
                 return `<span>${t}</span> <span class="verse-number">${n}</span> `;
             }).join('');
@@ -507,42 +552,47 @@ async function loadPrayerTimes() {
 
     const date = new Date();
     const d = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
-    
-    if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(async (pos) => {
-            try {
-                const lat = pos.coords.latitude;
-                const lng = pos.coords.longitude;
-                
-                // جلب اسم المدينة
-                try {
-                    const geoRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=ar`);
-                    const geoData = await geoRes.json();
-                    const city = geoData.city || geoData.locality || geoData.principalSubdivision || 'موقعك';
-                    document.getElementById('prayer-location').textContent = `المواقيت حسب: ${city}`;
-                } catch (e) {
-                    document.getElementById('prayer-location').textContent = `المواقيت حسب موقعك الحالي`;
-                }
 
-                // جلب المواقيت (Method=5 هي طريقة الهيئة المصرية العامة للمساحة، وهي الأقرب لمصر)
-                const res = await fetch(`https://api.aladhan.com/v1/timings/${d}?latitude=${lat}&longitude=${lng}&method=5`);
-                const data = await res.json();
-                if (data.code === 200) {
-                    localStorage.setItem('dhikr_prayer_cache', JSON.stringify(data.data.timings));
-                    localStorage.setItem('dhikr_prayer_date', today);
-                    renderPrayerTimes(data.data.timings);
-                }
-            } catch (e) { console.error("API Error", e); }
-        }, async (err) => {
-            // في حال رفض الموقع، نجلب مواقيت مكة كافتراضي
-            document.getElementById('prayer-location').textContent = `المواقيت حسب مكة المكرمة (الموقع غير متاح)`;
-            try {
-                const res = await fetch(`https://api.aladhan.com/v1/timingsByCity/${d}?city=Mecca&country=SA&method=4`);
-                const data = await res.json();
-                if (data.code === 200) renderPrayerTimes(data.data.timings);
-            } catch (e) {}
-        }, { timeout: 8000 });
+    if (!("geolocation" in navigator)) {
+        document.getElementById('prayer-location').textContent = 'المواقيت حسب مكة المكرمة (الموقع غير مدعوم)';
+        try {
+            const res = await fetch(`https://api.aladhan.com/v1/timingsByCity/${d}?city=Mecca&country=SA&method=4`);
+            const data = await res.json();
+            if (data.code === 200) renderPrayerTimes(data.data.timings);
+        } catch (e) {}
+        return;
     }
+
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+        try {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+
+            try {
+                const geoRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=ar`);
+                const geoData = await geoRes.json();
+                const city = geoData.city || geoData.locality || geoData.principalSubdivision || 'موقعك';
+                document.getElementById('prayer-location').textContent = `المواقيت حسب: ${city}`;
+            } catch (e) {
+                document.getElementById('prayer-location').textContent = `المواقيت حسب موقعك الحالي`;
+            }
+
+            const res = await fetch(`https://api.aladhan.com/v1/timings/${d}?latitude=${lat}&longitude=${lng}&method=5`);
+            const data = await res.json();
+            if (data.code === 200) {
+                localStorage.setItem('dhikr_prayer_cache', JSON.stringify(data.data.timings));
+                localStorage.setItem('dhikr_prayer_date', today);
+                renderPrayerTimes(data.data.timings);
+            }
+        } catch (e) { console.error("API Error", e); }
+    }, async (err) => {
+        document.getElementById('prayer-location').textContent = `المواقيت حسب مكة المكرمة (الموقع غير متاح)`;
+        try {
+            const res = await fetch(`https://api.aladhan.com/v1/timingsByCity/${d}?city=Mecca&country=SA&method=4`);
+            const data = await res.json();
+            if (data.code === 200) renderPrayerTimes(data.data.timings);
+        } catch (e) {}
+    }, { timeout: 8000 });
 }
 
 function renderPrayerTimes(timings) {
@@ -552,7 +602,7 @@ function renderPrayerTimes(timings) {
     const now = new Date();
     const nowMin = now.getHours() * 60 + now.getMinutes();
     let activeSet = false;
-    
+
     prayers.forEach(p => {
         const el = strip.querySelector(`[data-prayer="${p}"]`);
         if (!el) return;
@@ -619,7 +669,13 @@ function saveTasbih() { localStorage.setItem('dhikr_tasbih', JSON.stringify({ co
 
 function setupQibla() {
     const btn = document.getElementById('btn-qibla');
+    if (!btn) return;
     btn.onclick = () => {
+        // إصلاح: فحص دعم geolocation
+        if (!navigator.geolocation) {
+            showToast('جهازك لا يدعم تحديد الموقع');
+            return;
+        }
         btn.innerHTML = 'جاري التحديد...';
         navigator.geolocation.getCurrentPosition(pos => {
             const lat = pos.coords.latitude, lng = pos.coords.longitude;
@@ -649,10 +705,19 @@ function setupQibla() {
 /* ═══════════════════ Settings & PWA ═══════════════════ */
 function setupSettingsUI() {
     document.getElementById('set-dark').onchange = e => { settings.darkMode = e.target.checked; localStorage.setItem('dhikr_dark', settings.darkMode); applyTheme(); };
-    document.getElementById('set-font').oninput = e => { settings.fontScale = parseInt(e.target.value, 10); localStorage.setItem('dhikr_font', settings.fontScale); applyFontScales(); };
-    document.getElementById('set-adhkar-font').oninput = e => { settings.adhkarScale = parseInt(e.target.value, 10); localStorage.setItem('dhikr_adhkar_font', settings.adhkarScale); applyFontScales(); };
+    document.getElementById('set-font').oninput = e => {
+        settings.fontScale = parseInt(e.target.value, 10);
+        localStorage.setItem('dhikr_font', settings.fontScale);
+        state.quranZoom = settings.fontScale; // إصلاح: نُحدّث zoom فقط عند تغيير شريط القرآن
+        applyFontScales();
+    };
+    document.getElementById('set-adhkar-font').oninput = e => {
+        settings.adhkarScale = parseInt(e.target.value, 10);
+        localStorage.setItem('dhikr_adhkar_font', settings.adhkarScale);
+        applyFontScales();
+    };
     document.getElementById('set-reset-counter').onchange = e => { settings.resetCounter = e.target.checked; localStorage.setItem('dhikr_reset', settings.resetCounter); };
-    
+
     document.getElementById('reset-all-btn').onclick = () => {
         if (!confirm('سيتم مسح كل العدادات والمفضلة والإحصائيات. متابعة؟')) return;
         Object.keys(localStorage).filter(k => k.startsWith('count_') || ['dhikr_tasbih','dhikr_stats','dhikr_favorites'].includes(k)).forEach(k => localStorage.removeItem(k));
@@ -665,21 +730,33 @@ function setupSettingsUI() {
 }
 
 function setupPWA() {
+    const installBtn = document.getElementById('install-btn');
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+    // إصلاح: إظهار زر التثبيت على iOS مع تعليمات يدوية
+    if (isIOS) {
+        installBtn.hidden = false;
+        installBtn.onclick = () => {
+            showToast('للتثبيت على iPhone: اضغط زر المشاركة ↑ ثم "إضافة إلى الشاشة الرئيسية"');
+        };
+        return;
+    }
+
     window.addEventListener('beforeinstallprompt', e => {
         e.preventDefault();
         state.installPrompt = e;
-        document.getElementById('install-btn').hidden = false;
+        installBtn.hidden = false;
     });
-    document.getElementById('install-btn').onclick = async () => {
+    installBtn.onclick = async () => {
         if (!state.installPrompt) {
-            showToast('لتثبيت التطبيق على الآيفون: اضغط مشاركة ثم "إضافة للشاشة الرئيسية"');
+            showToast('التثبيت غير متاح على هذا المتصفح');
             return;
         }
         state.installPrompt.prompt();
         const { outcome } = await state.installPrompt.userChoice;
         if (outcome === 'accepted') showToast('شكراً لتثبيت التطبيق');
         state.installPrompt = null;
-        document.getElementById('install-btn').hidden = true;
+        installBtn.hidden = true;
     };
 }
 
@@ -687,9 +764,8 @@ function setupPWA() {
 function updateHijriDate() {
     const el = document.getElementById('hijri-date');
     try {
-        // إصلاح مشكلة "هـ هـ" بإزالة الإضافة اليدوية لأن المتصفح يضيفها تلقائياً
         const hijri = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
-        el.textContent = hijri; 
+        el.textContent = hijri;
     } catch { el.textContent = new Date().toLocaleDateString('ar-EG'); }
 }
 
