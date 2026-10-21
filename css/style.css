@@ -13,7 +13,7 @@
 
     --bg:#f5f1e8; --bg-elevated:#fbf9f4; --bg-sunken:#ebe4d5;
     --surface:#ffffff; --surface-hover:#faf7f0; --surface-pressed:#f2ede1;
-    --glass: rgba(251,249,244,0.95); /* لون صلب تقريباً لتحسين الأداء */
+    --glass: rgba(251,249,244,0.95);
     --glass-border: rgba(193,154,91,0.18);
 
     --primary:#0a3d2a; --primary-hover:#0f5132; --primary-soft:#dcece1; --on-primary:#fbf9f4;
@@ -196,7 +196,7 @@ a{color:inherit;text-decoration:none}
 .continue-body .label{ font-size: var(--text-xs); color: var(--text-muted); font-weight:600; }
 .continue-body .title{ font-family: var(--font-display); font-size: var(--text-lg); color: var(--primary); font-weight:700; }
 
-/* ---- VERSE BOX (تم إصلاح التداخل) ---- */
+/* ---- VERSE BOX ---- */
 .verse-box{
     background:var(--surface); padding:var(--s-5) var(--s-4);
     border-radius:var(--r-xl); text-align:center;
@@ -302,7 +302,7 @@ a{color:inherit;text-decoration:none}
 input[type="range"]{-webkit-appearance:none; width:100px; height:4px; border-radius:2px; background: var(--border-strong);}
 input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none; width:16px; height:16px; border-radius:50%; background:var(--accent);}
 
-/* ---- BOTTOM NAV (تم تحسينه) ---- */
+/* ---- BOTTOM NAV ---- */
 #bottom-nav{
     flex-shrink:0; height: calc(var(--nav-height) + env(safe-area-inset-bottom));
     padding-bottom: env(safe-area-inset-bottom);
@@ -357,7 +357,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none; width:16px; h
 
 /* Mushaf Styling */
 .mushaf-container{
-    background: #fdfbf5; /* لون ورق المصحف */
+    background: #fdfbf5;
     border: 2px solid var(--accent);
     border-radius:var(--r-md);
     padding:var(--s-6) var(--s-4);
@@ -377,7 +377,6 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none; width:16px; h
 }
 [data-theme="dark"] .mushaf-text{color:var(--text)}
 
-/* إزالة الرقم القديم والاعتماد على الدائرة */
 .verse-number{
     display:inline-flex; justify-content:center; align-items:center;
     width:32px; height:32px;
@@ -412,3 +411,50 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none; width:16px; h
 #scroll-top-btn.hidden{opacity:0;visibility:hidden;transform:translateY(20px)}
 .toast{position:fixed; bottom: calc(var(--nav-height) + var(--s-6) + env(safe-area-inset-bottom)); left:50%; transform: translate(-50%, 20px); background:var(--primary); color:var(--on-primary); padding:10px var(--s-4); border-radius:var(--r-full); font-size:var(--text-sm); font-weight:600; box-shadow: var(--shadow-lg); opacity:0; visibility:hidden; transition: all var(--dur-base); z-index:300;}
 .toast.show{opacity:1;visibility:visible;transform:translate(-50%,0)}
+
+/* ═══════════════════ Asma ul Husna Grid ═══════════════════ */
+.asma-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: var(--s-3);
+    margin-top: var(--s-4);
+    padding-bottom: var(--s-6);
+}
+
+.asma-card {
+    background: var(--surface);
+    border: 1px solid var(--border-accent);
+    border-radius: var(--r-lg);
+    padding: var(--s-4) var(--s-2);
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: var(--s-2);
+    transition: transform var(--dur-fast), box-shadow var(--dur-fast);
+}
+
+.asma-card:active {
+    transform: scale(0.96);
+    box-shadow: var(--shadow-md);
+}
+
+.asma-name {
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1.2;
+}
+[data-theme="dark"] .asma-name {
+    color: var(--c-gold-500);
+}
+
+.asma-meaning {
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    line-height: var(--leading-normal);
+}
