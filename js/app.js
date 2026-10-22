@@ -536,23 +536,23 @@ async function openSurah(number, name) {
             data.verses.forEach(v => {
                 let text = v.text_uthmani_tajweed || '';
                 
-                // 1. حذف وسوم نهاية الآية القادمة من الـ API تماماً
+                // 1. حذف الدائرة الزرقاء القادمة من الـ API (حذف العنصر بالكامل)
                 text = text.replace(/<span[^>]*class="end"[^>]*>.*?<\/span>/g, '');
                 
-                // 2. تحويل التجويد
+                // 2. حذف أي رموز قرآنية مزعجة (دائرة سوداء/زرقاء/حزب/سجدة)
+                text = text.replace(/[\u06DD\u06DE\u06E9\u06D6-\u06DC\u06DF-\u06E8\u06EA-\u06ED]/g, '');
+                
+                // 3. حذف أي أرقام متبقية (عربية أو إنجليزية) لتنظيف النص
+                text = text.replace(/[٠-٩0-9۰-۹]+/g, '');
+                
+                // 4. تطبيق ألوان التجويد
                 text = text.replace(/<tajweed\s+class=["']?([a-z_]+)["']?>/g, '<span class="$1">')
                            .replace(/<\/tajweed>/g, '</span>');
-                
-                // 3. 🔴 حذف الرموز المزعجة (الدائرة الزرقاء/السوداء ۝ و ۞ و ۩) بشكل قسري
-                text = text.replace(/[\u06DD\u06DE\u06E9]/g, '');
-                
-                // 4. حذف أي أرقام عربية متبقية
-                text = text.replace(/[٠-٩0-9۰-۹]+/g, '');
 
                 const ayahNum = parseInt(v.verse_key.split(':')[1], 10);
                 const arabicNum = ayahNum.toLocaleString('ar-EG');
 
-                // إضافة الآية + رقم الآية بتصميمنا
+                // إضافة النص النظيف + الدائرة الذهبية
                 html += `<span class="ayah-text" data-ayah="${ayahNum}" data-surah="${number}">${text}</span> <span class="ayah-number">${arabicNum}</span> `;
             });
             html += `</div>`;
