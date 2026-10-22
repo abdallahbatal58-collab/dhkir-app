@@ -500,12 +500,6 @@ function renderSurahList(surahs) {
     });
 }
 
-function formatTajweed(text) {
-    return (text || '')
-        .replace(/<tajweed\s+class=["']?([a-z_]+)["']?>/g, '<span class="$1">')
-        .replace(/<\/tajweed>/g, '</span>');
-}
-
 async function openSurah(number, name) {
     document.getElementById('reader-title').textContent = name;
     localStorage.setItem('dhikr_last_read', JSON.stringify({ number, name }));
@@ -521,47 +515,46 @@ async function openSurah(number, name) {
     quranAudio.isPlayingSurah = false;
     stopAllAudio();
 
-    let ok = false;
     try {
-        const res = await fetch(`https://api.quran.com/api/v4/verses/by_chapter/${number}?fields=text_uthmani_tajweed&per_page=300`);
+        // جلب النص العثماني مع التجويد من Quran.com API v4
+        const res = await fetch(`https://api.quran.com/api/v4/quran/verses/uthmani_tajweed?chapter_number=${number}`);
         const data = await res.json();
+
         if (data.verses && data.verses.length) {
             let html = '';
+            
+            // إضافة إطار اسم السورة
+            if (number !== 9) {
+                html += `<div class="surah-header">سُورَةُ ${name}</div>`;
+            }
+            
+            // إضافة البسملة (ما عدا الفاتحة والتوبة)
             if (number !== 1 && number !== 9) {
-                html += `<div style="text-align:center;margin-bottom:24px"><span style="font-family:'Amiri Quran',serif;font-size:calc(var(--quran-size) + 4px);color:var(--accent)">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</span></div>`;
+                html += `<div style="text-align:center;margin-bottom:20px;font-family:'KFGQPC Uthmanic Hafs', serif;font-size:calc(var(--quran-size) + 6px);color:var(--accent)">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>`;
             }
-            html += data.verses.map(v => {
-                let t = formatTajweed(v.text_uthmani_tajweed || '');
-                t = t.replace(/[٠-٩0-9۰-۹۝\[\]\(\)]+/g, '').trim();
-                const n = v.verse_key.split(':')[1];
-                return `<span class="ayah-text" data-ayah="${n}" data-surah="${number}">${t}</span> <span class="verse-number">${n}</span> `;
-            }).join('');
-            container.innerHTML = html;
-            ok = true;
-        }
-    } catch (e) { console.error(e); }
 
-    if (!ok) {
-        try {
-            const res = await fetch(`https://api.alquran.cloud/v1/surah/${number}/quran-tajweed`);
-            const data = await res.json();
-            if (data.code === 200) {
-                let html = '';
-                if (number !== 1 && number !== 9) {
-                    html += `<div style="text-align:center;margin-bottom:24px"><span style="font-family:'Amiri Quran',serif;font-size:calc(var(--quran-size) + 4px);color:var(--accent)">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</span></div>`;
-                }
-                html += data.data.ayahs.map(a => {
-                    let t = formatTajweed(a.text);
-                    t = t.replace(/[٠-٩0-9۰-۹۝\[\]\(\)]+/g, '').trim();
-                    return `<span class="ayah-text" data-ayah="${a.numberInSurah}" data-surah="${number}">${t}</span> <span class="verse-number">${a.numberInSurah}</span> `;
-                }).join('');
-                container.innerHTML = html;
-                ok = true;
-            }
-        } catch (e) {}
+            html += `<div class="mushaf-text">`;
+            data.verses.forEach(v => {
+                let text = v.text_uthmani_tajweed || '';
+                text = text.replace(/<tajweed\s+class=["']?([a-z_]+)["']?>/g, '<span class="$1">')
+                           .replace(/<\/tajweed>/g, '</span>')
+                           .replace(/<span class="?end"?>/g, '')
+                           .replace(/<\/span>/g, '</span>');
+                
+                const ayahNum = v.verse_key.split(':')[1];
+                html += `<span class="ayah-text" data-ayah="${ayahNum}" data-surah="${number}">${text}</span> <span class="ayah-end-marker">${ayahNum}</span> `;
+            });
+            html += `</div>`;
+            
+            container.innerHTML = html;
+        } else {
+            throw new Error('No verses found');
+        }
+    } catch (e) {
+        console.error('Failed to load Uthmani text:', e);
+        container.innerHTML = '<p class="loading-text">تعذر تحميل الآيات. تأكد من اتصالك بالإنترنت.</p>';
     }
-    if (!ok) container.innerHTML = '<p class="loading-text">تعذر تحميل الآيات.</p>';
-    else updatePlayerUI();
+    updatePlayerUI();
 }
 
 function updateContinueReading() {
@@ -606,7 +599,6 @@ async function loadPrayerTimes() {
                 document.getElementById('prayer-location').textContent = `المواقيت حسب موقعك الحالي`;
             }
 
-            // استخدمنا method=5 (الهيئة المصرية العامة للمساحة) وهو الأنسب لمصر
             const res = await fetch(`https://api.aladhan.com/v1/timings/${d}?latitude=${lat}&longitude=${lng}&method=5`);
             const data = await res.json();
             if (data.code === 200) {
@@ -625,7 +617,6 @@ async function loadPrayerTimes() {
     }, { timeout: 8000 });
 }
 
-/* ✅ إصلاح جذري لدالة عرض المواقيت وتحديد الصلاة القادمة */
 function renderPrayerTimes(timings) {
     if (!timings) return;
     const strip = document.getElementById('prayer-strip');
@@ -633,27 +624,24 @@ function renderPrayerTimes(timings) {
     const now = new Date();
     const nowMin = now.getHours() * 60 + now.getMinutes();
     
-    let nextPrayer = 'Fajr'; // الافتراضي
+    let nextPrayer = 'Fajr'; 
     
-    // البحث عن الصلاة القادمة
     for (let i = 0; i < prayers.length; i++) {
         const p = prayers[i];
-        // استخدام Regex لاستخراج الأرقام فقط وتجاهل أي حروف مثل (EET)
         const match = timings[p] ? timings[p].match(/(\d{1,2}):(\d{2})/) : null;
         if (match) {
             const pMin = parseInt(match[1], 10) * 60 + parseInt(match[2], 10);
             if (pMin > nowMin) {
                 nextPrayer = p;
-                break; // وجدنا الصلاة القادمة، نتوقف
+                break;
             }
         }
     }
 
-    // تحديث الواجهة
     prayers.forEach(p => {
         const el = strip.querySelector(`[data-prayer="${p}"]`);
         if (!el) return;
-        el.textContent = formatTime(timings[p]); // دالة التنسيق أدناه تم إصلاحها
+        el.textContent = formatTime(timings[p]);
         const item = el.closest('.prayer-item');
         if (p === nextPrayer) {
             item.classList.add('active');
@@ -663,7 +651,6 @@ function renderPrayerTimes(timings) {
     });
 }
 
-/* ✅ إصلاح دالة تنسيق الوقت لتتجاهل (EET) */
 function formatTime(t) {
     if (!t) return t;
     const match = t.match(/(\d{1,2}):(\d{2})/);
