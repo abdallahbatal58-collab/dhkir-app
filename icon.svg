@@ -1,52 +1,33 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
-    <!-- خلفية متدرجة -->
     <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#0f5132"/>
       <stop offset="100%" stop-color="#03100a"/>
     </linearGradient>
-    <!-- تدرج لوني للأيدي والهلال -->
     <linearGradient id="goldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0%" stop-color="#f9e5b8"/>
       <stop offset="100%" stop-color="#c19a5b"/>
     </linearGradient>
-    <!-- تدرج لوني للمسجد -->
     <linearGradient id="mosqueGrad" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0%" stop-color="#16694a"/>
       <stop offset="100%" stop-color="#062b1c"/>
     </linearGradient>
   </defs>
-
-  <!-- المربع الأساسي (الخلفية) -->
   <rect width="512" height="512" rx="120" fill="url(#bgGrad)"/>
-
-  <!-- خلفية المسجد (زخرفة) -->
   <g opacity="0.4">
     <path d="M 256 180 C 256 180 180 240 180 320 L 332 320 C 332 240 256 180 256 180 Z" fill="url(#mosqueGrad)"/>
-    <!-- المآذن -->
     <rect x="150" y="240" width="20" height="80" fill="url(#mosqueGrad)"/>
     <path d="M 150 240 L 170 240 L 160 210 Z" fill="url(#mosqueGrad)"/>
     <rect x="342" y="240" width="20" height="80" fill="url(#mosqueGrad)"/>
     <path d="M 342 240 L 362 240 L 352 210 Z" fill="url(#mosqueGrad)"/>
   </g>
-
-  <!-- الهلال -->
   <path d="M 256 120 A 35 35 0 1 1 220 160 A 45 45 0 1 0 256 120 Z" fill="url(#goldGrad)"/>
-
-  <!-- الأيدي (بأسلوب فني مسطح) -->
-  <!-- اليد اليسرى -->
   <path d="M 230 420 C 180 420 140 350 140 300 C 140 260 160 230 180 230 C 190 230 200 240 205 260 L 225 340 C 230 360 240 380 245 400 Z" fill="url(#goldGrad)"/>
-  <path d="M 180 230 C 170 210 180 180 195 180 C 210 180 220 210 220 230 Z" fill="url(#goldGrad)"/> <!-- الإبهام -->
-  
-  <!-- اليد اليمنى -->
+  <path d="M 180 230 C 170 210 180 180 195 180 C 210 180 220 210 220 230 Z" fill="url(#goldGrad)"/>
   <path d="M 282 420 C 332 420 372 350 372 300 C 372 260 352 230 332 230 C 322 230 312 240 307 260 L 287 340 C 282 360 272 380 267 400 Z" fill="url(#goldGrad)"/>
-  <path d="M 332 230 C 342 210 332 180 317 180 C 302 180 292 210 292 230 Z" fill="url(#goldGrad)"/> <!-- الإبهام -->
-
-  <!-- الأكمام (لتبدو كصورة الأيدي) -->
+  <path d="M 332 230 C 342 210 332 180 317 180 C 302 180 292 210 292 230 Z" fill="url(#goldGrad)"/>
   <path d="M 150 420 L 230 420 L 240 480 L 130 480 Z" fill="#e0e0e0" opacity="0.9"/>
   <path d="M 362 420 L 282 420 L 272 480 L 382 480 Z" fill="#e0e0e0" opacity="0.9"/>
-
-  <!-- تفاصيل الأصابع (خطوط بسيطة) -->
   <path d="M 205 260 L 230 330 M 220 230 L 245 330 M 195 230 L 210 330 M 175 240 L 185 310" stroke="#a8824a" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
   <path d="M 307 260 L 282 330 M 292 230 L 267 330 M 317 230 L 302 330 M 337 240 L 327 310" stroke="#a8824a" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
 </svg>
