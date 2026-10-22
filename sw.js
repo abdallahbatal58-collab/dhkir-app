@@ -1,20 +1,19 @@
 /* ═══════════════════════════════════════════════════════════════
-   ذِكْر | Service Worker v4.2.0
+   ذِكْر | Service Worker v4.3.0
    ═══════════════════════════════════════════════════════════════ */
 
-const CACHE_STATIC = 'dhikr-static-v4.2.0';
-const CACHE_API = 'dhikr-api-v4.2.0';
-const CACHE_MAX_ITEMS = 80;
+const CACHE_STATIC = 'dhikr-static-v4.3.0';
+const CACHE_API = 'dhikr-api-v4.3.0';
+const CACHE_MAX_ITEMS = 100;
 
 const PRECACHE = [
     './',
     './index.html',
     './manifest.json',
-    './css/style.css?v=4.2.0',
-    './js/data.js?v=4.2.0',
-    './js/app.js?v=4.2.0',
+    './css/style.css?v=4.3.0',
+    './js/data.js?v=4.3.0',
+    './js/app.js?v=4.3.0',
     './icon.svg',
-    './maskable.svg',
     'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css',
     'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js',
     'https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800&family=Scheherazade+New:wght@400;700&display=swap'
@@ -50,11 +49,13 @@ self.addEventListener('fetch', (e) => {
 
     const url = new URL(req.url);
 
+    // API & Audio CDN (Network First)
     if (url.hostname === 'api.alquran.cloud' ||
         url.hostname === 'api.quran.com' ||
         url.hostname === 'api.aladhan.com' ||
         url.hostname === 'api.bigdatacloud.net' ||
-        url.hostname === 'everyayah.com') { // دعم كاش الصوت
+        url.hostname === 'everyayah.com' || 
+        url.hostname === 'cdn.islamic.network') { 
         e.respondWith(
             fetch(req).then(res => {
                 if (res && res.status === 200) {
@@ -65,14 +66,12 @@ self.addEventListener('fetch', (e) => {
                     });
                 }
                 return res;
-            }).catch(() => caches.match(req).then(c => c || new Response(
-                JSON.stringify({ error: 'offline' }),
-                { headers: { 'Content-Type': 'application/json' }, status: 503 }
-            )))
+            }).catch(() => caches.match(req))
         );
         return;
     }
 
+    // HTML
     if (req.mode === 'navigate' || req.destination === 'document') {
         e.respondWith(
             fetch(req).then(res => {
@@ -84,6 +83,7 @@ self.addEventListener('fetch', (e) => {
         return;
     }
 
+    // Static (Cache First)
     e.respondWith(
         caches.match(req).then(cached => {
             if (cached) return cached;
@@ -96,13 +96,7 @@ self.addEventListener('fetch', (e) => {
                     });
                 }
                 return res;
-            }).catch(() => {
-                return new Response('/* offline */', {
-                    status: 503,
-                    statusText: 'Service Unavailable',
-                    headers: { 'Content-Type': 'text/plain' }
-                });
-            });
+            }).catch(() => new Response('/* offline */', { status: 503 }));
         })
     );
 });
