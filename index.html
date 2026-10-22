@@ -23,7 +23,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
 
-    <link rel="stylesheet" href="css/style.css?v=4.1.0">
+    <link rel="stylesheet" href="css/style.css?v=4.2.0">
 </head>
 <body>
 
@@ -261,7 +261,7 @@
                     </div>
                 </div>
 
-                <p class="app-version">الإصدار 4.1.0</p>
+                <p class="app-version">الإصدار 4.2.0</p>
             </section>
 
         </div>
@@ -333,6 +333,7 @@
 </aside>
 <div id="sidebar-overlay"></div>
 
+<!-- ═════ Overlay: Quran Reader ═════ -->
 <div id="overlay-quran-reader" class="overlay-page">
     <div class="reader-header">
         <button id="close-reader" class="icon-btn" aria-label="رجوع">
@@ -344,11 +345,39 @@
             <button class="icon-btn" id="zoom-in"><svg class="icon"><use href="#i-zoom-in"/></svg></button>
         </div>
     </div>
+
+    <!-- ═════ Audio Player Bar ═════ -->
+    <div class="audio-player-bar" id="audio-player-bar">
+        <div class="audio-controls">
+            <button id="btn-prev-ayah" class="icon-btn" aria-label="الآية السابقة">
+                <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M19 20L9 12l10-8v16zM5 19V5h2v14H5z"/></svg>
+            </button>
+            <button id="btn-play-pause" class="icon-btn play-btn" aria-label="تشغيل">
+                <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </button>
+            <button id="btn-next-ayah" class="icon-btn" aria-label="الآية التالية">
+                <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M5 4l10 8-10 8V4zM19 5v14h-2V5h2z"/></svg>
+            </button>
+        </div>
+        <div class="audio-info">
+            <span id="current-ayah-label">الآية 1</span>
+            <select id="reciter-select" class="reciter-select" aria-label="اختر القارئ"></select>
+        </div>
+        <div class="audio-progress-wrap">
+            <input type="range" id="audio-progress" min="0" max="100" value="0" step="0.1">
+        </div>
+        <button id="btn-play-surah" class="btn-play-surah" title="تشغيل السورة كاملة">
+            <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            تشغيل السورة
+        </button>
+    </div>
+
     <div class="mushaf-container" id="mushaf-container">
         <div id="list-quran-verses" class="mushaf-text"></div>
     </div>
 </div>
 
+<!-- ═════ Overlay: Search ═════ -->
 <div id="overlay-search" class="overlay-page">
     <div class="reader-header">
         <button id="close-search" class="icon-btn" aria-label="رجوع">
@@ -358,6 +387,21 @@
         <div style="width:42px"></div>
     </div>
     <div class="list" id="list-search"></div>
+</div>
+
+<!-- ═════ Tafsir Modal ═════ -->
+<div id="tafsir-modal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="tafsir-title">التفسير</h3>
+            <button id="close-tafsir" class="icon-btn" aria-label="إغلاق">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="modal-body" id="tafsir-body">
+            <p class="loading-text">جاري تحميل التفسير...</p>
+        </div>
+    </div>
 </div>
 
 <button id="scroll-top-btn" class="icon-btn hidden" aria-label="أعلى">
@@ -387,7 +431,7 @@ if ('serviceWorker' in navigator) {
     });
 }
 </script>
-<script src="js/data.js?v=4.1.0"></script>
-<script src="js/app.js?v=4.1.0"></script>
+<script src="js/data.js?v=4.2.0"></script>
+<script src="js/app.js?v=4.2.0"></script>
 </body>
 </html>
