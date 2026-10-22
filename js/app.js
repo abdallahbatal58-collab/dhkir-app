@@ -24,15 +24,16 @@ const TASBIH_CIRCUMFERENCE = 2 * Math.PI * 112;
 let swiper = null;
 
 /* ═══════════════════ Quran Audio & Reciters State ═══════════════════ */
+// ✅ كل قارئ له مصدران: mp3quran (أساسي) + islamic.network (احتياطي)
 const RECITERS = [
-    { id: 'alafasy', name: 'مشاري العفاسي', surahCdn: 'ar.alafasy', ayahCdn: 'Alafasy_128kbps' },
-    { id: 'husary', name: 'محمود الحصري', surahCdn: 'ar.husary', ayahCdn: 'Husary_128kbps' },
-    { id: 'minshawi', name: 'محمد المنشاوي', surahCdn: 'ar.minshawi', ayahCdn: 'Minshawy_Murattal_128kbps' },
-    { id: 'maher', name: 'ماهر المعيقلي', surahCdn: 'ar.mahermuaiqly', ayahCdn: 'MaherAlMuaiqly128kbps' },
-    { id: 'shatri', name: 'أبو بكر الشاطري', surahCdn: 'ar.shaatree', ayahCdn: 'Shatri_128kbps' },
-    { id: 'ajamy', name: 'أحمد العجمي', surahCdn: 'ar.ahmedajamy', ayahCdn: 'Ahmed_ibn_Ali_al-Ajamy_128kbps' },
-    { id: 'hudhaify', name: 'علي الحذيفي', surahCdn: 'ar.hudhaify', ayahCdn: 'Hudhaify_128kbps' },
-    { id: 'ayyoub', name: 'محمد أيوب', surahCdn: 'ar.muhammadayyoub', ayahCdn: 'Muhammad_Ayyoub_128kbps' }
+    { id: 'alafasy',  name: 'مشاري العفاسي',    mp3quran: 'https://server8.mp3quran.net/afs/',    islamicCdn: 'ar.alafasy',           ayahCdn: 'Alafasy_128kbps' },
+    { id: 'husary',   name: 'محمود الحصري',     mp3quran: 'https://server13.mp3quran.net/husr/',  islamicCdn: 'ar.husary',            ayahCdn: 'Husary_128kbps' },
+    { id: 'minshawi', name: 'محمد المنشاوي',    mp3quran: 'https://server10.mp3quran.net/minsh/', islamicCdn: 'ar.minshawi',          ayahCdn: 'Minshawy_Murattal_128kbps' },
+    { id: 'maher',    name: 'ماهر المعيقلي',    mp3quran: 'https://server12.mp3quran.net/maher/', islamicCdn: 'ar.mahermuaiqly',      ayahCdn: 'MaherAlMuaiqly128kbps' },
+    { id: 'shatri',   name: 'أبو بكر الشاطري',  mp3quran: 'https://server11.mp3quran.net/shatri/',islamicCdn: 'ar.shaatree',          ayahCdn: 'Shatri_128kbps' },
+    { id: 'ajamy',    name: 'أحمد العجمي',      mp3quran: 'https://server10.mp3quran.net/ajm/',   islamicCdn: 'ar.ahmedajamy',        ayahCdn: 'Ahmed_ibn_Ali_al-Ajamy_128kbps' },
+    { id: 'hudhaify', name: 'علي الحذيفي',      mp3quran: 'https://server9.mp3quran.net/hthfi/',  islamicCdn: 'ar.hudhaify',          ayahCdn: 'Hudhaify_128kbps' },
+    { id: 'ayyoub',   name: 'محمد أيوب',        mp3quran: 'https://server16.mp3quran.net/ayyub/', islamicCdn: 'ar.muhammadayyoub',    ayahCdn: 'Muhammad_Ayyoub_128kbps' }
 ];
 
 const quranAudio = {
@@ -905,26 +906,87 @@ function setupAudioPlayer() {
     });
 }
 
-function loadAndPlaySurah(surahNum) {
+/* ═══════════════════════════════════════════════════════════════
+   ✅ loadAndPlaySurah الجديدة: نظام Fallback بين مصدرين
+   1) mp3quran.net (أساسي، موثوق لكل القراء)
+   2) cdn.islamic.network (احتياطي)
+   ═══════════════════════════════════════════════════════════════ */
+async function loadAndPlaySurah(surahNum) {
     const reciter = getReciterObj();
-    // ✅ مُؤكَّد: بدون أصفار (1.mp3 بدلاً من 001.mp3)
-    const url = `https://cdn.islamic.network/quran/audio-surah/128/${reciter.surahCdn}/${surahNum}.mp3`;
+    const s3 = String(surahNum).padStart(3, '0');
 
     quranAudio.surahAudio.pause();
     quranAudio.surahAudio.currentTime = 0;
-    quranAudio.surahAudio.src = url;
-    quranAudio.surahAudio.load();
+    quranAudio.isPlayingSurah = true;
     quranAudio.loadedSurah = surahNum;
-
-    quranAudio.surahAudio.play().catch(err => {
-        console.warn('Surah audio play failed:', err);
-        showToast('تعذر تشغيل السورة. تأكد من الإنترنت أو جرب قارئاً آخر.');
-        quranAudio.isPlayingSurah = false;
-        quranAudio.loadedSurah = null;
-        updatePlayerUI();
-    });
-    document.getElementById('audio-status-label').textContent = `السورة كاملة`;
     updatePlayerUI();
+    document.getElementById('audio-status-label').textContent = 'جاري التحميل...';
+
+    const sources = [
+        `${reciter.mp3quran}${s3}.mp3`,                                                             // 1) mp3quran.net
+        `https://cdn.islamic.network/quran/audio-surah/128/${reciter.islamicCdn}/${surahNum}.mp3`   // 2) islamic.network
+    ];
+
+    for (let i = 0; i < sources.length; i++) {
+        const url = sources[i];
+        try {
+            await tryPlaySurahSource(url);
+            console.log(`[Audio] ✅ Success from source ${i + 1}:`, url);
+            document.getElementById('audio-status-label').textContent = 'السورة كاملة';
+            return;
+        } catch (err) {
+            console.warn(`[Audio] ❌ Source ${i + 1} failed:`, url, err.message || err);
+        }
+    }
+
+    showToast('تعذر تشغيل السورة. جرب قارئاً آخر.');
+    quranAudio.isPlayingSurah = false;
+    quranAudio.loadedSurah = null;
+    document.getElementById('audio-status-label').textContent = 'فشل التحميل';
+    updatePlayerUI();
+}
+
+/* ✅ محاولة تشغيل مصدر واحد - تنجح فقط عند حدث 'playing' */
+function tryPlaySurahSource(url) {
+    return new Promise((resolve, reject) => {
+        const audio = quranAudio.surahAudio;
+        let settled = false;
+
+        const cleanup = () => {
+            audio.removeEventListener('playing', onPlaying);
+            audio.removeEventListener('error', onError);
+            clearTimeout(timer);
+        };
+        const onPlaying = () => {
+            if (settled) return;
+            settled = true;
+            cleanup();
+            resolve();
+        };
+        const onError = () => {
+            if (settled) return;
+            settled = true;
+            cleanup();
+            reject(new Error('Load/play error'));
+        };
+
+        const timer = setTimeout(() => {
+            if (settled) return;
+            settled = true;
+            cleanup();
+            reject(new Error('Timeout after 6s'));
+        }, 6000);
+
+        audio.addEventListener('playing', onPlaying, { once: true });
+        audio.addEventListener('error', onError, { once: true });
+
+        audio.src = url;
+        audio.load();
+        // play() قد يفشل فوراً (مثلاً رابط 404) أو ينجح. الحدثان هما المرجع.
+        audio.play().catch(() => {
+            // لا نرفض هنا. سنعتمد على حدث 'error' أو 'timeout'.
+        });
+    });
 }
 
 function setupAyahDoubleTap() {
@@ -1007,7 +1069,7 @@ function setupBottomSheet() {
 
 function loadAndPlayAyah(surahNum, ayahNum) {
     const reciter = getReciterObj();
-    // ✅ هذا صحيح: everyayah يحتاج 6 أرقام (3 للسورة + 3 للآية)
+    // everyayah.com يحتاج 6 أرقام (3 للسورة + 3 للآية)
     const s = String(surahNum).padStart(3, '0');
     const a = String(ayahNum).padStart(3, '0');
     const url = `https://everyayah.com/data/${reciter.ayahCdn}/${s}${a}.mp3`;
@@ -1018,6 +1080,7 @@ function loadAndPlayAyah(surahNum, ayahNum) {
     quranAudio.ayahAudio.load();
 
     quranAudio.ayahAudio.play().catch(err => {
+        console.warn('Ayah play failed:', err);
         showToast('تعذر تشغيل الآية.');
     });
     quranAudio.isPlayingAyah = true;
