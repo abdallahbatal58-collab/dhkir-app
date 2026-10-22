@@ -24,7 +24,6 @@ const TASBIH_CIRCUMFERENCE = 2 * Math.PI * 112;
 let swiper = null;
 
 /* ═══════════════════ Quran Audio & Reciters State ═══════════════════ */
-// ✅ كل قارئ له مصدران: mp3quran (أساسي) + islamic.network (احتياطي)
 const RECITERS = [
     { id: 'alafasy',  name: 'مشاري العفاسي',    mp3quran: 'https://server8.mp3quran.net/afs/',    islamicCdn: 'ar.alafasy',           ayahCdn: 'Alafasy_128kbps' },
     { id: 'husary',   name: 'محمود الحصري',     mp3quran: 'https://server13.mp3quran.net/husr/',  islamicCdn: 'ar.husary',            ayahCdn: 'Husary_128kbps' },
@@ -607,6 +606,7 @@ async function loadPrayerTimes() {
                 document.getElementById('prayer-location').textContent = `المواقيت حسب موقعك الحالي`;
             }
 
+            // استخدمنا method=5 (الهيئة المصرية العامة للمساحة) وهو الأنسب لمصر
             const res = await fetch(`https://api.aladhan.com/v1/timings/${d}?latitude=${lat}&longitude=${lng}&method=5`);
             const data = await res.json();
             if (data.code === 200) {
@@ -625,32 +625,56 @@ async function loadPrayerTimes() {
     }, { timeout: 8000 });
 }
 
+/* ✅ إصلاح جذري لدالة عرض المواقيت وتحديد الصلاة القادمة */
 function renderPrayerTimes(timings) {
     if (!timings) return;
     const strip = document.getElementById('prayer-strip');
     const prayers = ['Fajr','Dhuhr','Asr','Maghrib','Isha'];
     const now = new Date();
     const nowMin = now.getHours() * 60 + now.getMinutes();
-    let activeSet = false;
+    
+    let nextPrayer = 'Fajr'; // الافتراضي
+    
+    // البحث عن الصلاة القادمة
+    for (let i = 0; i < prayers.length; i++) {
+        const p = prayers[i];
+        // استخدام Regex لاستخراج الأرقام فقط وتجاهل أي حروف مثل (EET)
+        const match = timings[p] ? timings[p].match(/(\d{1,2}):(\d{2})/) : null;
+        if (match) {
+            const pMin = parseInt(match[1], 10) * 60 + parseInt(match[2], 10);
+            if (pMin > nowMin) {
+                nextPrayer = p;
+                break; // وجدنا الصلاة القادمة، نتوقف
+            }
+        }
+    }
 
+    // تحديث الواجهة
     prayers.forEach(p => {
         const el = strip.querySelector(`[data-prayer="${p}"]`);
         if (!el) return;
-        el.textContent = formatTime(timings[p]);
+        el.textContent = formatTime(timings[p]); // دالة التنسيق أدناه تم إصلاحها
         const item = el.closest('.prayer-item');
-        const [h, m] = timings[p].split(':').map(Number);
-        if (!activeSet && (h * 60 + m) > nowMin) { item.classList.add('active'); activeSet = true; }
-        else item.classList.remove('active');
+        if (p === nextPrayer) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
     });
 }
 
+/* ✅ إصلاح دالة تنسيق الوقت لتتجاهل (EET) */
 function formatTime(t) {
-    if (!t || !t.includes(':')) return t;
-    const [h, m] = t.split(':');
-    const hh = parseInt(h, 10);
+    if (!t) return t;
+    const match = t.match(/(\d{1,2}):(\d{2})/);
+    if (!match) return t;
+    
+    const hh = parseInt(match[1], 10);
+    const mm = match[2];
     const suffix = hh >= 12 ? 'م' : 'ص';
     const h12 = hh > 12 ? hh - 12 : (hh === 0 ? 12 : hh);
-    return `${h12}:${m} ${suffix}`;
+    
+    return `${h12}:${mm} ${suffix}`;
 }
 
 /* ═══════════════════ Tasbih & Qibla ═══════════════════ */
@@ -906,11 +930,6 @@ function setupAudioPlayer() {
     });
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   ✅ loadAndPlaySurah الجديدة: نظام Fallback بين مصدرين
-   1) mp3quran.net (أساسي، موثوق لكل القراء)
-   2) cdn.islamic.network (احتياطي)
-   ═══════════════════════════════════════════════════════════════ */
 async function loadAndPlaySurah(surahNum) {
     const reciter = getReciterObj();
     const s3 = String(surahNum).padStart(3, '0');
@@ -923,8 +942,8 @@ async function loadAndPlaySurah(surahNum) {
     document.getElementById('audio-status-label').textContent = 'جاري التحميل...';
 
     const sources = [
-        `${reciter.mp3quran}${s3}.mp3`,                                                             // 1) mp3quran.net
-        `https://cdn.islamic.network/quran/audio-surah/128/${reciter.islamicCdn}/${surahNum}.mp3`   // 2) islamic.network
+        `${reciter.mp3quran}${s3}.mp3`,
+        `https://cdn.islamic.network/quran/audio-surah/128/${reciter.islamicCdn}/${surahNum}.mp3`
     ];
 
     for (let i = 0; i < sources.length; i++) {
@@ -946,7 +965,6 @@ async function loadAndPlaySurah(surahNum) {
     updatePlayerUI();
 }
 
-/* ✅ محاولة تشغيل مصدر واحد - تنجح فقط عند حدث 'playing' */
 function tryPlaySurahSource(url) {
     return new Promise((resolve, reject) => {
         const audio = quranAudio.surahAudio;
@@ -982,10 +1000,7 @@ function tryPlaySurahSource(url) {
 
         audio.src = url;
         audio.load();
-        // play() قد يفشل فوراً (مثلاً رابط 404) أو ينجح. الحدثان هما المرجع.
-        audio.play().catch(() => {
-            // لا نرفض هنا. سنعتمد على حدث 'error' أو 'timeout'.
-        });
+        audio.play().catch(() => {});
     });
 }
 
@@ -1069,7 +1084,6 @@ function setupBottomSheet() {
 
 function loadAndPlayAyah(surahNum, ayahNum) {
     const reciter = getReciterObj();
-    // everyayah.com يحتاج 6 أرقام (3 للسورة + 3 للآية)
     const s = String(surahNum).padStart(3, '0');
     const a = String(ayahNum).padStart(3, '0');
     const url = `https://everyayah.com/data/${reciter.ayahCdn}/${s}${a}.mp3`;
