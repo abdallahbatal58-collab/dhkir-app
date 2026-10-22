@@ -1,9 +1,9 @@
 /* ═══════════════════════════════════════════════════════════════
-   ذِكْر | Service Worker v4.5.0
+   ذِكْر | Service Worker v4.5.1
    ═══════════════════════════════════════════════════════════════ */
 
-const CACHE_STATIC = 'dhikr-static-v4.5.0';
-const CACHE_API = 'dhikr-api-v4.5.0';
+const CACHE_STATIC = 'dhikr-static-v4.5.1';
+const CACHE_API = 'dhikr-api-v4.5.1';
 const CACHE_MAX_ITEMS = 100;
 
 const PRECACHE = [
@@ -49,12 +49,15 @@ self.addEventListener('fetch', (e) => {
 
     const url = new URL(req.url);
 
+    // ⚠️ استثناء ملفات الصوت تماماً من الكاش لكي تعمل
+    if (url.hostname === 'everyayah.com' || url.hostname === 'cdn.islamic.network') {
+        return;
+    }
+
     if (url.hostname === 'api.alquran.cloud' ||
         url.hostname === 'api.quran.com' ||
         url.hostname === 'api.aladhan.com' ||
-        url.hostname === 'api.bigdatacloud.net' ||
-        url.hostname === 'everyayah.com' || 
-        url.hostname === 'cdn.islamic.network') { 
+        url.hostname === 'api.bigdatacloud.net') {
         e.respondWith(
             fetch(req).then(res => {
                 if (res && res.status === 200) {
