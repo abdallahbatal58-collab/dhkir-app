@@ -1,9 +1,9 @@
 /* ═══════════════════════════════════════════════════════════════
-   ذِكْر | Service Worker v4.5.1
+   ذِكْر | Service Worker v4.5.2
    ═══════════════════════════════════════════════════════════════ */
 
-const CACHE_STATIC = 'dhikr-static-v4.5.1';
-const CACHE_API = 'dhikr-api-v4.5.1';
+const CACHE_STATIC = 'dhikr-static-v4.5.2';
+const CACHE_API = 'dhikr-api-v4.5.2';
 const CACHE_MAX_ITEMS = 100;
 
 const PRECACHE = [
@@ -49,8 +49,10 @@ self.addEventListener('fetch', (e) => {
 
     const url = new URL(req.url);
 
-    // ⚠️ استثناء ملفات الصوت تماماً من الكاش لكي تعمل
-    if (url.hostname === 'everyayah.com' || url.hostname === 'cdn.islamic.network') {
+    // ⚠️ استثناء كامل لملفات الصوت من الكاش (mp3quran + everyayah + islamic.network)
+    if (url.hostname === 'everyayah.com' ||
+        url.hostname === 'cdn.islamic.network' ||
+        url.hostname.includes('mp3quran.net')) {
         return;
     }
 
