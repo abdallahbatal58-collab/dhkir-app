@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   ذِكْر — Design System v4.0.0
+   ذِكْر — Design System v4.2.0
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
@@ -351,7 +351,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none; width:16px; h
 .overlay-page.active{display:block}
 @keyframes slideUpFade{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 
-.reader-header{display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--s-4); padding-bottom:var(--s-3); border-bottom:1px solid var(--border); position:sticky; top: calc(-1 * var(--s-4) - env(safe-area-inset-top)); background:var(--bg); z-index:1;}
+.reader-header{display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--s-4); padding-bottom:var(--s-3); border-bottom:1px solid var(--border); position:sticky; top: calc(-1 * var(--s-4) - env(safe-area-inset-top)); background:var(--bg); z-index:10;}
 .reader-header h2{font-family:var(--font-display); font-size:var(--text-xl); color:var(--accent);}
 .reader-controls { display: flex; gap: 4px; }
 
@@ -458,3 +458,179 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none; width:16px; h
     color: var(--text-secondary);
     line-height: var(--leading-normal);
 }
+
+/* ═══════════════════ Quran Audio Player ═══════════════════ */
+.audio-player-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-2);
+    background: var(--surface);
+    border: 1px solid var(--border-accent);
+    border-radius: var(--r-xl);
+    padding: var(--s-3);
+    margin-bottom: var(--s-4);
+    box-shadow: var(--shadow-sm);
+    position: sticky;
+    top: calc(-1 * var(--s-4) - env(safe-area-inset-top));
+    z-index: 10;
+}
+.audio-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--s-1);
+}
+.audio-controls .icon-btn {
+    width: 36px; height: 36px;
+    background: var(--bg-sunken);
+    border-radius: var(--r-full);
+}
+.audio-controls .play-btn {
+    background: var(--primary);
+    color: var(--on-primary);
+    width: 44px; height: 44px;
+}
+.audio-controls .play-btn .icon {
+    width: 20px; height: 20px;
+}
+.audio-info {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    flex: 1;
+    min-width: 140px;
+}
+#current-ayah-label {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+.reciter-select {
+    flex: 1;
+    padding: 6px var(--s-2);
+    border-radius: var(--r-md);
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+    font-size: var(--text-xs);
+    font-family: var(--font-body);
+    color: var(--text);
+    max-width: 150px;
+}
+.audio-progress-wrap {
+    width: 100%;
+    order: 4;
+}
+#audio-progress {
+    width: 100%;
+    height: 4px;
+    -webkit-appearance: none;
+    background: var(--border);
+    border-radius: 2px;
+    outline: none;
+}
+#audio-progress::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+}
+.btn-play-surah {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px var(--s-3);
+    border-radius: var(--r-full);
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    border: 1px solid var(--border-accent);
+    white-space: nowrap;
+}
+.btn-play-surah .icon { width: 14px; height: 14px; }
+
+/* ═══════════════════ Ayah Actions ═══════════════════ */
+.ayah-wrapper {
+    display: inline;
+    position: relative;
+}
+.ayah-actions {
+    display: inline-flex;
+    gap: 4px;
+    vertical-align: middle;
+    margin: 0 4px;
+}
+.btn-ayah-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--bg-sunken);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all var(--dur-fast);
+}
+.btn-ayah-action:hover {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-color: var(--accent);
+}
+.btn-ayah-action .icon { width: 14px; height: 14px; }
+.ayah-playing {
+    background: var(--accent-soft) !important;
+    border-color: var(--accent) !important;
+    color: var(--accent) !important;
+}
+
+/* ═══════════════════ Tafsir Modal ═══════════════════ */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    z-index: 500;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: var(--s-4);
+}
+.modal-overlay.active { display: flex; }
+.modal-content {
+    background: var(--surface);
+    border-radius: var(--r-xl);
+    width: 100%;
+    max-width: 500px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+}
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--s-4);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-elevated);
+}
+.modal-header h3 {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    color: var(--primary);
+    margin: 0;
+}
+.modal-body {
+    padding: var(--s-4);
+    overflow-y: auto;
+    font-family: var(--font-body);
+    line-height: var(--leading-relaxed);
+    color: var(--text);
+    font-size: var(--text-sm);
+}
+[data-theme="dark"] .modal-body { color: var(--text-secondary); }
