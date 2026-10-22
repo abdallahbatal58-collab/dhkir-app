@@ -23,10 +23,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&family=Tajawal:wght@300;400;500;700;800&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
 
-    <link rel="stylesheet" href="css/style.css?v=4.5.0">
+    <!-- تم تحديث الإصدار لإجبار المتصفح على تحميل التعديلات الجديدة -->
+    <link rel="stylesheet" href="css/style.css?v=4.5.3">
 </head>
 <body>
 
+<!-- ═════ SVG Icon Sprite ═════ -->
 <svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
     <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-7h-6v7H4a1 1 0 0 1-1-1V9.5Z"/></symbol>
     <symbol id="i-sunrise" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M4.93 5.93l2.83 2.83M2 12h4M19 12h4M17.66 8.34l2.83-2.83M22 22H2M8 22a4 4 0 0 1 8 0"/></symbol>
@@ -59,6 +61,7 @@
     <symbol id="i-play" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></symbol>
 </svg>
 
+<!-- ═════ Splash (واجهة البداية المطابقة للصورة) ═════ -->
 <div id="splash">
     <div class="splash-content">
         <div class="bismillah-splash">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>
@@ -67,8 +70,8 @@
     </div>
 </div>
 
+<!-- ═════ App Shell ═════ -->
 <div id="app">
-
     <header id="header">
         <button id="menu-btn" class="icon-btn" aria-label="القائمة">
             <svg class="icon"><use href="#i-menu"/></svg>
@@ -81,7 +84,6 @@
 
     <main id="main-content" class="swiper">
         <div class="swiper-wrapper">
-
             <section id="page-home" class="swiper-slide page">
                 <div class="hero">
                     <div class="hero-content">
@@ -150,7 +152,6 @@
             <section id="page-food" class="swiper-slide page"><h2 class="page-title">أذكار الطعام</h2><div class="list" id="list-food"></div></section>
             <section id="page-travel" class="swiper-slide page"><h2 class="page-title">أذكار السفر</h2><div class="list" id="list-travel"></div></section>
             <section id="page-ruqyah" class="swiper-slide page"><h2 class="page-title">الرقية الشرعية</h2><div class="list" id="list-ruqyah"></div></section>
-            
             <section id="page-duas" class="swiper-slide page"><h2 class="page-title">الأدعية</h2><div class="list" id="list-duas"></div></section>
             <section id="page-favorites" class="swiper-slide page"><h2 class="page-title">المفضلة</h2><div class="list" id="list-favorites"></div></section>
             <section id="page-stats" class="swiper-slide page"><h2 class="page-title">إحصائياتك</h2><div id="stats-container"></div></section>
@@ -212,7 +213,6 @@
 
             <section id="page-settings" class="swiper-slide page">
                 <h2 class="page-title">الإعدادات</h2>
-
                 <div class="settings-group">
                     <h3 class="settings-title">المظهر والقراءة</h3>
                     <div class="settings-card">
@@ -230,7 +230,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="settings-group">
                     <h3 class="settings-title">العدادات</h3>
                     <div class="settings-card">
@@ -240,7 +239,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="settings-group">
                     <h3 class="settings-title">التطبيق</h3>
                     <div class="settings-card">
@@ -258,10 +256,8 @@
                         </button>
                     </div>
                 </div>
-
-                <p class="app-version">الإصدار 4.5.0</p>
+                <p class="app-version">الإصدار 4.5.3</p>
             </section>
-
         </div>
     </main>
 
@@ -342,7 +338,6 @@
             <button class="icon-btn" id="zoom-in"><svg class="icon"><use href="#i-zoom-in"/></svg></button>
         </div>
     </div>
-
     <div class="audio-player-bar" id="audio-player-bar">
         <div class="audio-controls">
             <button id="btn-play-pause" class="icon-btn play-btn" aria-label="تشغيل">
@@ -357,7 +352,6 @@
             <input type="range" id="audio-progress" min="0" max="100" value="0" step="0.1">
         </div>
     </div>
-
     <div class="mushaf-container" id="mushaf-container">
         <div id="list-quran-verses" class="mushaf-text"></div>
     </div>
@@ -373,12 +367,10 @@
         </div>
         <div class="bottom-sheet-actions">
             <button id="btn-sheet-listen" class="btn-sheet-action">
-                <svg class="icon"><use href="#i-play"/></svg>
-                استماع للآية
+                <svg class="icon"><use href="#i-play"/></svg> استماع للآية
             </button>
             <button id="btn-sheet-tafsir" class="btn-sheet-action">
-                <svg class="icon"><use href="#i-book"/></svg>
-                عرض التفسير الميسر
+                <svg class="icon"><use href="#i-book"/></svg> عرض التفسير الميسر
             </button>
         </div>
         <div class="bottom-sheet-body" id="sheet-tafsir-body"></div>
@@ -403,7 +395,7 @@
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<!-- ═════ عناصر الصوت (ضرورية لعمل المشغل) ═════ -->
+<!-- ═════ عناصر الصوت ═════ -->
 <audio id="surah-audio" preload="none"></audio>
 <audio id="ayah-audio" preload="none"></audio>
 
@@ -428,7 +420,7 @@ if ('serviceWorker' in navigator) {
     });
 }
 </script>
-<script src="js/data.js?v=4.5.0"></script>
-<script src="js/app.js?v=4.5.0"></script>
+<script src="js/data.js?v=4.5.3"></script>
+<script src="js/app.js?v=4.5.3"></script>
 </body>
 </html>
