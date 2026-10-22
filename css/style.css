@@ -87,7 +87,7 @@ a{color:inherit;text-decoration:none}
     position: fixed;
     inset: 0;
     z-index: 9999;
-    background-color: #0a3d2a; /* الخلفية الخضراء الداكنة */
+    background-color: #0a3d2a;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -421,33 +421,6 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none; width:16px; h
 }
 [data-theme="dark"] .mushaf-container{ background:#0a0a0a; border-color:var(--c-gold-700); }
 
-/* إطار اسم السورة */
-.surah-header {
-    text-align: center;
-    background: linear-gradient(to right, transparent, var(--accent-soft), transparent);
-    border: 2px solid var(--accent);
-    border-radius: 50px;
-    padding: 8px 24px;
-    margin: 0 auto 20px auto;
-    display: inline-block;
-    font-family: 'Amiri', serif;
-    font-size: 1.4rem;
-    color: var(--accent);
-    position: relative;
-    left: 50%;
-    transform: translateX(-50%);
-}
-.surah-header::before, .surah-header::after {
-    content: '۞';
-    color: var(--accent);
-    font-size: 1.8rem;
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-}
-.surah-header::before { right: 10px; }
-.surah-header::after { left: 10px; }
-
 .mushaf-text{
     font-family: var(--font-quran);
     font-size: calc(var(--quran-size) + 4px);
@@ -473,21 +446,6 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none; width:16px; h
     color: var(--c-gold-700) !important;
     border-radius: 6px;
     box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.5);
-}
-
-.ayah-end-marker {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px; height: 36px;
-    border: 2px solid var(--accent);
-    border-radius: 50%;
-    color: var(--accent);
-    font-family: 'Amiri', serif;
-    font-size: 0.9rem;
-    margin: 0 6px;
-    vertical-align: middle;
-    background-color: var(--bg-elevated);
 }
 
 /* تجويد */
