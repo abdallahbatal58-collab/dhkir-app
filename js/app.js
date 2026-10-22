@@ -522,34 +522,35 @@ async function openSurah(number, name) {
         if (data.verses && data.verses.length) {
             let html = '';
             
-            // 1. اسم السورة كنص عادي بخط المصحف (بدون إطار)
+            // اسم السورة
             let cleanName = name.replace(/^سُورَةُ\s*/, '').replace(/^سورة\s*/, '');
             html += `<div style="text-align:center; font-family:'KFGQPC Uthmanic Hafs', 'Amiri Quran', serif; font-size: calc(var(--quran-size) + 12px); color: var(--accent); margin-bottom: 30px; font-weight: bold;">سُورَةُ ${cleanName}</div>`;
             
-            // 2. البسملة
+            // البسملة
             if (number !== 1 && number !== 9) {
                 html += `<div style="text-align:center; margin-bottom:30px; font-family:'KFGQPC Uthmanic Hafs', 'Amiri Quran', serif; font-size:calc(var(--quran-size) + 4px); color:var(--text);">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>`;
             }
 
-            // 3. نص الآيات
+            // الآيات
             html += `<div class="mushaf-text">`;
             data.verses.forEach(v => {
                 let text = v.text_uthmani_tajweed || '';
                 
-                // تطبيق ألوان التجويد
+                // تحويل التجويد
                 text = text.replace(/<tajweed\s+class=["']?([a-z_]+)["']?>/g, '<span class="$1">')
                            .replace(/<\/tajweed>/g, '</span>');
                 
-                // إزالة علامة نهاية الآية (التي تحتوي على الرقم)
-                text = text.replace(/<span class="end">.*?<\/span>/g, '');
+                // 🔴 حذف الدائرة الزرقاء القادمة من الـ API نهائياً
+                text = text.replace(/<span[^>]*class=["']?end["']?[^>]*>.*?<\/span>/g, '');
                 
-                // إزالة رموز الأحزاب (۞) وعلامات الوقف المزعجة ليكون النص نظيفاً
-                text = text.replace(/[\u06DE\u06E9\u06D6-\u06DC\u06DF-\u06E8\u06EA-\u06ED]/g, '');
-                
-                // إزالة أي أرقام متبقية
-                text = text.replace(/[٠-٩0-9۰-۹]+/g, '');
+                // إزالة أي أرقام عربية متبقية داخل النص لتنظيفه تماماً
+                text = text.replace(/[٠-٩0-9۰-۹۝]+/g, '');
 
-                html += `<span class="ayah-text" data-ayah="${v.verse_key.split(':')[1]}" data-surah="${number}">${text}</span> `;
+                const ayahNum = parseInt(v.verse_key.split(':')[1], 10);
+                const arabicNum = ayahNum.toLocaleString('ar-EG');
+
+                // إضافة نص الآية + رقم الآية بتصميمنا الخاص
+                html += `<span class="ayah-text" data-ayah="${ayahNum}" data-surah="${number}">${text}</span> <span class="ayah-number">${arabicNum}</span> `;
             });
             html += `</div>`;
             
