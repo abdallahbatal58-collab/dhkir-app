@@ -1,18 +1,18 @@
 /* ═══════════════════════════════════════════════════════════════
-   ذِكْر | Service Worker v4.1.0
+   ذِكْر | Service Worker v4.2.0
    ═══════════════════════════════════════════════════════════════ */
 
-const CACHE_STATIC = 'dhikr-static-v4.1.0';
-const CACHE_API = 'dhikr-api-v4.1.0';
+const CACHE_STATIC = 'dhikr-static-v4.2.0';
+const CACHE_API = 'dhikr-api-v4.2.0';
 const CACHE_MAX_ITEMS = 80;
 
 const PRECACHE = [
     './',
     './index.html',
     './manifest.json',
-    './css/style.css?v=4.1.0',
-    './js/data.js?v=4.1.0',
-    './js/app.js?v=4.1.0',
+    './css/style.css?v=4.2.0',
+    './js/data.js?v=4.2.0',
+    './js/app.js?v=4.2.0',
     './icon.svg',
     './maskable.svg',
     'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css',
@@ -53,7 +53,8 @@ self.addEventListener('fetch', (e) => {
     if (url.hostname === 'api.alquran.cloud' ||
         url.hostname === 'api.quran.com' ||
         url.hostname === 'api.aladhan.com' ||
-        url.hostname === 'api.bigdatacloud.net') {
+        url.hostname === 'api.bigdatacloud.net' ||
+        url.hostname === 'everyayah.com') { // دعم كاش الصوت
         e.respondWith(
             fetch(req).then(res => {
                 if (res && res.status === 200) {
