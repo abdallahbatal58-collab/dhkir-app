@@ -23,7 +23,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
 
-    <link rel="stylesheet" href="css/style.css?v=4.2.0">
+    <link rel="stylesheet" href="css/style.css?v=4.3.0">
 </head>
 <body>
 
@@ -57,12 +57,16 @@
     <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
     <symbol id="i-zoom-in" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></symbol>
     <symbol id="i-zoom-out" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></symbol>
 </svg>
 
 <!-- ═════ Splash ═════ -->
 <div id="splash">
     <div class="splash-content">
-        <div class="bismillah">﷽</div>
+        <svg width="120" height="120" viewBox="0 0 512 512" style="margin-bottom:20px">
+            <use href="icon.svg#logo"></use> <!-- Assuming we embed it or load via img -->
+        </svg>
+        <img src="icon.svg" alt="Logo" style="width:120px; height:120px; margin-bottom:20px;">
         <h1 class="splash-title">ذِكْر</h1>
         <div class="spinner"></div>
     </div>
@@ -261,7 +265,7 @@
                     </div>
                 </div>
 
-                <p class="app-version">الإصدار 4.2.0</p>
+                <p class="app-version">الإصدار 4.3.0</p>
             </section>
 
         </div>
@@ -346,36 +350,52 @@
         </div>
     </div>
 
-    <!-- ═════ Audio Player Bar ═════ -->
+    <!-- ═════ Audio Player Bar (Surah Level) ═════ -->
     <div class="audio-player-bar" id="audio-player-bar">
         <div class="audio-controls">
-            <button id="btn-prev-ayah" class="icon-btn" aria-label="الآية السابقة">
-                <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M19 20L9 12l10-8v16zM5 19V5h2v14H5z"/></svg>
-            </button>
             <button id="btn-play-pause" class="icon-btn play-btn" aria-label="تشغيل">
                 <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
             </button>
-            <button id="btn-next-ayah" class="icon-btn" aria-label="الآية التالية">
-                <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M5 4l10 8-10 8V4zM19 5v14h-2V5h2z"/></svg>
-            </button>
         </div>
         <div class="audio-info">
-            <span id="current-ayah-label">الآية 1</span>
+            <span id="audio-status-label">استمع للسورة</span>
             <select id="reciter-select" class="reciter-select" aria-label="اختر القارئ"></select>
         </div>
         <div class="audio-progress-wrap">
             <input type="range" id="audio-progress" min="0" max="100" value="0" step="0.1">
         </div>
-        <button id="btn-play-surah" class="btn-play-surah" title="تشغيل السورة كاملة">
-            <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-            تشغيل السورة
-        </button>
     </div>
 
     <div class="mushaf-container" id="mushaf-container">
         <div id="list-quran-verses" class="mushaf-text"></div>
     </div>
 </div>
+
+<!-- ═════ Bottom Sheet for Ayah Actions ═════ -->
+<div id="ayah-bottom-sheet" class="bottom-sheet">
+    <div class="bottom-sheet-content">
+        <div class="bottom-sheet-header">
+            <span id="selected-ayah-label">الآية المحددة</span>
+            <button id="close-bottom-sheet" class="icon-btn" aria-label="إغلاق">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="bottom-sheet-actions">
+            <button id="btn-sheet-listen" class="btn-sheet-action">
+                <svg class="icon"><use href="#i-play"/></svg>
+                استماع للآية
+            </button>
+            <button id="btn-sheet-tafsir" class="btn-sheet-action">
+                <svg class="icon"><use href="#i-book"/></svg>
+                عرض التفسير الميسر
+            </button>
+        </div>
+        <div class="bottom-sheet-body" id="sheet-tafsir-body">
+            <!-- Tafsir text will be injected here -->
+        </div>
+    </div>
+</div>
+<div id="bottom-sheet-overlay" class="bottom-sheet-overlay"></div>
 
 <!-- ═════ Overlay: Search ═════ -->
 <div id="overlay-search" class="overlay-page">
@@ -387,21 +407,6 @@
         <div style="width:42px"></div>
     </div>
     <div class="list" id="list-search"></div>
-</div>
-
-<!-- ═════ Tafsir Modal ═════ -->
-<div id="tafsir-modal" class="modal-overlay">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 id="tafsir-title">التفسير</h3>
-            <button id="close-tafsir" class="icon-btn" aria-label="إغلاق">
-                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
-        </div>
-        <div class="modal-body" id="tafsir-body">
-            <p class="loading-text">جاري تحميل التفسير...</p>
-        </div>
-    </div>
 </div>
 
 <button id="scroll-top-btn" class="icon-btn hidden" aria-label="أعلى">
@@ -431,7 +436,7 @@ if ('serviceWorker' in navigator) {
     });
 }
 </script>
-<script src="js/data.js?v=4.2.0"></script>
-<script src="js/app.js?v=4.2.0"></script>
+<script src="js/data.js?v=4.3.0"></script>
+<script src="js/app.js?v=4.3.0"></script>
 </body>
 </html>
