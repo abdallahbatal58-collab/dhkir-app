@@ -78,11 +78,11 @@ a{color:inherit;text-decoration:none}
     position: fixed;
     inset: 0;
     z-index: 9999;
-    background: #0a3d2a;
+    background-color: #0a3d2a; /* الخلفية الخضراء الداكنة */
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: opacity var(--dur-slow) var(--ease-out), visibility var(--dur-slow);
+    transition: opacity 0.6s ease, visibility 0.6s ease;
 }
 #splash.hide {
     opacity: 0;
@@ -100,40 +100,38 @@ a{color:inherit;text-decoration:none}
 }
 .bismillah-splash {
     font-family: 'Aref Ruqaa', 'Amiri', serif;
-    font-size: clamp(2rem, 8vw, 3.5rem);
-    background: linear-gradient(to right, #e6d5a8, #d4af37, #c19a5b);
+    font-size: clamp(2.2rem, 10vw, 4.5rem);
+    background: linear-gradient(135deg, #fcebb6 0%, #d4af37 50%, #a8824a 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-shadow: 0px 2px 4px rgba(0,0,0,0.3);
-    margin-bottom: 40px;
+    margin-bottom: 50px;
     white-space: nowrap;
     letter-spacing: 1px;
 }
 .splash-title {
     font-family: 'Aref Ruqaa', 'Amiri', serif;
-    font-size: clamp(4rem, 15vw, 6rem);
+    font-size: clamp(5rem, 20vw, 8rem);
     background: linear-gradient(to bottom, #f4e4b8, #d4af37, #a8824a);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    letter-spacing: 2px;
-    margin-bottom: 40px;
+    letter-spacing: 0px;
+    margin-bottom: 50px;
     line-height: 1;
-    text-shadow: 0px 4px 8px rgba(0,0,0,0.4);
 }
 .spinner {
-    width: 45px;
-    height: 45px;
-    border: 3px solid rgba(212, 175, 55, 0.2);
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(212, 175, 55, 0.15);
     border-top-color: #d4af37;
+    border-right-color: #d4af37;
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.spinner-sm{display:inline-block;width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;vertical-align:middle;margin-left:var(--s-2)}
-
+@keyframes spin { 
+    to { transform: rotate(360deg); } 
+}
 /* ---- APP SHELL ---- */
 #app{display:flex; flex-direction:column; height:100vh; height:100dvh; max-width:100%;}
 #header{
