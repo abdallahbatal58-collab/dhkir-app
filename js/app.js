@@ -23,6 +23,31 @@ const settings = {
 const TASBIH_CIRCUMFERENCE = 2 * Math.PI * 112;
 let swiper = null;
 
+/* ═══════════════════ Quran Audio State ═══════════════════ */
+const RECITERS = [
+    { id: 'Alafasy_128kbps', name: 'مشاري العفاسي' },
+    { id: 'Abdul_Basit_Murattal_192kbps', name: 'عبد الباسط مرتل' },
+    { id: 'Husary_128kbps', name: 'محمود الحصري' },
+    { id: 'Minshawy_Murattal_128kbps', name: 'محمد المنشاوي' },
+    { id: 'Sudais_128kbps', name: 'عبد الرحمن السديس' },
+    { id: 'Shatri_128kbps', name: 'أبو بكر الشاطري' },
+    { id: 'Maher_AlMuaiqly_128kbps', name: 'ماهر المعيقلي' },
+    { id: 'Ajamy_128kbps', name: 'أحمد العجمي' },
+    { id: 'Yasser_Ad-Dussary_128kbps', name: 'ياسر الدوسري' },
+    { id: 'Ghamadi_40kbps', name: 'سعد الغامدي' }
+];
+
+const quranAudio = {
+    audio: new Audio(),
+    currentSurah: null,
+    currentAyah: 1,
+    totalAyahs: 0,
+    reciter: RECITERS[0].id,
+    isPlaying: false,
+    isPlayingFullSurah: false,
+    ayahElements: []
+};
+
 /* ═══════════════════ Bootstrap ═══════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
@@ -43,6 +68,7 @@ function initApp() {
     setupScrollTop();
     setupPWA();
     setupQuranZoom();
+    setupAudioPlayer();
     document.addEventListener('click', handleCardClick);
     renderAllAdhkar();
     renderFavorites();
@@ -118,7 +144,6 @@ function updateNavState(pageId) {
         if (active) activeBtn = btn;
     });
 
-    // إصلاح: تمرير الشريط السفلي للزر النشط بدقة باستخدام scrollIntoView
     if (activeBtn) {
         activeBtn.scrollIntoView({
             behavior: 'smooth',
@@ -165,7 +190,10 @@ function setupNavigation() {
         document.body.style.overflow = 'hidden';
     };
     document.getElementById('sidebar-overlay').onclick = closeSidebar;
-    document.getElementById('close-reader').onclick = () => document.getElementById('overlay-quran-reader').classList.remove('active');
+    document.getElementById('close-reader').onclick = () => {
+        document.getElementById('overlay-quran-reader').classList.remove('active');
+        stopAudio();
+    };
     document.getElementById('close-search').onclick = () => {
         document.getElementById('overlay-search').classList.remove('active');
         document.getElementById('search-input').value = '';
@@ -491,11 +519,19 @@ async function openSurah(number, name) {
     document.getElementById('overlay-quran-reader').scrollTop = 0;
     updateQuranZoom();
 
+    // إعادة تعيين حالة المشغل
+    quranAudio.currentSurah = number;
+    quranAudio.currentAyah = 1;
+    quranAudio.isPlaying = false;
+    quranAudio.isPlayingFullSurah = false;
+    stopAudio();
+
     let ok = false;
     try {
         const res = await fetch(`https://api.quran.com/api/v4/verses/by_chapter/${number}?fields=text_uthmani_tajweed&per_page=300`);
         const data = await res.json();
         if (data.verses && data.verses.length) {
+            quranAudio.totalAyahs = data.verses.length;
             let html = '';
             if (number !== 1 && number !== 9) {
                 html += `<div style="text-align:center;margin-bottom:24px"><span style="font-family:'Amiri Quran',serif;font-size:calc(var(--quran-size) + 4px);color:var(--accent)">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</span></div>`;
@@ -504,18 +540,31 @@ async function openSurah(number, name) {
                 let t = formatTajweed(v.text_uthmani_tajweed || '');
                 t = t.replace(/[٠-٩0-9۰-۹۝\[\]\(\)]+/g, '').trim();
                 const n = v.verse_key.split(':')[1];
-                return `<span>${t}</span> <span class="verse-number">${n}</span> `;
+                return `<span class="ayah-wrapper" data-ayah="${n}" data-surah="${number}">
+                    <span>${t}</span>
+                    <span class="ayah-actions">
+                        <button class="btn-ayah-action btn-play-ayah" data-ayah="${n}" data-surah="${number}" title="تشغيل الآية">
+                            <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        </button>
+                        <button class="btn-ayah-action btn-tafsir-ayah" data-ayah="${n}" data-surah="${number}" title="التفسير">
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                        </button>
+                    </span>
+                    <span class="verse-number">${n}</span>
+                </span> `;
             }).join('');
             container.innerHTML = html;
             ok = true;
+            bindAyahActions();
         }
-    } catch (e) {}
+    } catch (e) { console.error(e); }
 
     if (!ok) {
         try {
             const res = await fetch(`https://api.alquran.cloud/v1/surah/${number}/quran-tajweed`);
             const data = await res.json();
             if (data.code === 200) {
+                quranAudio.totalAyahs = data.data.ayahs.length;
                 let html = '';
                 if (number !== 1 && number !== 9) {
                     html += `<div style="text-align:center;margin-bottom:24px"><span style="font-family:'Amiri Quran',serif;font-size:calc(var(--quran-size) + 4px);color:var(--accent)">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</span></div>`;
@@ -523,14 +572,27 @@ async function openSurah(number, name) {
                 html += data.data.ayahs.map(a => {
                     let t = formatTajweed(a.text);
                     t = t.replace(/[٠-٩0-9۰-۹۝\[\]\(\)]+/g, '').trim();
-                    return `<span>${t}</span> <span class="verse-number">${a.numberInSurah}</span> `;
+                    return `<span class="ayah-wrapper" data-ayah="${a.numberInSurah}" data-surah="${number}">
+                        <span>${t}</span>
+                        <span class="ayah-actions">
+                            <button class="btn-ayah-action btn-play-ayah" data-ayah="${a.numberInSurah}" data-surah="${number}" title="تشغيل الآية">
+                                <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            </button>
+                            <button class="btn-ayah-action btn-tafsir-ayah" data-ayah="${a.numberInSurah}" data-surah="${number}" title="التفسير">
+                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                            </button>
+                        </span>
+                        <span class="verse-number">${a.numberInSurah}</span>
+                    </span> `;
                 }).join('');
                 container.innerHTML = html;
                 ok = true;
+                bindAyahActions();
             }
         } catch (e) {}
     }
     if (!ok) container.innerHTML = '<p class="loading-text">تعذر تحميل الآيات.</p>';
+    else updatePlayerUI();
 }
 
 function updateContinueReading() {
@@ -778,4 +840,192 @@ function showToast(msg) {
     t.textContent = msg; t.classList.add('show');
     clearTimeout(t._timeout);
     t._timeout = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+/* ═══════════════════ Quran Audio Functions ═══════════════════ */
+function bindAyahActions() {
+    document.querySelectorAll('.btn-play-ayah').forEach(btn => {
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            const ayah = parseInt(btn.dataset.ayah, 10);
+            const surah = parseInt(btn.dataset.surah, 10);
+            playAyah(surah, ayah);
+        };
+    });
+    document.querySelectorAll('.btn-tafsir-ayah').forEach(btn => {
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            const ayah = parseInt(btn.dataset.ayah, 10);
+            const surah = parseInt(btn.dataset.surah, 10);
+            showTafsir(surah, ayah);
+        };
+    });
+}
+
+function getAyahAudioUrl(surah, ayah) {
+    const s = String(surah).padStart(3, '0');
+    const a = String(ayah).padStart(3, '0');
+    return `https://everyayah.com/data/${quranAudio.reciter}/${s}${a}.mp3`;
+}
+
+function playAyah(surah, ayah) {
+    quranAudio.isPlayingFullSurah = false;
+    quranAudio.currentAyah = ayah;
+    quranAudio.isPlaying = true;
+    loadAndPlayAudio(surah, ayah);
+    highlightAyah(ayah);
+}
+
+function loadAndPlayAudio(surah, ayah) {
+    const url = getAyahAudioUrl(surah, ayah);
+    quranAudio.audio.src = url;
+    quranAudio.audio.play().catch(err => {
+        console.warn('Audio play failed:', err);
+        showToast('تعذر تشغيل الصوت. تأكد من اتصالك بالإنترنت.');
+    });
+    updatePlayerUI();
+    document.getElementById('current-ayah-label').textContent = `الآية ${ayah}`;
+}
+
+function stopAudio() {
+    quranAudio.audio.pause();
+    quranAudio.audio.currentTime = 0;
+    quranAudio.isPlaying = false;
+    quranAudio.isPlayingFullSurah = false;
+    updatePlayerUI();
+    removeHighlight();
+}
+
+function updatePlayerUI() {
+    const playBtn = document.getElementById('btn-play-pause');
+    if (playBtn) {
+        playBtn.innerHTML = quranAudio.isPlaying
+            ? '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>'
+            : '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+    }
+    document.getElementById('current-ayah-label').textContent = `الآية ${quranAudio.currentAyah}`;
+}
+
+function highlightAyah(ayah) {
+    removeHighlight();
+    const el = document.querySelector(`.ayah-wrapper[data-ayah="${ayah}"]`);
+    if (el) {
+        el.classList.add('ayah-playing');
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
+function removeHighlight() {
+    document.querySelectorAll('.ayah-wrapper').forEach(el => el.classList.remove('ayah-playing'));
+}
+
+function setupAudioPlayer() {
+    const playPauseBtn = document.getElementById('btn-play-pause');
+    const prevBtn = document.getElementById('btn-prev-ayah');
+    const nextBtn = document.getElementById('btn-next-ayah');
+    const playSurahBtn = document.getElementById('btn-play-surah');
+    const reciterSelect = document.getElementById('reciter-select');
+    const progressBar = document.getElementById('audio-progress');
+
+    if (reciterSelect) {
+        reciterSelect.innerHTML = RECITERS.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+        reciterSelect.value = quranAudio.reciter;
+        reciterSelect.onchange = (e) => {
+            quranAudio.reciter = e.target.value;
+            if (quranAudio.isPlaying) {
+                loadAndPlayAudio(quranAudio.currentSurah, quranAudio.currentAyah);
+            }
+        };
+    }
+
+    playPauseBtn.onclick = () => {
+        if (quranAudio.isPlaying) {
+            quranAudio.audio.pause();
+            quranAudio.isPlaying = false;
+        } else {
+            quranAudio.isPlaying = true;
+            if (!quranAudio.audio.src) {
+                loadAndPlayAudio(quranAudio.currentSurah, quranAudio.currentAyah);
+            } else {
+                quranAudio.audio.play();
+            }
+        }
+        updatePlayerUI();
+    };
+
+    prevBtn.onclick = () => {
+        if (quranAudio.currentAyah > 1) {
+            quranAudio.currentAyah--;
+            loadAndPlayAudio(quranAudio.currentSurah, quranAudio.currentAyah);
+            highlightAyah(quranAudio.currentAyah);
+        }
+    };
+
+    nextBtn.onclick = () => {
+        if (quranAudio.currentAyah < quranAudio.totalAyahs) {
+            quranAudio.currentAyah++;
+            loadAndPlayAudio(quranAudio.currentSurah, quranAudio.currentAyah);
+            highlightAyah(quranAudio.currentAyah);
+        }
+    };
+
+    playSurahBtn.onclick = () => {
+        quranAudio.isPlayingFullSurah = true;
+        quranAudio.currentAyah = 1;
+        loadAndPlayAudio(quranAudio.currentSurah, 1);
+        highlightAyah(1);
+    };
+
+    quranAudio.audio.addEventListener('timeupdate', () => {
+        if (quranAudio.audio.duration) {
+            progressBar.value = (quranAudio.audio.currentTime / quranAudio.audio.duration) * 100;
+        }
+    });
+    progressBar.oninput = (e) => {
+        if (quranAudio.audio.duration) {
+            quranAudio.audio.currentTime = (e.target.value / 100) * quranAudio.audio.duration;
+        }
+    };
+
+    quranAudio.audio.addEventListener('ended', () => {
+        if (quranAudio.isPlayingFullSurah && quranAudio.currentAyah < quranAudio.totalAyahs) {
+            quranAudio.currentAyah++;
+            loadAndPlayAudio(quranAudio.currentSurah, quranAudio.currentAyah);
+            highlightAyah(quranAudio.currentAyah);
+        } else {
+            quranAudio.isPlaying = false;
+            updatePlayerUI();
+        }
+    });
+}
+
+/* ═══════════════════ Tafsir Functions ═══════════════════ */
+async function showTafsir(surah, ayah) {
+    const modal = document.getElementById('tafsir-modal');
+    const body = document.getElementById('tafsir-body');
+    const title = document.getElementById('tafsir-title');
+    title.textContent = `تفسير الآية ${ayah} من سورة ${document.getElementById('reader-title').textContent}`;
+    body.innerHTML = '<p class="loading-text">جاري تحميل التفسير...</p>';
+    modal.classList.add('active');
+
+    try {
+        const res = await fetch(`https://api.quran.com/api/v4/quran/tafsirs/1?verse_key=${surah}:${ayah}`);
+        const data = await res.json();
+        if (data.tafsir && data.tafsir.text) {
+            const cleanText = data.tafsir.text.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+            body.innerHTML = `<p>${cleanText}</p>`;
+        } else {
+            body.innerHTML = '<p class="loading-text">عذراً، التفسير غير متاح لهذه الآية حالياً.</p>';
+        }
+    } catch (e) {
+        console.error(e);
+        body.innerHTML = '<p class="loading-text">تعذر تحميل التفسير. تأكد من اتصالك بالإنترنت.</p>';
+    }
+
+    document.getElementById('close-tafsir').onclick = () => {
+        modal.classList.remove('active');
+    };
+    modal.onclick = (e) => {
+        if (e.target === modal) modal.classList.remove('active');
+    };
 }
