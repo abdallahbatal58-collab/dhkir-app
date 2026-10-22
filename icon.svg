@@ -1,14 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0a3d2a"/>
-      <stop offset="100%" stop-color="#03100a"/>
-    </linearGradient>
-    <linearGradient id="gold" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#f4e4b8"/>
-      <stop offset="100%" stop-color="#a8824a"/>
-    </linearGradient>
-  </defs>
-  <rect width="512" height="512" rx="120" fill="url(#bg)"/>
-  <text x="256" y="330" font-family="'Aref Ruqaa', 'Amiri', serif" font-size="200" font-weight="bold" fill="url(#gold)" text-anchor="middle">ذِكْر</text>
+    <!-- الخلفية الخضراء الداكنة -->
+    <rect width="512" height="512" fill="#0a3d2a"/>
+
+    <!-- المربع المستقيم -->
+    <rect x="80" y="80" width="352" height="352" fill="none" stroke="#d4af37" stroke-width="3" opacity="0.9"/>
+
+    <!-- المربع المائل (يصنع النجمة الثمانية) -->
+    <polygon points="256,50 462,256 256,462 50,256" fill="none" stroke="#d4af37" stroke-width="3" opacity="0.9"/>
+
+    <!-- الدائرة الذهبية -->
+    <circle cx="256" cy="256" r="140" fill="none" stroke="#d4af37" stroke-width="3" opacity="0.9"/>
+
+    <!-- القبة الذهبية -->
+    <path d="M 180,320 Q 180,200 256,160 Q 332,200 332,320 Z" fill="#d4af37"/>
+
+    <!-- القمة العلوية للقبة -->
+    <line x1="256" y1="160" x2="256" y2="130" stroke="#d4af37" stroke-width="4"/>
+    <circle cx="256" cy="125" r="5" fill="#d4af37"/>
+
+    <!-- قاعدة القبة -->
+    <line x1="160" y1="320" x2="352" y2="320" stroke="#d4af37" stroke-width="4" stroke-linecap="round"/>
 </svg>
