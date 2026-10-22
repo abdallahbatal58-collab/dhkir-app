@@ -1,18 +1,18 @@
 /* ═══════════════════════════════════════════════════════════════
-   ذِكْر | Service Worker v4.4.0
+   ذِكْر | Service Worker v4.5.0
    ═══════════════════════════════════════════════════════════════ */
 
-const CACHE_STATIC = 'dhikr-static-v4.4.0';
-const CACHE_API = 'dhikr-api-v4.4.0';
+const CACHE_STATIC = 'dhikr-static-v4.5.0';
+const CACHE_API = 'dhikr-api-v4.5.0';
 const CACHE_MAX_ITEMS = 100;
 
 const PRECACHE = [
     './',
     './index.html',
     './manifest.json',
-    './css/style.css?v=4.4.0',
-    './js/data.js?v=4.4.0',
-    './js/app.js?v=4.4.0',
+    './css/style.css?v=4.5.0',
+    './js/data.js?v=4.5.0',
+    './js/app.js?v=4.5.0',
     './icon.svg',
     'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css',
     'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js',
