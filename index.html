@@ -20,10 +20,10 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&family=Tajawal:wght@300;400;500;700;800&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
 
-    <link rel="stylesheet" href="css/style.css?v=4.3.0">
+    <link rel="stylesheet" href="css/style.css?v=4.4.0">
 </head>
 <body>
 
@@ -63,10 +63,7 @@
 <!-- ═════ Splash ═════ -->
 <div id="splash">
     <div class="splash-content">
-        <svg width="120" height="120" viewBox="0 0 512 512" style="margin-bottom:20px">
-            <use href="icon.svg#logo"></use> <!-- Assuming we embed it or load via img -->
-        </svg>
-        <img src="icon.svg" alt="Logo" style="width:120px; height:120px; margin-bottom:20px;">
+        <div class="bismillah-splash">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>
         <h1 class="splash-title">ذِكْر</h1>
         <div class="spinner"></div>
     </div>
@@ -265,7 +262,7 @@
                     </div>
                 </div>
 
-                <p class="app-version">الإصدار 4.3.0</p>
+                <p class="app-version">الإصدار 4.4.0</p>
             </section>
 
         </div>
@@ -350,7 +347,7 @@
         </div>
     </div>
 
-    <!-- ═════ Audio Player Bar (Surah Level) ═════ -->
+    <!-- ═════ Audio Player Bar ═════ -->
     <div class="audio-player-bar" id="audio-player-bar">
         <div class="audio-controls">
             <button id="btn-play-pause" class="icon-btn play-btn" aria-label="تشغيل">
@@ -358,7 +355,7 @@
             </button>
         </div>
         <div class="audio-info">
-            <span id="audio-status-label">استمع للسورة</span>
+            <span id="audio-status-label">السورة كاملة</span>
             <select id="reciter-select" class="reciter-select" aria-label="اختر القارئ"></select>
         </div>
         <div class="audio-progress-wrap">
@@ -391,7 +388,7 @@
             </button>
         </div>
         <div class="bottom-sheet-body" id="sheet-tafsir-body">
-            <!-- Tafsir text will be injected here -->
+            <!-- Tafsir text injected here -->
         </div>
     </div>
 </div>
@@ -436,7 +433,7 @@ if ('serviceWorker' in navigator) {
     });
 }
 </script>
-<script src="js/data.js?v=4.3.0"></script>
-<script src="js/app.js?v=4.3.0"></script>
+<script src="js/data.js?v=4.4.0"></script>
+<script src="js/app.js?v=4.4.0"></script>
 </body>
 </html>
