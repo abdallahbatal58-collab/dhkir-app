@@ -26,15 +26,13 @@ let swiper = null;
 /* ═══════════════════ Quran Audio & Reciters State ═══════════════════ */
 const RECITERS = [
     { id: 'alafasy', name: 'مشاري العفاسي', surahCdn: 'ar.alafasy', ayahCdn: 'Alafasy_128kbps' },
-    { id: 'basit', name: 'عبد الباسط مرتل', surahCdn: 'ar.abdulbasitmurattal', ayahCdn: 'Abdul_Basit_Murattal_192kbps' },
     { id: 'husary', name: 'محمود الحصري', surahCdn: 'ar.husary', ayahCdn: 'Husary_128kbps' },
     { id: 'minshawi', name: 'محمد المنشاوي', surahCdn: 'ar.minshawi', ayahCdn: 'Minshawy_Murattal_128kbps' },
-    { id: 'sudais', name: 'عبد الرحمن السديس', surahCdn: 'ar.abdurrahmaansudais', ayahCdn: 'Sudais_128kbps' },
-    { id: 'shatri', name: 'أبو بكر الشاطري', surahCdn: 'ar.shaatree', ayahCdn: 'Shatri_128kbps' },
     { id: 'maher', name: 'ماهر المعيقلي', surahCdn: 'ar.mahermuaiqly', ayahCdn: 'Maher_AlMuaiqly_128kbps' },
+    { id: 'shatri', name: 'أبو بكر الشاطري', surahCdn: 'ar.shaatree', ayahCdn: 'Shatri_128kbps' },
     { id: 'ajamy', name: 'أحمد العجمي', surahCdn: 'ar.ahmedajamy', ayahCdn: 'Ajamy_128kbps' },
-    { id: 'yasser', name: 'ياسر الدوسري', surahCdn: 'ar.yasseraldossari', ayahCdn: 'Yasser_Ad-Dussary_128kbps' },
-    { id: 'ghamadi', name: 'سعد الغامدي', surahCdn: 'ar.saoodshuraym', ayahCdn: 'Ghamadi_40kbps' }
+    { id: 'hudhaify', name: 'علي الحذيفي', surahCdn: 'ar.hudhaify', ayahCdn: 'Hudhaify_128kbps' },
+    { id: 'ayyoub', name: 'محمد أيوب', surahCdn: 'ar.muhammadayyoub', ayahCdn: 'Muhammad_Ayyoub_128kbps' }
 ];
 
 const quranAudio = {
@@ -847,6 +845,7 @@ function setupAudioPlayer() {
         reciterSelect.value = quranAudio.reciterId;
         reciterSelect.onchange = (e) => {
             quranAudio.reciterId = e.target.value;
+            // إجبار التحديث الفوري للقارئ أثناء التشغيل
             if (quranAudio.isPlayingSurah) {
                 loadAndPlaySurah(quranAudio.currentSurah);
             }
@@ -897,10 +896,16 @@ function setupAudioPlayer() {
 function loadAndPlaySurah(surahNum) {
     const reciter = getReciterObj();
     const url = `https://cdn.islamic.network/quran/audio-surah/128/${reciter.surahCdn}/${surahNum}.mp3`;
+    
+    // تفريغ المصدر القديم وإعادة التحميل لضمان التحديث الفوري
+    quranAudio.surahAudio.pause();
+    quranAudio.surahAudio.currentTime = 0;
     quranAudio.surahAudio.src = url;
+    quranAudio.surahAudio.load();
+
     quranAudio.surahAudio.play().catch(err => {
         console.warn('Surah audio play failed:', err);
-        showToast('تعذر تشغيل السورة. تأكد من الإنترنت.');
+        showToast('تعذر تشغيل السورة. تأكد من الإنترنت أو جرب قارئاً آخر.');
         quranAudio.isPlayingSurah = false;
         updatePlayerUI();
     });
@@ -918,7 +923,6 @@ function setupAyahDoubleTap() {
         const tapLength = currentTime - lastTap;
 
         if (tapLength < 300 && tapLength > 0) {
-            // Double tap detected
             e.preventDefault();
             const surah = parseInt(ayahEl.dataset.surah, 10);
             const ayah = parseInt(ayahEl.dataset.ayah, 10);
@@ -993,7 +997,11 @@ function loadAndPlayAyah(surahNum, ayahNum) {
     const a = String(ayahNum).padStart(3, '0');
     const url = `https://everyayah.com/data/${reciter.ayahCdn}/${s}${a}.mp3`;
     
+    quranAudio.ayahAudio.pause();
+    quranAudio.ayahAudio.currentTime = 0;
     quranAudio.ayahAudio.src = url;
+    quranAudio.ayahAudio.load();
+    
     quranAudio.ayahAudio.play().catch(err => {
         showToast('تعذر تشغيل الآية.');
     });
