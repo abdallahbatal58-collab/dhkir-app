@@ -536,20 +536,23 @@ async function openSurah(number, name) {
             data.verses.forEach(v => {
                 let text = v.text_uthmani_tajweed || '';
                 
-                // تحويل التجويد
+                // 1. حذف وسوم نهاية الآية القادمة من الـ API تماماً
+                text = text.replace(/<span[^>]*class="end"[^>]*>.*?<\/span>/g, '');
+                
+                // 2. تحويل التجويد
                 text = text.replace(/<tajweed\s+class=["']?([a-z_]+)["']?>/g, '<span class="$1">')
                            .replace(/<\/tajweed>/g, '</span>');
                 
-                // 🔴 حذف الدائرة الزرقاء القادمة من الـ API نهائياً
-                text = text.replace(/<span[^>]*class=["']?end["']?[^>]*>.*?<\/span>/g, '');
+                // 3. 🔴 حذف الرموز المزعجة (الدائرة الزرقاء/السوداء ۝ و ۞ و ۩) بشكل قسري
+                text = text.replace(/[\u06DD\u06DE\u06E9]/g, '');
                 
-                // إزالة أي أرقام عربية متبقية داخل النص لتنظيفه تماماً
-                text = text.replace(/[٠-٩0-9۰-۹۝]+/g, '');
+                // 4. حذف أي أرقام عربية متبقية
+                text = text.replace(/[٠-٩0-9۰-۹]+/g, '');
 
                 const ayahNum = parseInt(v.verse_key.split(':')[1], 10);
                 const arabicNum = ayahNum.toLocaleString('ar-EG');
 
-                // إضافة نص الآية + رقم الآية بتصميمنا الخاص
+                // إضافة الآية + رقم الآية بتصميمنا
                 html += `<span class="ayah-text" data-ayah="${ayahNum}" data-surah="${number}">${text}</span> <span class="ayah-number">${arabicNum}</span> `;
             });
             html += `</div>`;
