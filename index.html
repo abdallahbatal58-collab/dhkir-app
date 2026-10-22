@@ -20,7 +20,6 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- تم إضافة خط Aref Ruqaa -->
     <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&family=Tajawal:wght@300;400;500;700;800&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
 
@@ -28,7 +27,6 @@
 </head>
 <body>
 
-<!-- ═════ SVG Icon Sprite ═════ -->
 <svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
     <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-7h-6v7H4a1 1 0 0 1-1-1V9.5Z"/></symbol>
     <symbol id="i-sunrise" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M4.93 5.93l2.83 2.83M2 12h4M19 12h4M17.66 8.34l2.83-2.83M22 22H2M8 22a4 4 0 0 1 8 0"/></symbol>
@@ -61,7 +59,6 @@
     <symbol id="i-play" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></symbol>
 </svg>
 
-<!-- ═════ Splash ═════ -->
 <div id="splash">
     <div class="splash-content">
         <div class="bismillah-splash">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>
@@ -70,7 +67,6 @@
     </div>
 </div>
 
-<!-- ═════ App Shell ═════ -->
 <div id="app">
 
     <header id="header">
@@ -335,7 +331,6 @@
 </aside>
 <div id="sidebar-overlay"></div>
 
-<!-- ═════ Overlay: Quran Reader ═════ -->
 <div id="overlay-quran-reader" class="overlay-page">
     <div class="reader-header">
         <button id="close-reader" class="icon-btn" aria-label="رجوع">
@@ -348,7 +343,6 @@
         </div>
     </div>
 
-    <!-- ═════ Audio Player Bar ═════ -->
     <div class="audio-player-bar" id="audio-player-bar">
         <div class="audio-controls">
             <button id="btn-play-pause" class="icon-btn play-btn" aria-label="تشغيل">
@@ -369,7 +363,6 @@
     </div>
 </div>
 
-<!-- ═════ Bottom Sheet for Ayah Actions ═════ -->
 <div id="ayah-bottom-sheet" class="bottom-sheet">
     <div class="bottom-sheet-content">
         <div class="bottom-sheet-header">
@@ -388,14 +381,11 @@
                 عرض التفسير الميسر
             </button>
         </div>
-        <div class="bottom-sheet-body" id="sheet-tafsir-body">
-            <!-- Tafsir text injected here -->
-        </div>
+        <div class="bottom-sheet-body" id="sheet-tafsir-body"></div>
     </div>
 </div>
 <div id="bottom-sheet-overlay" class="bottom-sheet-overlay"></div>
 
-<!-- ═════ Overlay: Search ═════ -->
 <div id="overlay-search" class="overlay-page">
     <div class="reader-header">
         <button id="close-search" class="icon-btn" aria-label="رجوع">
@@ -412,6 +402,10 @@
 </button>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<!-- ═════ عناصر الصوت (ضرورية لعمل المشغل) ═════ -->
+<audio id="surah-audio" preload="none"></audio>
+<audio id="ayah-audio" preload="none"></audio>
 
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
