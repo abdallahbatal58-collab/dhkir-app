@@ -1,22 +1,22 @@
 /* ═══════════════════════════════════════════════════════════════
-   ذِكْر | Service Worker v4.3.0
+   ذِكْر | Service Worker v4.4.0
    ═══════════════════════════════════════════════════════════════ */
 
-const CACHE_STATIC = 'dhikr-static-v4.3.0';
-const CACHE_API = 'dhikr-api-v4.3.0';
+const CACHE_STATIC = 'dhikr-static-v4.4.0';
+const CACHE_API = 'dhikr-api-v4.4.0';
 const CACHE_MAX_ITEMS = 100;
 
 const PRECACHE = [
     './',
     './index.html',
     './manifest.json',
-    './css/style.css?v=4.3.0',
-    './js/data.js?v=4.3.0',
-    './js/app.js?v=4.3.0',
+    './css/style.css?v=4.4.0',
+    './js/data.js?v=4.4.0',
+    './js/app.js?v=4.4.0',
     './icon.svg',
     'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css',
     'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js',
-    'https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800&family=Scheherazade+New:wght@400;700&display=swap'
+    'https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&family=Tajawal:wght@300;400;500;700;800&family=Scheherazade+New:wght@400;700&display=swap'
 ];
 
 self.addEventListener('install', (e) => {
@@ -49,7 +49,6 @@ self.addEventListener('fetch', (e) => {
 
     const url = new URL(req.url);
 
-    // API & Audio CDN (Network First)
     if (url.hostname === 'api.alquran.cloud' ||
         url.hostname === 'api.quran.com' ||
         url.hostname === 'api.aladhan.com' ||
@@ -71,7 +70,6 @@ self.addEventListener('fetch', (e) => {
         return;
     }
 
-    // HTML
     if (req.mode === 'navigate' || req.destination === 'document') {
         e.respondWith(
             fetch(req).then(res => {
@@ -83,7 +81,6 @@ self.addEventListener('fetch', (e) => {
         return;
     }
 
-    // Static (Cache First)
     e.respondWith(
         caches.match(req).then(cached => {
             if (cached) return cached;
