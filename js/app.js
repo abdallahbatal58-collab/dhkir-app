@@ -516,33 +516,40 @@ async function openSurah(number, name) {
     stopAllAudio();
 
     try {
-        // جلب النص العثماني مع التجويد من Quran.com API v4
         const res = await fetch(`https://api.quran.com/api/v4/quran/verses/uthmani_tajweed?chapter_number=${number}`);
         const data = await res.json();
 
         if (data.verses && data.verses.length) {
             let html = '';
             
-            // إضافة إطار اسم السورة
-            if (number !== 9) {
-                html += `<div class="surah-header">سُورَةُ ${name}</div>`;
-            }
+            // 1. اسم السورة كنص عادي بخط المصحف (بدون إطار)
+            let cleanName = name.replace(/^سُورَةُ\s*/, '').replace(/^سورة\s*/, '');
+            html += `<div style="text-align:center; font-family:'KFGQPC Uthmanic Hafs', 'Amiri Quran', serif; font-size: calc(var(--quran-size) + 12px); color: var(--accent); margin-bottom: 30px; font-weight: bold;">سُورَةُ ${cleanName}</div>`;
             
-            // إضافة البسملة (ما عدا الفاتحة والتوبة)
+            // 2. البسملة
             if (number !== 1 && number !== 9) {
-                html += `<div style="text-align:center;margin-bottom:20px;font-family:'KFGQPC Uthmanic Hafs', serif;font-size:calc(var(--quran-size) + 6px);color:var(--accent)">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>`;
+                html += `<div style="text-align:center; margin-bottom:30px; font-family:'KFGQPC Uthmanic Hafs', 'Amiri Quran', serif; font-size:calc(var(--quran-size) + 4px); color:var(--text);">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>`;
             }
 
+            // 3. نص الآيات
             html += `<div class="mushaf-text">`;
             data.verses.forEach(v => {
                 let text = v.text_uthmani_tajweed || '';
-                text = text.replace(/<tajweed\s+class=["']?([a-z_]+)["']?>/g, '<span class="$1">')
-                           .replace(/<\/tajweed>/g, '</span>')
-                           .replace(/<span class="?end"?>/g, '')
-                           .replace(/<\/span>/g, '</span>');
                 
-                const ayahNum = v.verse_key.split(':')[1];
-                html += `<span class="ayah-text" data-ayah="${ayahNum}" data-surah="${number}">${text}</span> <span class="ayah-end-marker">${ayahNum}</span> `;
+                // تطبيق ألوان التجويد
+                text = text.replace(/<tajweed\s+class=["']?([a-z_]+)["']?>/g, '<span class="$1">')
+                           .replace(/<\/tajweed>/g, '</span>');
+                
+                // إزالة علامة نهاية الآية (التي تحتوي على الرقم)
+                text = text.replace(/<span class="end">.*?<\/span>/g, '');
+                
+                // إزالة رموز الأحزاب (۞) وعلامات الوقف المزعجة ليكون النص نظيفاً
+                text = text.replace(/[\u06DE\u06E9\u06D6-\u06DC\u06DF-\u06E8\u06EA-\u06ED]/g, '');
+                
+                // إزالة أي أرقام متبقية
+                text = text.replace(/[٠-٩0-9۰-۹]+/g, '');
+
+                html += `<span class="ayah-text" data-ayah="${v.verse_key.split(':')[1]}" data-surah="${number}">${text}</span> `;
             });
             html += `</div>`;
             
