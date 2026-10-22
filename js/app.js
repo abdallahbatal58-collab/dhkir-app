@@ -23,30 +23,31 @@ const settings = {
 const TASBIH_CIRCUMFERENCE = 2 * Math.PI * 112;
 let swiper = null;
 
-/* ═══════════════════ Quran Audio State ═══════════════════ */
+/* ═══════════════════ Quran Audio & Reciters State ═══════════════════ */
 const RECITERS = [
-    { id: 'Alafasy_128kbps', name: 'مشاري العفاسي' },
-    { id: 'Abdul_Basit_Murattal_192kbps', name: 'عبد الباسط مرتل' },
-    { id: 'Husary_128kbps', name: 'محمود الحصري' },
-    { id: 'Minshawy_Murattal_128kbps', name: 'محمد المنشاوي' },
-    { id: 'Sudais_128kbps', name: 'عبد الرحمن السديس' },
-    { id: 'Shatri_128kbps', name: 'أبو بكر الشاطري' },
-    { id: 'Maher_AlMuaiqly_128kbps', name: 'ماهر المعيقلي' },
-    { id: 'Ajamy_128kbps', name: 'أحمد العجمي' },
-    { id: 'Yasser_Ad-Dussary_128kbps', name: 'ياسر الدوسري' },
-    { id: 'Ghamadi_40kbps', name: 'سعد الغامدي' }
+    { id: 'alafasy', name: 'مشاري العفاسي', surahCdn: 'ar.alafasy', ayahCdn: 'Alafasy_128kbps' },
+    { id: 'basit', name: 'عبد الباسط مرتل', surahCdn: 'ar.abdulbasitmurattal', ayahCdn: 'Abdul_Basit_Murattal_192kbps' },
+    { id: 'husary', name: 'محمود الحصري', surahCdn: 'ar.husary', ayahCdn: 'Husary_128kbps' },
+    { id: 'minshawi', name: 'محمد المنشاوي', surahCdn: 'ar.minshawi', ayahCdn: 'Minshawy_Murattal_128kbps' },
+    { id: 'sudais', name: 'عبد الرحمن السديس', surahCdn: 'ar.abdurrahmaansudais', ayahCdn: 'Sudais_128kbps' },
+    { id: 'shatri', name: 'أبو بكر الشاطري', surahCdn: 'ar.shaatree', ayahCdn: 'Shatri_128kbps' },
+    { id: 'maher', name: 'ماهر المعيقلي', surahCdn: 'ar.mahermuaiqly', ayahCdn: 'Maher_AlMuaiqly_128kbps' },
+    { id: 'ajamy', name: 'أحمد العجمي', surahCdn: 'ar.ahmedajamy', ayahCdn: 'Ajamy_128kbps' },
+    { id: 'yasser', name: 'ياسر الدوسري', surahCdn: 'ar.yasseraldossari', ayahCdn: 'Yasser_Ad-Dussary_128kbps' },
+    { id: 'ghamadi', name: 'سعد الغامدي', surahCdn: 'ar.saoodshuraym', ayahCdn: 'Ghamadi_40kbps' } // Fallback for Surah
 ];
 
 const quranAudio = {
-    audio: new Audio(),
+    surahAudio: new Audio(), // مشغل السورة الكاملة
+    ayahAudio: new Audio(),  // مشغل الآية المفردة
     currentSurah: null,
     currentAyah: 1,
-    totalAyahs: 0,
-    reciter: RECITERS[0].id,
-    isPlaying: false,
-    isPlayingFullSurah: false,
-    ayahElements: []
+    reciterId: 'alafasy',
+    isPlayingSurah: false,
+    isPlayingAyah: false
 };
+
+let selectedAyahData = { surah: null, ayah: null };
 
 /* ═══════════════════ Bootstrap ═══════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
@@ -69,6 +70,8 @@ function initApp() {
     setupPWA();
     setupQuranZoom();
     setupAudioPlayer();
+    setupAyahDoubleTap();
+    setupBottomSheet();
     document.addEventListener('click', handleCardClick);
     renderAllAdhkar();
     renderFavorites();
@@ -192,7 +195,7 @@ function setupNavigation() {
     document.getElementById('sidebar-overlay').onclick = closeSidebar;
     document.getElementById('close-reader').onclick = () => {
         document.getElementById('overlay-quran-reader').classList.remove('active');
-        stopAudio();
+        stopAllAudio();
     };
     document.getElementById('close-search').onclick = () => {
         document.getElementById('overlay-search').classList.remove('active');
@@ -522,16 +525,14 @@ async function openSurah(number, name) {
     // إعادة تعيين حالة المشغل
     quranAudio.currentSurah = number;
     quranAudio.currentAyah = 1;
-    quranAudio.isPlaying = false;
-    quranAudio.isPlayingFullSurah = false;
-    stopAudio();
+    quranAudio.isPlayingSurah = false;
+    stopAllAudio();
 
     let ok = false;
     try {
         const res = await fetch(`https://api.quran.com/api/v4/verses/by_chapter/${number}?fields=text_uthmani_tajweed&per_page=300`);
         const data = await res.json();
         if (data.verses && data.verses.length) {
-            quranAudio.totalAyahs = data.verses.length;
             let html = '';
             if (number !== 1 && number !== 9) {
                 html += `<div style="text-align:center;margin-bottom:24px"><span style="font-family:'Amiri Quran',serif;font-size:calc(var(--quran-size) + 4px);color:var(--accent)">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</span></div>`;
@@ -540,22 +541,11 @@ async function openSurah(number, name) {
                 let t = formatTajweed(v.text_uthmani_tajweed || '');
                 t = t.replace(/[٠-٩0-9۰-۹۝\[\]\(\)]+/g, '').trim();
                 const n = v.verse_key.split(':')[1];
-                return `<span class="ayah-wrapper" data-ayah="${n}" data-surah="${number}">
-                    <span>${t}</span>
-                    <span class="ayah-actions">
-                        <button class="btn-ayah-action btn-play-ayah" data-ayah="${n}" data-surah="${number}" title="تشغيل الآية">
-                            <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                        </button>
-                        <button class="btn-ayah-action btn-tafsir-ayah" data-ayah="${n}" data-surah="${number}" title="التفسير">
-                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                        </button>
-                    </span>
-                    <span class="verse-number">${n}</span>
-                </span> `;
+                // النص النظيف فقط بدون أزرار
+                return `<span class="ayah-text" data-ayah="${n}" data-surah="${number}">${t}</span> <span class="verse-number">${n}</span> `;
             }).join('');
             container.innerHTML = html;
             ok = true;
-            bindAyahActions();
         }
     } catch (e) { console.error(e); }
 
@@ -564,7 +554,6 @@ async function openSurah(number, name) {
             const res = await fetch(`https://api.alquran.cloud/v1/surah/${number}/quran-tajweed`);
             const data = await res.json();
             if (data.code === 200) {
-                quranAudio.totalAyahs = data.data.ayahs.length;
                 let html = '';
                 if (number !== 1 && number !== 9) {
                     html += `<div style="text-align:center;margin-bottom:24px"><span style="font-family:'Amiri Quran',serif;font-size:calc(var(--quran-size) + 4px);color:var(--accent)">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</span></div>`;
@@ -572,22 +561,10 @@ async function openSurah(number, name) {
                 html += data.data.ayahs.map(a => {
                     let t = formatTajweed(a.text);
                     t = t.replace(/[٠-٩0-9۰-۹۝\[\]\(\)]+/g, '').trim();
-                    return `<span class="ayah-wrapper" data-ayah="${a.numberInSurah}" data-surah="${number}">
-                        <span>${t}</span>
-                        <span class="ayah-actions">
-                            <button class="btn-ayah-action btn-play-ayah" data-ayah="${a.numberInSurah}" data-surah="${number}" title="تشغيل الآية">
-                                <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                            </button>
-                            <button class="btn-ayah-action btn-tafsir-ayah" data-ayah="${a.numberInSurah}" data-surah="${number}" title="التفسير">
-                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                            </button>
-                        </span>
-                        <span class="verse-number">${a.numberInSurah}</span>
-                    </span> `;
+                    return `<span class="ayah-text" data-ayah="${a.numberInSurah}" data-surah="${number}">${t}</span> <span class="verse-number">${a.numberInSurah}</span> `;
                 }).join('');
                 container.innerHTML = html;
                 ok = true;
-                bindAyahActions();
             }
         } catch (e) {}
     }
@@ -842,190 +819,200 @@ function showToast(msg) {
     t._timeout = setTimeout(() => t.classList.remove('show'), 2400);
 }
 
-/* ═══════════════════ Quran Audio Functions ═══════════════════ */
-function bindAyahActions() {
-    document.querySelectorAll('.btn-play-ayah').forEach(btn => {
-        btn.onclick = (e) => {
-            e.stopPropagation();
-            const ayah = parseInt(btn.dataset.ayah, 10);
-            const surah = parseInt(btn.dataset.surah, 10);
-            playAyah(surah, ayah);
-        };
-    });
-    document.querySelectorAll('.btn-tafsir-ayah').forEach(btn => {
-        btn.onclick = (e) => {
-            e.stopPropagation();
-            const ayah = parseInt(btn.dataset.ayah, 10);
-            const surah = parseInt(btn.dataset.surah, 10);
-            showTafsir(surah, ayah);
-        };
-    });
+/* ═══════════════════ Quran Audio & Tafsir (New Logic) ═══════════════════ */
+
+function getReciterObj() {
+    return RECITERS.find(r => r.id === quranAudio.reciterId) || RECITERS[0];
 }
 
-function getAyahAudioUrl(surah, ayah) {
-    const s = String(surah).padStart(3, '0');
-    const a = String(ayah).padStart(3, '0');
-    return `https://everyayah.com/data/${quranAudio.reciter}/${s}${a}.mp3`;
-}
-
-function playAyah(surah, ayah) {
-    quranAudio.isPlayingFullSurah = false;
-    quranAudio.currentAyah = ayah;
-    quranAudio.isPlaying = true;
-    loadAndPlayAudio(surah, ayah);
-    highlightAyah(ayah);
-}
-
-function loadAndPlayAudio(surah, ayah) {
-    const url = getAyahAudioUrl(surah, ayah);
-    quranAudio.audio.src = url;
-    quranAudio.audio.play().catch(err => {
-        console.warn('Audio play failed:', err);
-        showToast('تعذر تشغيل الصوت. تأكد من اتصالك بالإنترنت.');
-    });
+function stopAllAudio() {
+    quranAudio.surahAudio.pause();
+    quranAudio.surahAudio.currentTime = 0;
+    quranAudio.isPlayingSurah = false;
+    quranAudio.ayahAudio.pause();
+    quranAudio.ayahAudio.currentTime = 0;
+    quranAudio.isPlayingAyah = false;
     updatePlayerUI();
-    document.getElementById('current-ayah-label').textContent = `الآية ${ayah}`;
-}
-
-function stopAudio() {
-    quranAudio.audio.pause();
-    quranAudio.audio.currentTime = 0;
-    quranAudio.isPlaying = false;
-    quranAudio.isPlayingFullSurah = false;
-    updatePlayerUI();
-    removeHighlight();
 }
 
 function updatePlayerUI() {
     const playBtn = document.getElementById('btn-play-pause');
     if (playBtn) {
-        playBtn.innerHTML = quranAudio.isPlaying
+        playBtn.innerHTML = quranAudio.isPlayingSurah
             ? '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>'
             : '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
     }
-    document.getElementById('current-ayah-label').textContent = `الآية ${quranAudio.currentAyah}`;
-}
-
-function highlightAyah(ayah) {
-    removeHighlight();
-    const el = document.querySelector(`.ayah-wrapper[data-ayah="${ayah}"]`);
-    if (el) {
-        el.classList.add('ayah-playing');
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-}
-
-function removeHighlight() {
-    document.querySelectorAll('.ayah-wrapper').forEach(el => el.classList.remove('ayah-playing'));
 }
 
 function setupAudioPlayer() {
     const playPauseBtn = document.getElementById('btn-play-pause');
-    const prevBtn = document.getElementById('btn-prev-ayah');
-    const nextBtn = document.getElementById('btn-next-ayah');
-    const playSurahBtn = document.getElementById('btn-play-surah');
     const reciterSelect = document.getElementById('reciter-select');
     const progressBar = document.getElementById('audio-progress');
 
     if (reciterSelect) {
         reciterSelect.innerHTML = RECITERS.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
-        reciterSelect.value = quranAudio.reciter;
+        reciterSelect.value = quranAudio.reciterId;
         reciterSelect.onchange = (e) => {
-            quranAudio.reciter = e.target.value;
-            if (quranAudio.isPlaying) {
-                loadAndPlayAudio(quranAudio.currentSurah, quranAudio.currentAyah);
+            quranAudio.reciterId = e.target.value;
+            if (quranAudio.isPlayingSurah) {
+                loadAndPlaySurah(quranAudio.currentSurah);
+            }
+            if (quranAudio.isPlayingAyah) {
+                // If playing an ayah in the sheet, update it
+                if (selectedAyahData.surah && selectedAyahData.ayah) {
+                    loadAndPlayAyah(selectedAyahData.surah, selectedAyahData.ayah);
+                }
             }
         };
     }
 
     playPauseBtn.onclick = () => {
-        if (quranAudio.isPlaying) {
-            quranAudio.audio.pause();
-            quranAudio.isPlaying = false;
+        if (quranAudio.isPlayingSurah) {
+            quranAudio.surahAudio.pause();
+            quranAudio.isPlayingSurah = false;
         } else {
-            quranAudio.isPlaying = true;
-            if (!quranAudio.audio.src) {
-                loadAndPlayAudio(quranAudio.currentSurah, quranAudio.currentAyah);
+            quranAudio.isPlayingSurah = true;
+            if (!quranAudio.surahAudio.src) {
+                loadAndPlaySurah(quranAudio.currentSurah);
             } else {
-                quranAudio.audio.play();
+                quranAudio.surahAudio.play();
             }
         }
         updatePlayerUI();
     };
 
-    prevBtn.onclick = () => {
-        if (quranAudio.currentAyah > 1) {
-            quranAudio.currentAyah--;
-            loadAndPlayAudio(quranAudio.currentSurah, quranAudio.currentAyah);
-            highlightAyah(quranAudio.currentAyah);
-        }
-    };
-
-    nextBtn.onclick = () => {
-        if (quranAudio.currentAyah < quranAudio.totalAyahs) {
-            quranAudio.currentAyah++;
-            loadAndPlayAudio(quranAudio.currentSurah, quranAudio.currentAyah);
-            highlightAyah(quranAudio.currentAyah);
-        }
-    };
-
-    playSurahBtn.onclick = () => {
-        quranAudio.isPlayingFullSurah = true;
-        quranAudio.currentAyah = 1;
-        loadAndPlayAudio(quranAudio.currentSurah, 1);
-        highlightAyah(1);
-    };
-
-    quranAudio.audio.addEventListener('timeupdate', () => {
-        if (quranAudio.audio.duration) {
-            progressBar.value = (quranAudio.audio.currentTime / quranAudio.audio.duration) * 100;
+    quranAudio.surahAudio.addEventListener('timeupdate', () => {
+        if (quranAudio.surahAudio.duration) {
+            progressBar.value = (quranAudio.surahAudio.currentTime / quranAudio.surahAudio.duration) * 100;
         }
     });
     progressBar.oninput = (e) => {
-        if (quranAudio.audio.duration) {
-            quranAudio.audio.currentTime = (e.target.value / 100) * quranAudio.audio.duration;
+        if (quranAudio.surahAudio.duration) {
+            quranAudio.surahAudio.currentTime = (e.target.value / 100) * quranAudio.surahAudio.duration;
         }
     };
 
-    quranAudio.audio.addEventListener('ended', () => {
-        if (quranAudio.isPlayingFullSurah && quranAudio.currentAyah < quranAudio.totalAyahs) {
-            quranAudio.currentAyah++;
-            loadAndPlayAudio(quranAudio.currentSurah, quranAudio.currentAyah);
-            highlightAyah(quranAudio.currentAyah);
-        } else {
-            quranAudio.isPlaying = false;
-            updatePlayerUI();
-        }
+    quranAudio.surahAudio.addEventListener('ended', () => {
+        quranAudio.isPlayingSurah = false;
+        updatePlayerUI();
+    });
+
+    // Ayah Audio Controls
+    quranAudio.ayahAudio.addEventListener('ended', () => {
+        quranAudio.isPlayingAyah = false;
     });
 }
 
-/* ═══════════════════ Tafsir Functions ═══════════════════ */
-async function showTafsir(surah, ayah) {
-    const modal = document.getElementById('tafsir-modal');
-    const body = document.getElementById('tafsir-body');
-    const title = document.getElementById('tafsir-title');
-    title.textContent = `تفسير الآية ${ayah} من سورة ${document.getElementById('reader-title').textContent}`;
-    body.innerHTML = '<p class="loading-text">جاري تحميل التفسير...</p>';
-    modal.classList.add('active');
+function loadAndPlaySurah(surahNum) {
+    const reciter = getReciterObj();
+    const url = `https://cdn.islamic.network/quran/audio-surah/128/${reciter.surahCdn}/${surahNum}.mp3`;
+    quranAudio.surahAudio.src = url;
+    quranAudio.surahAudio.play().catch(err => {
+        console.warn('Surah audio play failed:', err);
+        showToast('تعذر تشغيل السورة. تأكد من الإنترنت.');
+        quranAudio.isPlayingSurah = false;
+        updatePlayerUI();
+    });
+    document.getElementById('audio-status-label').textContent = `السورة كاملة`;
+    updatePlayerUI();
+}
 
-    try {
-        const res = await fetch(`https://api.quran.com/api/v4/quran/tafsirs/1?verse_key=${surah}:${ayah}`);
-        const data = await res.json();
-        if (data.tafsir && data.tafsir.text) {
-            const cleanText = data.tafsir.text.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-            body.innerHTML = `<p>${cleanText}</p>`;
-        } else {
-            body.innerHTML = '<p class="loading-text">عذراً، التفسير غير متاح لهذه الآية حالياً.</p>';
+function setupAyahDoubleTap() {
+    let lastTap = 0;
+    document.getElementById('list-quran-verses').addEventListener('click', (e) => {
+        const ayahEl = e.target.closest('.ayah-text');
+        if (!ayahEl) return;
+
+        const currentTime = new Date().getTime();
+        const tapLength = currentTime - lastTap;
+
+        if (tapLength < 300 && tapLength > 0) {
+            // Double tap detected
+            e.preventDefault();
+            const surah = parseInt(ayahEl.dataset.surah, 10);
+            const ayah = parseInt(ayahEl.dataset.ayah, 10);
+            selectAyah(ayahEl, surah, ayah);
         }
-    } catch (e) {
-        console.error(e);
-        body.innerHTML = '<p class="loading-text">تعذر تحميل التفسير. تأكد من اتصالك بالإنترنت.</p>';
-    }
+        lastTap = currentTime;
+    });
+}
 
-    document.getElementById('close-tafsir').onclick = () => {
-        modal.classList.remove('active');
+function selectAyah(el, surah, ayah) {
+    // إزالة التحديد السابق
+    document.querySelectorAll('.ayah-text.ayah-selected').forEach(n => n.classList.remove('ayah-selected'));
+    
+    // إضافة التحديد الجديد
+    el.classList.add('ayah-selected');
+    selectedAyahData = { surah, ayah };
+
+    // تحديث الـ Bottom Sheet
+    document.getElementById('selected-ayah-label').textContent = `سورة ${document.getElementById('reader-title').textContent} - الآية ${ayah}`;
+    document.getElementById('sheet-tafsir-body').innerHTML = '';
+    document.getElementById('sheet-tafsir-body').classList.remove('show');
+    
+    // إظهار الـ Bottom Sheet
+    document.getElementById('ayah-bottom-sheet').classList.add('open');
+    document.getElementById('bottom-sheet-overlay').classList.add('open');
+
+    if (navigator.vibrate) navigator.vibrate(15);
+}
+
+function setupBottomSheet() {
+    const closeBtn = document.getElementById('close-bottom-sheet');
+    const overlay = document.getElementById('bottom-sheet-overlay');
+    const btnListen = document.getElementById('btn-sheet-listen');
+    const btnTafsir = document.getElementById('btn-sheet-tafsir');
+
+    const closeSheet = () => {
+        document.getElementById('ayah-bottom-sheet').classList.remove('open');
+        overlay.classList.remove('open');
+        document.querySelectorAll('.ayah-text.ayah-selected').forEach(n => n.classList.remove('ayah-selected'));
+        quranAudio.ayahAudio.pause();
+        quranAudio.ayahAudio.currentTime = 0;
+        quranAudio.isPlayingAyah = false;
     };
-    modal.onclick = (e) => {
-        if (e.target === modal) modal.classList.remove('active');
+
+    closeBtn.onclick = closeSheet;
+    overlay.onclick = closeSheet;
+
+    btnListen.onclick = () => {
+        if (!selectedAyahData.surah || !selectedAyahData.ayah) return;
+        loadAndPlayAyah(selectedAyahData.surah, selectedAyahData.ayah);
     };
+
+    btnTafsir.onclick = async () => {
+        if (!selectedAyahData.surah || !selectedAyahData.ayah) return;
+        const bodyEl = document.getElementById('sheet-tafsir-body');
+        bodyEl.classList.add('show');
+        bodyEl.innerHTML = '<p class="loading-text"><span class="spinner-sm"></span> جاري تحميل التفسير...</p>';
+        
+        try {
+            // Tafsir Muyassar API
+            const res = await fetch(`https://api.alquran.cloud/v1/ayah/${selectedAyahData.surah}:${selectedAyahData.ayah}/ar.muyassar`);
+            const data = await res.json();
+            if (data.code === 200 && data.data && data.data.text) {
+                bodyEl.innerHTML = `<p>${data.data.text}</p>`;
+            } else {
+                bodyEl.innerHTML = '<p class="loading-text">عذراً، التفسير غير متاح حالياً.</p>';
+            }
+        } catch (e) {
+            console.error(e);
+            bodyEl.innerHTML = '<p class="loading-text">تعذر تحميل التفسير. تأكد من الإنترنت.</p>';
+        }
+    };
+}
+
+function loadAndPlayAyah(surahNum, ayahNum) {
+    const reciter = getReciterObj();
+    const s = String(surahNum).padStart(3, '0');
+    const a = String(ayahNum).padStart(3, '0');
+    // Use everyayah for single ayah
+    const url = `https://everyayah.com/data/${reciter.ayahCdn}/${s}${a}.mp3`;
+    
+    quranAudio.ayahAudio.src = url;
+    quranAudio.ayahAudio.play().catch(err => {
+        showToast('تعذر تشغيل الآية.');
+    });
+    quranAudio.isPlayingAyah = true;
+    showToast(`جاري تشغيل الآية ${ayahNum}...`);
 }
