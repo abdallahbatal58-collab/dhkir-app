@@ -32,6 +32,7 @@
     --font-body:'Tajawal',system-ui,-apple-system,sans-serif;
     --font-display:'Amiri','Times New Roman',serif;
     --font-quran:'KFGQPC Uthmanic Hafs','Amiri Quran','Scheherazade New',serif;
+    --font-adhkar:'Amiri','Scheherazade New',serif; /* خط الأذكار (يدعم الفاصلة) */
 
     --text-xs:0.75rem; --text-sm:0.875rem; --text-base:1rem; --text-lg:1.125rem;
     --text-xl:1.25rem; --text-2xl:1.5rem; --text-3xl:1.875rem; --text-4xl:2.25rem;
@@ -280,8 +281,10 @@ a{color:inherit;text-decoration:none}
 .basmala,.istiadha{font-family:var(--font-display); font-size:var(--text-xl); font-weight:700; color:var(--accent);}
 .istiadha{font-size:var(--text-base);color:var(--text-muted)}
 
+/* ✅ تم تغيير الخط هنا إلى font-adhkar (Amiri) لحل مشكلة الفاصلة */
 .adhkar-text{
-    font-family:var(--font-quran); font-size:var(--adhkar-size);
+    font-family:var(--font-adhkar); 
+    font-size:var(--adhkar-size);
     line-height:var(--leading-quran); color:var(--text);
     margin-bottom:var(--s-3); text-align:justify;
     user-select:text; -webkit-user-select:text;
