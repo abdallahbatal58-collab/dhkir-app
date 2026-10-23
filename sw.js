@@ -1,18 +1,18 @@
 /* ═══════════════════════════════════════════════════════════════
-   ذِكْر | Service Worker v4.9.0
+   ذِكْر | Service Worker v5.0.0
    ═══════════════════════════════════════════════════════════════ */
 
-const CACHE_STATIC = 'dhikr-static-v4.9.0';
-const CACHE_API = 'dhikr-api-v4.9.0';
+const CACHE_STATIC = 'dhikr-static-v5.0.0';
+const CACHE_API = 'dhikr-api-v5.0.0';
 const CACHE_MAX_ITEMS = 100;
 
 const PRECACHE = [
     './',
     './index.html',
     './manifest.json',
-    './css/style.css?v=4.9.0',
-    './js/data.js?v=4.9.0',
-    './js/app.js?v=4.9.0',
+    './css/style.css?v=5.0.0',
+    './js/data.js?v=5.0.0',
+    './js/app.js?v=5.0.0',
     './icon.svg',
     'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css',
     'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js',
@@ -90,7 +90,7 @@ self.addEventListener('fetch', (e) => {
         return;
     }
 
-    // باقي الملفات (CSS, JS, Images)
+    // باقي الملفات (CSS, JS, Images) - الكاش أولاً
     e.respondWith(
         caches.match(req).then(cached => {
             if (cached) return cached;
