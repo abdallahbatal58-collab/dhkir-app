@@ -50,7 +50,6 @@ let selectedAyahData = { surah: null, ayah: null };
 
 /* ═══════════════════ Bootstrap ═══════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
-    // تم إزالة التأخير، يفتح التطبيق مباشرة
     initApp();
 });
 
@@ -240,7 +239,21 @@ function renderAllAdhkar() {
     });
 }
 
-/* 🔴 هنا تم تعديل الدالة لترقيم الآيات التي تحتوي على رمز (۝) */
+// ✅ دالة تنسيق النص لتحويل (۝) إلى دوائر ذهبية مرقمة
+function formatAdhkarText(text) {
+    if (!text) return '';
+    // إذا كان النص يحتوي على رمز نهاية الآية
+    if (text.includes('۝')) {
+        let counter = 1;
+        return text.replace(/۝/g, () => {
+            const num = counter.toLocaleString('ar-EG');
+            counter++;
+            return ` <span class="ayah-number">${num}</span> `;
+        });
+    }
+    return text;
+}
+
 function generateCardHTML(item) {
     let header = '';
     if (item.type === 'surah') {
@@ -249,21 +262,15 @@ function generateCardHTML(item) {
         header = `<p class="istiadha">أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ</p>`;
     }
 
-    let formattedText = item.text;
-    // استبدال رمز نهاية الآية (۝) برقم في دائرة ذهبية
-    if (item.text.includes('۝')) {
-        const parts = item.text.split('۝').filter(p => p.trim() !== '');
-        formattedText = parts.map((part, index) => {
-            const num = (index + 1).toLocaleString('ar-EG');
-            return `<span>${part.trim()}</span> <span class="ayah-number">${num}</span>`;
-        }).join(' ');
-    }
-
     const btn = item.count > 1
         ? `<button class="btn-dhikr" data-action="increment" data-id="${item.id}" data-max="${item.count}">التكرار (0/${item.count})</button>`
         : '';
 
     const isFav = getFavorites().includes(item.id);
+    
+    // استخدام دالة التنسيق هنا
+    const formattedText = formatAdhkarText(item.text);
+
     return `
         <article class="adhkar-card" id="card-${item.id}">
             ${header ? `<div class="card-header">${header}</div>` : ''}
@@ -322,7 +329,8 @@ function resetAdhkarCounters(category) {
 async function copyDhikr(id) {
     const item = ADHKAR_DATA.find(x => x.id === id);
     if (!item) return;
-    const text = `${item.text}\n\n${item.source || ''}\n\n— من تطبيق ذِكْر`;
+    let plainText = item.text.replace(/<[^>]+>/g, '');
+    const text = `${plainText}\n\n${item.source || ''}\n\n— من تطبيق ذِكْر`;
     try {
         await navigator.clipboard.writeText(text);
         showToast('تم النسخ ✓');
@@ -339,7 +347,8 @@ async function copyDhikr(id) {
 async function shareDhikr(id) {
     const item = ADHKAR_DATA.find(x => x.id === id);
     if (!item) return;
-    const text = `${item.text}\n\n${item.source || ''}\n\n— من تطبيق ذِكْر`;
+    let plainText = item.text.replace(/<[^>]+>/g, '');
+    const text = `${plainText}\n\n${item.source || ''}\n\n— من تطبيق ذِكْر`;
     if (navigator.share) {
         try { await navigator.share({ title: 'ذِكْر', text }); } catch {}
     } else {
@@ -450,7 +459,7 @@ function setupSearch() {
 }
 
 function normalize(text) {
-    return (text || '').replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/[\u064B-\u065F\u0670]/g, '').trim().toLowerCase();
+    return (text || '').replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/[\u064B-\u065F\u0670]/g, '').replace(/<[^>]+>/g, '').trim().toLowerCase();
 }
 
 function executeSearch(silent = false) {
