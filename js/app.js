@@ -516,10 +516,11 @@ async function openSurah(number, name) {
     stopAllAudio();
 
     try {
-        const res = await fetch(`https://api.quran.com/api/v4/quran/verses/uthmani_tajweed?chapter_number=${number}`);
+        // 🔴 استخدام النص العثماني الصافي (بدون أكواد تجويد معقدة)
+        const res = await fetch(`https://api.alquran.cloud/v1/surah/${number}/quran-uthmani`);
         const data = await res.json();
 
-        if (data.verses && data.verses.length) {
+        if (data.code === 200 && data.data.ayahs) {
             let html = '';
             
             // اسم السورة
@@ -533,23 +534,13 @@ async function openSurah(number, name) {
 
             // الآيات
             html += `<div class="mushaf-text">`;
-            data.verses.forEach(v => {
-                let text = v.text_uthmani_tajweed || '';
+            data.data.ayahs.forEach(v => {
+                let text = v.text;
                 
-                // 1. حذف الدائرة الزرقاء القادمة من الـ API (حذف العنصر بالكامل)
-                text = text.replace(/<span[^>]*class="end"[^>]*>.*?<\/span>/g, '');
-                
-                // 2. حذف أي رموز قرآنية مزعجة (دائرة سوداء/زرقاء/حزب/سجدة)
-                text = text.replace(/[\u06DD\u06DE\u06E9\u06D6-\u06DC\u06DF-\u06E8\u06EA-\u06ED]/g, '');
-                
-                // 3. حذف أي أرقام متبقية (عربية أو إنجليزية) لتنظيف النص
-                text = text.replace(/[٠-٩0-9۰-۹]+/g, '');
-                
-                // 4. تطبيق ألوان التجويد
-                text = text.replace(/<tajweed\s+class=["']?([a-z_]+)["']?>/g, '<span class="$1">')
-                           .replace(/<\/tajweed>/g, '</span>');
+                // حذف أي رموز زخرفية متبقية إن وجدت
+                text = text.replace(/[\u06D6-\u06ED]/g, '');
 
-                const ayahNum = parseInt(v.verse_key.split(':')[1], 10);
+                const ayahNum = v.numberInSurah;
                 const arabicNum = ayahNum.toLocaleString('ar-EG');
 
                 // إضافة النص النظيف + الدائرة الذهبية
