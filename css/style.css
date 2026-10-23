@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   ذِكْر — Design System v4.8.0
+   ذِكْر — Design System v4.9.0
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
@@ -80,65 +80,6 @@ a{color:inherit;text-decoration:none}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:var(--r-sm)}
 .user-selectable{user-select:text;-webkit-user-select:text}
 .icon{width:1.25em;height:1.25em;stroke-width:1.8;flex-shrink:0;color:currentColor}
-
-#splash {
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    background-color: #0a3d2a;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: opacity 0.6s ease, visibility 0.6s ease;
-}
-#splash.hide {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-}
-.splash-content {
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    padding: 20px;
-}
-.bismillah-splash {
-    font-family: 'Aref Ruqaa', 'Amiri', serif;
-    font-size: clamp(2.2rem, 10vw, 4.5rem);
-    background: linear-gradient(135deg, #fcebb6 0%, #d4af37 50%, #a8824a 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 50px;
-    white-space: nowrap;
-    letter-spacing: 1px;
-}
-.splash-title {
-    font-family: 'Aref Ruqaa', 'Amiri', serif;
-    font-size: clamp(5rem, 20vw, 8rem);
-    background: linear-gradient(to bottom, #f4e4b8, #d4af37, #a8824a);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    letter-spacing: 0px;
-    margin-bottom: 50px;
-    line-height: 1;
-}
-.spinner {
-    width: 50px;
-    height: 50px;
-    border: 4px solid rgba(212, 175, 55, 0.15);
-    border-top-color: #d4af37;
-    border-right-color: #d4af37;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-@keyframes spin { 
-    to { transform: rotate(360deg); } 
-}
 
 #app{display:flex; flex-direction:column; height:100vh; height:100dvh; max-width:100%;}
 #header{
@@ -406,13 +347,12 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none; width:16px; h
 }
 [data-theme="dark"] .mushaf-container{ background:#0a0a0a; border-color:var(--c-gold-700); }
 
-/* 🔴 هنا تم ضبط النص ليكون مثل صفحة المصحف */
 .mushaf-text{
     font-family: var(--font-quran);
     font-size: calc(var(--quran-size) + 4px);
     line-height: 2.8; 
-    text-align: justify; /* يوزع الكلمات بالتساوي */
-    text-align-last: center; /* السطر الأخير في المنتصف */
+    text-align: justify; 
+    text-align-last: center;
     color: #000; 
     direction: rtl;
     user-select:none; 
