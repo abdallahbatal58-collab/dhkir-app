@@ -1,18 +1,18 @@
 /* ═══════════════════════════════════════════════════════════════
-   ذِكْر | Service Worker v5.0.0
+   ذِكْر | Service Worker v5.1.0
    ═══════════════════════════════════════════════════════════════ */
 
-const CACHE_STATIC = 'dhikr-static-v5.0.0';
-const CACHE_API = 'dhikr-api-v5.0.0';
+const CACHE_STATIC = 'dhikr-static-v5.1.0';
+const CACHE_API = 'dhikr-api-v5.1.0';
 const CACHE_MAX_ITEMS = 100;
 
 const PRECACHE = [
     './',
     './index.html',
     './manifest.json',
-    './css/style.css?v=5.0.0',
-    './js/data.js?v=5.0.0',
-    './js/app.js?v=5.0.0',
+    './css/style.css?v=5.1.0',
+    './js/data.js?v=5.1.0',
+    './js/app.js?v=5.1.0',
     './icon.svg',
     'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css',
     'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js',
@@ -33,7 +33,6 @@ self.addEventListener('activate', (e) => {
     e.waitUntil(
         caches.keys().then(keys =>
             Promise.all(keys.map(k => {
-                // حذف أي كاش قديم لا يطابق الإصدار الحالي
                 if (k !== CACHE_STATIC && k !== CACHE_API) return caches.delete(k);
             }))
         ).then(() => self.clients.claim())
@@ -50,7 +49,6 @@ self.addEventListener('fetch', (e) => {
 
     const url = new URL(req.url);
 
-    // ⚠️ استثناء كامل لملفات الصوت والخطوط من الكاش
     if (url.hostname === 'everyayah.com' ||
         url.hostname === 'cdn.islamic.network' ||
         url.hostname.includes('mp3quran.net') ||
@@ -58,7 +56,6 @@ self.addEventListener('fetch', (e) => {
         return;
     }
 
-    // التعامل مع APIs (شبكة أولاً ثم الكاش)
     if (url.hostname === 'api.alquran.cloud' ||
         url.hostname === 'api.quran.com' ||
         url.hostname === 'api.aladhan.com' ||
@@ -73,12 +70,11 @@ self.addEventListener('fetch', (e) => {
                     });
                 }
                 return res;
-            }).catch(() => caches.match(req))
+            }).catch(() => caches.match(req).then(c => c || new Response('', {status: 404})))
         );
         return;
     }
 
-    // التعامل مع صفحات HTML
     if (req.mode === 'navigate' || req.destination === 'document') {
         e.respondWith(
             fetch(req).then(res => {
@@ -90,7 +86,6 @@ self.addEventListener('fetch', (e) => {
         return;
     }
 
-    // باقي الملفات (CSS, JS, Images) - الكاش أولاً
     e.respondWith(
         caches.match(req).then(cached => {
             if (cached) return cached;
