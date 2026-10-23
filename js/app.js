@@ -50,10 +50,8 @@ let selectedAyahData = { surah: null, ayah: null };
 
 /* ═══════════════════ Bootstrap ═══════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-        document.getElementById('splash')?.classList.add('hide');
-        initApp();
-    }, 1000);
+    // تم إزالة التأخير، يفتح التطبيق مباشرة
+    initApp();
 });
 
 function initApp() {
@@ -242,12 +240,23 @@ function renderAllAdhkar() {
     });
 }
 
+/* 🔴 هنا تم تعديل الدالة لترقيم الآيات التي تحتوي على رمز (۝) */
 function generateCardHTML(item) {
     let header = '';
     if (item.type === 'surah') {
         header = `<p class="basmala">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>`;
     } else if (item.type === 'ayah') {
         header = `<p class="istiadha">أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ</p>`;
+    }
+
+    let formattedText = item.text;
+    // استبدال رمز نهاية الآية (۝) برقم في دائرة ذهبية
+    if (item.text.includes('۝')) {
+        const parts = item.text.split('۝').filter(p => p.trim() !== '');
+        formattedText = parts.map((part, index) => {
+            const num = (index + 1).toLocaleString('ar-EG');
+            return `<span>${part.trim()}</span> <span class="ayah-number">${num}</span>`;
+        }).join(' ');
     }
 
     const btn = item.count > 1
@@ -258,7 +267,7 @@ function generateCardHTML(item) {
     return `
         <article class="adhkar-card" id="card-${item.id}">
             ${header ? `<div class="card-header">${header}</div>` : ''}
-            <div class="adhkar-text">${item.text}</div>
+            <div class="adhkar-text">${formattedText}</div>
             <div class="dua-ref">${item.source || ''}</div>
             <div class="adhkar-actions">
                 ${btn}
@@ -516,34 +525,27 @@ async function openSurah(number, name) {
     stopAllAudio();
 
     try {
-        // 🔴 استخدام النص العثماني الصافي (بدون أكواد تجويد معقدة)
         const res = await fetch(`https://api.alquran.cloud/v1/surah/${number}/quran-uthmani`);
         const data = await res.json();
 
         if (data.code === 200 && data.data.ayahs) {
             let html = '';
             
-            // اسم السورة
             let cleanName = name.replace(/^سُورَةُ\s*/, '').replace(/^سورة\s*/, '');
             html += `<div style="text-align:center; font-family:'KFGQPC Uthmanic Hafs', 'Amiri Quran', serif; font-size: calc(var(--quran-size) + 12px); color: var(--accent); margin-bottom: 30px; font-weight: bold;">سُورَةُ ${cleanName}</div>`;
             
-            // البسملة
             if (number !== 1 && number !== 9) {
                 html += `<div style="text-align:center; margin-bottom:30px; font-family:'KFGQPC Uthmanic Hafs', 'Amiri Quran', serif; font-size:calc(var(--quran-size) + 4px); color:var(--text);">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>`;
             }
 
-            // الآيات
             html += `<div class="mushaf-text">`;
             data.data.ayahs.forEach(v => {
                 let text = v.text;
-                
-                // حذف أي رموز زخرفية متبقية إن وجدت
                 text = text.replace(/[\u06D6-\u06ED]/g, '');
 
                 const ayahNum = v.numberInSurah;
                 const arabicNum = ayahNum.toLocaleString('ar-EG');
 
-                // إضافة النص النظيف + الدائرة الذهبية
                 html += `<span class="ayah-text" data-ayah="${ayahNum}" data-surah="${number}">${text}</span> <span class="ayah-number">${arabicNum}</span> `;
             });
             html += `</div>`;
