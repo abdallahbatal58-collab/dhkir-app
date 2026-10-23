@@ -2,18 +2,19 @@
    ذِكْر | Service Worker v5.1.0
    ═══════════════════════════════════════════════════════════════ */
 
-const CACHE_STATIC = 'dhikr-static-v5.1.0';
-const CACHE_API = 'dhikr-api-v5.1.0';
+const CACHE_STATIC = 'dhikr-static-v5.1.1';
+const CACHE_API = 'dhikr-api-v5.1.1';
 const CACHE_MAX_ITEMS = 100;
 
 const PRECACHE = [
     './',
     './index.html',
     './manifest.json',
-    './css/style.css?v=5.1.0',
-    './js/data.js?v=5.1.0',
-    './js/app.js?v=5.1.0',
-    './icon.svg',
+    './css/style.css?v=5.1.1', /* تحديث رقم الإصدار هنا */
+    './js/data.js?v=5.1.1',
+    './js/app.js?v=5.1.1',
+    // ... باقي المصفوفة كما هي
+  
     'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css',
     'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js',
     'https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&family=Tajawal:wght@300;400;500;700;800&family=Scheherazade+New:wght@400;700&display=swap'
