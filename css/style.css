@@ -389,20 +389,20 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none; width:16px; h
     box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.5);
 }
 
-/* تصميم رقم الآية (الدائرة الذهبية) */
+/* تصميم رقم الآية (الدائرة الذهبية الأصغر) */
 .ayah-number {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 34px;
-    height: 34px;
-    border: 1.5px solid var(--accent);
+    width: 26px;       /* تم التصغير من 34px */
+    height: 26px;      /* تم التصغير من 34px */
+    border: 1px solid var(--accent); /* تم تنعيم الإطار */
     border-radius: 50%;
     color: var(--accent);
     font-family: 'Tajawal', sans-serif;
-    font-size: 0.85rem;
+    font-size: 0.7rem; /* تم تصغير الخط */
     font-weight: 700;
-    margin: 0 6px;
+    margin: 0 4px;     /* تم تقليل المسافة الجانبية */
     vertical-align: middle;
     user-select: none;
     background-color: var(--bg-elevated);
