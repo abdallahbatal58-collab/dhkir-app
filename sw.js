@@ -1,18 +1,18 @@
 /* ═══════════════════════════════════════════════════════════════
-   ذِكْر | Service Worker v4.8.0
+   ذِكْر | Service Worker v4.9.0
    ═══════════════════════════════════════════════════════════════ */
 
-const CACHE_STATIC = 'dhikr-static-v4.8.0';
-const CACHE_API = 'dhikr-api-v4.8.0';
+const CACHE_STATIC = 'dhikr-static-v4.9.0';
+const CACHE_API = 'dhikr-api-v4.9.0';
 const CACHE_MAX_ITEMS = 100;
 
 const PRECACHE = [
     './',
     './index.html',
     './manifest.json',
-    './css/style.css?v=4.8.0',
-    './js/data.js?v=4.8.0',
-    './js/app.js?v=4.8.0',
+    './css/style.css?v=4.9.0',
+    './js/data.js?v=4.9.0',
+    './js/app.js?v=4.9.0',
     './icon.svg',
     'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css',
     'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js',
@@ -33,6 +33,7 @@ self.addEventListener('activate', (e) => {
     e.waitUntil(
         caches.keys().then(keys =>
             Promise.all(keys.map(k => {
+                // حذف أي كاش قديم لا يطابق الإصدار الحالي
                 if (k !== CACHE_STATIC && k !== CACHE_API) return caches.delete(k);
             }))
         ).then(() => self.clients.claim())
@@ -49,6 +50,7 @@ self.addEventListener('fetch', (e) => {
 
     const url = new URL(req.url);
 
+    // ⚠️ استثناء كامل لملفات الصوت والخطوط من الكاش
     if (url.hostname === 'everyayah.com' ||
         url.hostname === 'cdn.islamic.network' ||
         url.hostname.includes('mp3quran.net') ||
@@ -56,6 +58,7 @@ self.addEventListener('fetch', (e) => {
         return;
     }
 
+    // التعامل مع APIs (شبكة أولاً ثم الكاش)
     if (url.hostname === 'api.alquran.cloud' ||
         url.hostname === 'api.quran.com' ||
         url.hostname === 'api.aladhan.com' ||
@@ -75,6 +78,7 @@ self.addEventListener('fetch', (e) => {
         return;
     }
 
+    // التعامل مع صفحات HTML
     if (req.mode === 'navigate' || req.destination === 'document') {
         e.respondWith(
             fetch(req).then(res => {
@@ -86,6 +90,7 @@ self.addEventListener('fetch', (e) => {
         return;
     }
 
+    // باقي الملفات (CSS, JS, Images)
     e.respondWith(
         caches.match(req).then(cached => {
             if (cached) return cached;
