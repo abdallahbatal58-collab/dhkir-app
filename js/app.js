@@ -295,7 +295,7 @@ function renderAllAdhkar() {
         if (!el) return;
         const items = ADHKAR_DATA.filter(d => d.category === cat);
         el.innerHTML = items.length ? items.map(generateCardHTML).join('') :
-            `<div class="empty-state"><svg class="icon"><use href="#i-hands"/></svg><h3>لا توجد أذكار</h3><p>سيتم إضافتها قريباً</p></div>`;
+            `<div class="empty-state"><svg class="icon" viewBox="0 0 24 24"><use href="#i-hands"/></svg><h3>لا توجد أذكار</h3><p>سيتم إضافتها قريباً</p></div>`;
     });
 }
 
@@ -335,13 +335,13 @@ function generateCardHTML(item) {
             <div class="adhkar-actions">
                 ${btn}
                 <button type="button" class="btn-fav ${isFav ? 'active' : ''}" data-action="favorite" data-id="${item.id}" aria-label="المفضلة">
-                    <svg class="icon"><use href="#i-star"/></svg>
+                    <svg class="icon" viewBox="0 0 24 24"><use href="#i-star"/></svg>
                 </button>
                 <button type="button" class="btn-util" data-action="copy" data-id="${item.id}" aria-label="نسخ">
-                    <svg class="icon"><use href="#i-copy"/></svg>
+                    <svg class="icon" viewBox="0 0 24 24"><use href="#i-copy"/></svg>
                 </button>
                 <button type="button" class="btn-util" data-action="share" data-id="${item.id}" aria-label="مشاركة">
-                    <svg class="icon"><use href="#i-share"/></svg>
+                    <svg class="icon" viewBox="0 0 24 24"><use href="#i-share"/></svg>
                 </button>
             </div>
         </article>`;
@@ -368,7 +368,7 @@ function incrementDhikr(btn, id, max) {
     trackDhikr();
     if (cur === max) {
         btn.classList.add('done');
-        btn.innerHTML = `<svg class="icon" style="display:inline-block;vertical-align:middle;width:1em;height:1em"><use href="#i-check"/></svg> تم`;
+        btn.innerHTML = `<svg class="icon" viewBox="0 0 24 24" style="display:inline-block;vertical-align:middle;width:1em;height:1em"><use href="#i-check"/></svg> تم`;
         if (navigator.vibrate) navigator.vibrate([80,40,80]);
     }
 }
@@ -435,7 +435,7 @@ function renderFavorites() {
     if (!el) return;
     const favs = getFavorites();
     if (!favs.length) {
-        el.innerHTML = `<div class="empty-state"><svg class="icon"><use href="#i-star"/></svg><h3>لا توجد مفضلة بعد</h3><p>اضغط ★ في أي ذكر لحفظه هنا</p></div>`;
+        el.innerHTML = `<div class="empty-state"><svg class="icon" viewBox="0 0 24 24"><use href="#i-star"/></svg><h3>لا توجد مفضلة بعد</h3><p>اضغط ★ في أي ذكر لحفظه هنا</p></div>`;
         return;
     }
     el.innerHTML = favs.map(id => ADHKAR_DATA.find(x => x.id === id)).filter(Boolean).map(generateCardHTML).join('');
@@ -526,7 +526,7 @@ function executeSearch(silent = false) {
     if (!container) return;
     
     container.innerHTML = results.length ? results.map(generateCardHTML).join('') :
-        `<div class="empty-state"><svg class="icon"><use href="#i-search"/></svg><h3>لا نتائج</h3><p>لم نجد "${q}"</p></div>`;
+        `<div class="empty-state"><svg class="icon" viewBox="0 0 24 24"><use href="#i-search"/></svg><h3>لا نتائج</h3><p>لم نجد "${q}"</p></div>`;
     
     if (!silent) {
         const overlay = safeGet('overlay-search');
@@ -612,10 +612,10 @@ async function openSurah(number, name) {
     stopAllAudio();
 
     try {
-        const res = await fetch(`https://api.alquran.cloud/v1/surah/${number}/quran-uthmani`);
+        const res = await fetch(`https://api.quran.com/api/v4/quran/verses/uthmani?chapter_number=${number}`);
         const data = await res.json();
 
-        if (data.code === 200 && data.data.ayahs) {
+        if (data.verses && data.verses.length > 0) {
             let html = '';
             
             let cleanName = name.replace(/^سُورَةُ\s*/, '').replace(/^سورة\s*/, '');
@@ -626,10 +626,11 @@ async function openSurah(number, name) {
             }
 
             html += `<div class="mushaf-text">`;
-            data.data.ayahs.forEach(v => {
-                let text = v.text;
-                const ayahNum = v.numberInSurah;
+            data.verses.forEach(v => {
+                const text = v.text_uthmani; 
+                const ayahNum = v.verse_key.split(':')[1]; 
                 const arabicNum = ayahNum.toLocaleString('ar-EG');
+
                 html += `<span class="ayah-text" data-ayah="${ayahNum}" data-surah="${number}">${text}</span> <span class="ayah-number">${arabicNum}</span> `;
             });
             html += `</div>`;
@@ -730,12 +731,12 @@ function requestLocationAndPrayerTimes(isManual = false) {
         } catch (e) { 
             if (isManual) showToast('تعذر جلب المواقيت'); 
             const btn = safeGet('btn-request-location');
-            if (btn) { btn.disabled = false; btn.innerHTML = '<svg class="icon"><use href="#i-location"/></svg><span>تحديد الموقع للمواقيت</span>'; }
+            if (btn) { btn.disabled = false; btn.innerHTML = '<svg class="icon" viewBox="0 0 24 24"><use href="#i-location"/></svg><span>تحديد الموقع للمواقيت</span>'; }
         }
     }, (err) => {
         if (isManual) showToast('الرجاء السماح بالوصول للموقع');
         const btn = safeGet('btn-request-location');
-        if (btn) { btn.disabled = false; btn.innerHTML = '<svg class="icon"><use href="#i-location"/></svg><span>تحديد الموقع للمواقيت</span>'; }
+        if (btn) { btn.disabled = false; btn.innerHTML = '<svg class="icon" viewBox="0 0 24 24"><use href="#i-location"/></svg><span>تحديد الموقع للمواقيت</span>'; }
     }, { timeout: 8000 });
 }
 
