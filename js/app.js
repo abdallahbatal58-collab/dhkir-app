@@ -612,11 +612,10 @@ async function openSurah(number, name) {
     stopAllAudio();
 
     try {
-        // ✅ المصدر الرسمي: Quran Foundation (نص عثماني دقيق متوافق مع خط KFGQPC)
-        const res = await fetch(`https://api.quran.com/api/v4/quran/verses/uthmani?chapter_number=${number}`);
+        const res = await fetch(`https://api.alquran.cloud/v1/surah/${number}/quran-uthmani`);
         const data = await res.json();
 
-        if (data.verses && data.verses.length > 0) {
+        if (data.code === 200 && data.data.ayahs) {
             let html = '';
             
             let cleanName = name.replace(/^سُورَةُ\s*/, '').replace(/^سورة\s*/, '');
@@ -627,11 +626,10 @@ async function openSurah(number, name) {
             }
 
             html += `<div class="mushaf-text">`;
-            data.verses.forEach(v => {
-                const text = v.text_uthmani; // النص العثماني الكامل
-                const ayahNum = v.verse_key.split(':')[1]; // استخراج رقم الآية
+            data.data.ayahs.forEach(v => {
+                let text = v.text;
+                const ayahNum = v.numberInSurah;
                 const arabicNum = ayahNum.toLocaleString('ar-EG');
-
                 html += `<span class="ayah-text" data-ayah="${ayahNum}" data-surah="${number}">${text}</span> <span class="ayah-number">${arabicNum}</span> `;
             });
             html += `</div>`;
