@@ -4,6 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <meta name="description" content="تطبيق ذِكْر — أذكار الصباح والمساء، سبحة إلكترونية، اتجاه القبلة، القرآن الكريم، والأدعية النبوية.">
+    
+    <!-- سياسة الأمان (CSP) لحماية التطبيق -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net;
+        font-src 'self' https://fonts.gstatic.com https://raw.githubusercontent.com;
+        img-src 'self' data:;
+        connect-src 'self' https://api.alquran.cloud https://api.aladhan.com https://api.quran.com https://api.bigdatacloud.net https://everyayah.com https://cdn.islamic.network https://*.mp3quran.net;
+        media-src 'self' blob: https:;
+        object-src 'none';
+        base-uri 'self';
+        frame-ancestors 'none';
+        form-action 'self';
+    ">
+
     <meta name="theme-color" content="#0a3d2a" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#050e0a" media="(prefers-color-scheme: dark)">
     <meta name="color-scheme" content="light dark">
@@ -16,15 +32,17 @@
 
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/svg+xml" href="icon.svg">
-    <link rel="apple-touch-icon" href="icon.svg">
+    <!-- تم التعديل: أيقونة iOS تتطلب صيغة PNG وليس SVG -->
+    <link rel="apple-touch-icon" href="icon-180.png">
 
+    <!-- تحسين تحميل الخطوط: نطلب الخطوط الأساسية فقط لتسريع التطبيق -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&family=Tajawal:wght@300;400;500;700;800&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
-
-    <!-- تحديث الإصدار إلى 5.1.0 -->
-    <link rel="stylesheet" href="css/style.css?v=5.1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    
+    <!-- تثبيت إصدار Swiper المحدد وتحسين تحميله -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11.1.14/swiper-bundle.min.css">
+    <link rel="stylesheet" href="css/style.css?v=5.3.0">
 </head>
 <body>
 
@@ -59,16 +77,17 @@
     <symbol id="i-zoom-in" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></symbol>
     <symbol id="i-zoom-out" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></symbol>
     <symbol id="i-play" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
 </svg>
 
 <!-- ═════ App Shell ═════ -->
 <div id="app">
     <header id="header">
-        <button id="menu-btn" class="icon-btn" aria-label="القائمة">
+        <button type="button" id="menu-btn" class="icon-btn" aria-label="القائمة">
             <svg class="icon"><use href="#i-menu"/></svg>
         </button>
         <div class="brand">ذِكْر</div>
-        <button id="theme-btn" class="icon-btn" aria-label="تبديل الوضع">
+        <button type="button" id="theme-btn" class="icon-btn" aria-label="تبديل الوضع">
             <svg class="icon"><use href="#i-moon"/></svg>
         </button>
     </header>
@@ -82,6 +101,12 @@
                         <h2 class="greeting">أهلاً بك</h2>
                         
                         <div class="prayer-header" id="prayer-location">جاري تحديد الموقع...</div>
+                        <!-- تم التعديل: زر بدلاً من طلب الإذن التلقائي -->
+                        <button type="button" id="btn-request-location" class="btn-secondary" style="max-width: 200px; margin: 0 auto var(--s-3) auto; font-size: var(--text-xs); padding: 8px 16px;">
+                            <svg class="icon"><use href="#i-location"/></svg>
+                            <span>تحديد الموقع للمواقيت</span>
+                        </button>
+                        
                         <div class="prayer-strip" id="prayer-strip">
                             <div class="prayer-item"><span class="label">الفجر</span><span class="time" data-prayer="Fajr">—</span></div>
                             <div class="prayer-item"><span class="label">الظهر</span><span class="time" data-prayer="Dhuhr">—</span></div>
@@ -100,25 +125,25 @@
                 </div>
 
                 <div class="grid">
-                    <button class="card ripple" data-target="morning">
+                    <button type="button" class="card" data-target="morning">
                         <div class="card-icon-wrap"><svg class="icon"><use href="#i-sunrise"/></svg></div>
                         <h3>الصباح</h3>
                     </button>
-                    <button class="card ripple" data-target="evening">
+                    <button type="button" class="card" data-target="evening">
                         <div class="card-icon-wrap"><svg class="icon"><use href="#i-moon"/></svg></div>
                         <h3>المساء</h3>
                     </button>
-                    <button class="card ripple" data-target="tasbih">
+                    <button type="button" class="card" data-target="tasbih">
                         <div class="card-icon-wrap"><svg class="icon"><use href="#i-tasbih"/></svg></div>
                         <h3>السبحة</h3>
                     </button>
-                    <button class="card ripple" data-target="quran">
+                    <button type="button" class="card" data-target="quran">
                         <div class="card-icon-wrap"><svg class="icon"><use href="#i-book"/></svg></div>
                         <h3>القرآن</h3>
                     </button>
                 </div>
 
-                <button class="continue-card" id="continue-reading" hidden>
+                <button type="button" class="continue-card" id="continue-reading" hidden>
                     <div class="continue-icon"><svg class="icon"><use href="#i-book"/></svg></div>
                     <div class="continue-body">
                         <div class="label">متابعة القراءة</div>
@@ -164,13 +189,13 @@
                             <circle class="tasbih-ring-bg" cx="120" cy="120" r="112"/>
                             <circle class="tasbih-ring-progress" id="tasbih-progress" cx="120" cy="120" r="112" stroke-dasharray="703.7" stroke-dashoffset="703.7"/>
                         </svg>
-                        <button class="tasbih-circle" id="tasbih-btn" aria-label="اذكر">
+                        <button type="button" class="tasbih-circle" id="tasbih-btn" aria-label="اذكر">
                             <span class="count" id="tasbih-count">0</span>
                             <span class="target" id="tasbih-max">/ 33</span>
                         </button>
                     </div>
                     <h3 class="dhikr-text" id="tasbih-text">سُبْحَانَ اللَّهِ</h3>
-                    <button id="reset-tasbih" class="btn-secondary">
+                    <button type="button" id="reset-tasbih" class="btn-secondary">
                         <svg class="icon"><use href="#i-refresh"/></svg>
                         <span>تصفير</span>
                     </button>
@@ -180,7 +205,7 @@
             <section id="page-quran" class="swiper-slide page">
                 <h2 class="page-title">فهرس السور</h2>
                 <div class="list" id="list-quran">
-                    <p class="loading-text"><span class="spinner-sm"></span> جاري تحميل السور...</p>
+                    <div class="loading-text"><span class="spinner-sm"></span> جاري تحميل السور...</div>
                 </div>
             </section>
 
@@ -195,7 +220,7 @@
                     </div>
                     <h3 id="qibla-angle-text">في انتظار الموقع...</h3>
                     <p class="qibla-hint">ضع الهاتف على سطح مستوٍ بعيداً عن المعادن. وجّه السهم نحو الأعلى ثم حرّك الهاتف حتى يشير السهم نحو الكعبة.</p>
-                    <button id="btn-qibla" class="btn-primary">
+                    <button type="button" id="btn-qibla" class="btn-primary">
                         <svg class="icon"><use href="#i-location"/></svg>
                         <span>تحديد القبلة</span>
                     </button>
@@ -208,16 +233,19 @@
                     <h3 class="settings-title">المظهر والقراءة</h3>
                     <div class="settings-card">
                         <div class="set-item">
-                            <span class="set-label"><svg class="icon"><use href="#i-moon"/></svg> الوضع الليلي</span>
-                            <label class="switch"><input type="checkbox" id="set-dark"><span class="slider"></span></label>
+                            <label class="set-label" for="set-dark"><svg class="icon"><use href="#i-moon"/></svg> الوضع الليلي</label>
+                            <label class="switch">
+                                <input type="checkbox" id="set-dark" aria-label="الوضع الليلي">
+                                <span class="slider"></span>
+                            </label>
                         </div>
                         <div class="set-item">
-                            <span class="set-label"><svg class="icon"><use href="#i-book"/></svg> حجم خط القرآن</span>
-                            <input type="range" id="set-font" min="18" max="40" step="2" value="24">
+                            <label class="set-label" for="set-font"><svg class="icon"><use href="#i-book"/></svg> حجم خط القرآن</label>
+                            <input type="range" id="set-font" min="18" max="40" step="2" value="24" aria-label="حجم خط القرآن">
                         </div>
                         <div class="set-item">
-                            <span class="set-label"><svg class="icon"><use href="#i-hands"/></svg> حجم خط الأذكار</span>
-                            <input type="range" id="set-adhkar-font" min="16" max="32" step="2" value="20">
+                            <label class="set-label" for="set-adhkar-font"><svg class="icon"><use href="#i-hands"/></svg> حجم خط الأذكار</label>
+                            <input type="range" id="set-adhkar-font" min="16" max="32" step="2" value="20" aria-label="حجم خط الأذكار">
                         </div>
                     </div>
                 </div>
@@ -225,58 +253,62 @@
                     <h3 class="settings-title">العدادات</h3>
                     <div class="settings-card">
                         <div class="set-item">
-                            <span class="set-label"><svg class="icon"><use href="#i-refresh"/></svg> تصفير العداد عند مغادرة القسم</span>
-                            <label class="switch"><input type="checkbox" id="set-reset-counter" checked><span class="slider"></span></label>
+                            <label class="set-label" for="set-reset-counter"><svg class="icon"><use href="#i-refresh"/></svg> تصفير العداد عند مغادرة القسم</label>
+                            <label class="switch">
+                                <input type="checkbox" id="set-reset-counter" checked aria-label="تصفير العداد عند مغادرة القسم">
+                                <span class="slider"></span>
+                            </label>
                         </div>
                     </div>
                 </div>
                 <div class="settings-group">
                     <h3 class="settings-title">التطبيق</h3>
                     <div class="settings-card">
-                        <button class="set-item set-btn" id="install-btn" hidden>
+                        <button type="button" class="set-item set-btn" id="install-btn" hidden>
                             <span class="set-label"><svg class="icon"><use href="#i-download"/></svg> تثبيت التطبيق</span>
                             <svg class="icon icon-muted"><use href="#i-arrow-right"/></svg>
                         </button>
-                        <button class="set-item set-btn" id="share-app-btn">
+                        <button type="button" class="set-item set-btn" id="share-app-btn">
                             <span class="set-label"><svg class="icon"><use href="#i-share"/></svg> مشاركة التطبيق</span>
                             <svg class="icon icon-muted"><use href="#i-arrow-right"/></svg>
                         </button>
-                        <button class="set-item set-btn" id="reset-all-btn">
+                        <button type="button" class="set-item set-btn" id="reset-all-btn">
                             <span class="set-label"><svg class="icon"><use href="#i-refresh"/></svg> تصفير كل شيء</span>
                             <svg class="icon icon-muted"><use href="#i-arrow-right"/></svg>
                         </button>
                     </div>
                 </div>
-                <p class="app-version">الإصدار 5.1.0</p>
+                <p class="app-version">الإصدار 5.3.0</p>
             </section>
         </div>
     </main>
 
     <nav id="bottom-nav" aria-label="التنقل الرئيسي">
         <div class="nav-scroll-wrapper" id="nav-wrapper">
-            <button data-target="home" class="active"><svg class="icon"><use href="#i-home"/></svg><span>الرئيسية</span></button>
-            <button data-target="morning"><svg class="icon"><use href="#i-sunrise"/></svg><span>الصباح</span></button>
-            <button data-target="evening"><svg class="icon"><use href="#i-moon"/></svg><span>المساء</span></button>
-            <button data-target="sleep"><svg class="icon"><use href="#i-bed"/></svg><span>النوم</span></button>
-            <button data-target="wake"><svg class="icon"><use href="#i-sunrise"/></svg><span>الاستيقاظ</span></button>
-            <button data-target="prayer"><svg class="icon"><use href="#i-mosque"/></svg><span>بعد الصلاة</span></button>
-            <button data-target="mosque"><svg class="icon"><use href="#i-mosque"/></svg><span>المسجد</span></button>
-            <button data-target="food"><svg class="icon"><use href="#i-utensils"/></svg><span>الطعام</span></button>
-            <button data-target="travel"><svg class="icon"><use href="#i-plane"/></svg><span>السفر</span></button>
-            <button data-target="ruqyah"><svg class="icon"><use href="#i-shield"/></svg><span>الرقية</span></button>
-            <button data-target="duas"><svg class="icon"><use href="#i-hands"/></svg><span>الأدعية</span></button>
-            <button data-target="tasbih"><svg class="icon"><use href="#i-tasbih"/></svg><span>السبحة</span></button>
-            <button data-target="quran"><svg class="icon"><use href="#i-book"/></svg><span>القرآن</span></button>
-            <button data-target="qibla"><svg class="icon"><use href="#i-compass"/></svg><span>القبلة</span></button>
-            <button data-target="favorites"><svg class="icon"><use href="#i-star"/></svg><span>المفضلة</span></button>
-            <button data-target="stats"><svg class="icon"><use href="#i-chart"/></svg><span>تقدمي</span></button>
-            <button data-target="asmah"><svg class="icon"><use href="#i-star"/></svg><span>الأسماء</span></button>
-            <button data-target="settings"><svg class="icon"><use href="#i-settings"/></svg><span>الإعدادات</span></button>
+            <button type="button" data-target="home" class="active" aria-label="الرئيسية"><svg class="icon"><use href="#i-home"/></svg><span>الرئيسية</span></button>
+            <button type="button" data-target="morning" aria-label="أذكار الصباح"><svg class="icon"><use href="#i-sunrise"/></svg><span>الصباح</span></button>
+            <button type="button" data-target="evening" aria-label="أذكار المساء"><svg class="icon"><use href="#i-moon"/></svg><span>المساء</span></button>
+            <button type="button" data-target="sleep" aria-label="أذكار النوم"><svg class="icon"><use href="#i-bed"/></svg><span>النوم</span></button>
+            <button type="button" data-target="wake" aria-label="أذكار الاستيقاظ"><svg class="icon"><use href="#i-sunrise"/></svg><span>الاستيقاظ</span></button>
+            <button type="button" data-target="prayer" aria-label="أذكار بعد الصلاة"><svg class="icon"><use href="#i-mosque"/></svg><span>بعد الصلاة</span></button>
+            <button type="button" data-target="mosque" aria-label="أذكار المسجد"><svg class="icon"><use href="#i-mosque"/></svg><span>المسجد</span></button>
+            <button type="button" data-target="food" aria-label="أذكار الطعام"><svg class="icon"><use href="#i-utensils"/></svg><span>الطعام</span></button>
+            <button type="button" data-target="travel" aria-label="أذكار السفر"><svg class="icon"><use href="#i-plane"/></svg><span>السفر</span></button>
+            <button type="button" data-target="ruqyah" aria-label="الرقية الشرعية"><svg class="icon"><use href="#i-shield"/></svg><span>الرقية</span></button>
+            <button type="button" data-target="duas" aria-label="الأدعية"><svg class="icon"><use href="#i-hands"/></svg><span>الأدعية</span></button>
+            <button type="button" data-target="tasbih" aria-label="السبحة"><svg class="icon"><use href="#i-tasbih"/></svg><span>السبحة</span></button>
+            <button type="button" data-target="quran" aria-label="القرآن"><svg class="icon"><use href="#i-book"/></svg><span>القرآن</span></button>
+            <button type="button" data-target="qibla" aria-label="القبلة"><svg class="icon"><use href="#i-compass"/></svg><span>القبلة</span></button>
+            <button type="button" data-target="favorites" aria-label="المفضلة"><svg class="icon"><use href="#i-star"/></svg><span>المفضلة</span></button>
+            <button type="button" data-target="stats" aria-label="تقدمي"><svg class="icon"><use href="#i-chart"/></svg><span>تقدمي</span></button>
+            <button type="button" data-target="asmah" aria-label="أسماء الله الحسنى"><svg class="icon"><use href="#i-star"/></svg><span>الأسماء</span></button>
+            <button type="button" data-target="settings" aria-label="الإعدادات"><svg class="icon"><use href="#i-settings"/></svg><span>الإعدادات</span></button>
         </div>
     </nav>
 </div>
 
-<aside id="sidebar" aria-hidden="true">
+<!-- تم التعديل: إضافة inert لمنع الوصول للعناصر المخفية -->
+<aside id="sidebar" aria-hidden="true" inert>
     <div class="sidebar-header">
         <h2>ذِكْر</h2>
         <p>أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ</p>
@@ -320,18 +352,18 @@
 
 <div id="overlay-quran-reader" class="overlay-page">
     <div class="reader-header">
-        <button id="close-reader" class="icon-btn" aria-label="رجوع">
+        <button type="button" id="close-reader" class="icon-btn" aria-label="رجوع">
             <svg class="icon"><use href="#i-arrow-right"/></svg>
         </button>
         <h2 id="reader-title">اسم السورة</h2>
         <div class="reader-controls">
-            <button class="icon-btn" id="zoom-out"><svg class="icon"><use href="#i-zoom-out"/></svg></button>
-            <button class="icon-btn" id="zoom-in"><svg class="icon"><use href="#i-zoom-in"/></svg></button>
+            <button type="button" class="icon-btn" id="zoom-out" aria-label="تصغير الخط"><svg class="icon"><use href="#i-zoom-out"/></svg></button>
+            <button type="button" class="icon-btn" id="zoom-in" aria-label="تكبير الخط"><svg class="icon"><use href="#i-zoom-in"/></svg></button>
         </div>
     </div>
     <div class="audio-player-bar" id="audio-player-bar">
         <div class="audio-controls">
-            <button id="btn-play-pause" class="icon-btn play-btn" aria-label="تشغيل">
+            <button type="button" id="btn-play-pause" class="icon-btn play-btn" aria-label="تشغيل">
                 <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
             </button>
         </div>
@@ -340,7 +372,7 @@
             <select id="reciter-select" class="reciter-select" aria-label="اختر القارئ"></select>
         </div>
         <div class="audio-progress-wrap">
-            <input type="range" id="audio-progress" min="0" max="100" value="0" step="0.1">
+            <input type="range" id="audio-progress" min="0" max="100" value="0" step="0.1" aria-label="شريط التقدم">
         </div>
     </div>
     <div class="mushaf-container" id="mushaf-container">
@@ -348,19 +380,19 @@
     </div>
 </div>
 
-<div id="ayah-bottom-sheet" class="bottom-sheet">
+<div id="ayah-bottom-sheet" class="bottom-sheet" aria-hidden="true" inert>
     <div class="bottom-sheet-content">
         <div class="bottom-sheet-header">
             <span id="selected-ayah-label">الآية المحددة</span>
-            <button id="close-bottom-sheet" class="icon-btn" aria-label="إغلاق">
-                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <button type="button" id="close-bottom-sheet" class="icon-btn" aria-label="إغلاق">
+                <svg class="icon"><use href="#i-close"/></svg>
             </button>
         </div>
         <div class="bottom-sheet-actions">
-            <button id="btn-sheet-listen" class="btn-sheet-action">
+            <button type="button" id="btn-sheet-listen" class="btn-sheet-action">
                 <svg class="icon"><use href="#i-play"/></svg> استماع للآية
             </button>
-            <button id="btn-sheet-tafsir" class="btn-sheet-action">
+            <button type="button" id="btn-sheet-tafsir" class="btn-sheet-action">
                 <svg class="icon"><use href="#i-book"/></svg> عرض التفسير الميسر
             </button>
         </div>
@@ -371,7 +403,7 @@
 
 <div id="overlay-search" class="overlay-page">
     <div class="reader-header">
-        <button id="close-search" class="icon-btn" aria-label="رجوع">
+        <button type="button" id="close-search" class="icon-btn" aria-label="رجوع">
             <svg class="icon"><use href="#i-arrow-right"/></svg>
         </button>
         <h2 class="page-title" style="margin:0;padding:0">نتائج البحث</h2>
@@ -380,7 +412,7 @@
     <div class="list" id="list-search"></div>
 </div>
 
-<button id="scroll-top-btn" class="icon-btn hidden" aria-label="أعلى">
+<button type="button" id="scroll-top-btn" class="icon-btn hidden" aria-label="العودة لأعلى">
     <svg class="icon"><use href="#i-arrow-up"/></svg>
 </button>
 
@@ -389,29 +421,9 @@
 <audio id="surah-audio" preload="none"></audio>
 <audio id="ayah-audio" preload="none"></audio>
 
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-<script>
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js').then(reg => {
-            reg.addEventListener('updatefound', () => {
-                const w = reg.installing;
-                if (!w) return;
-                w.addEventListener('statechange', () => {
-                    if (w.state === 'installed' && navigator.serviceWorker.controller) {
-                        const t = document.getElementById('toast');
-                        t.textContent = 'تحديث جديد متوفر — أعد تحميل الصفحة';
-                        t.classList.add('show');
-                        setTimeout(() => t.classList.remove('show'), 5000);
-                    }
-                });
-            });
-        });
-    });
-}
-</script>
-<!-- تحديث الإصدار إلى 5.1.0 -->
-<script src="js/data.js?v=5.1.0"></script>
-<script src="js/app.js?v=5.1.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/swiper@11.1.14/swiper-bundle.min.js"></script>
+<!-- تم نقل كود الـ Service Worker إلى app.js لدعم الـ CSP -->
+<script src="js/data.js?v=5.3.0"></script>
+<script src="js/app.js?v=5.3.0"></script>
 </body>
 </html>
