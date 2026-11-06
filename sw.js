@@ -6,12 +6,11 @@ const CACHE_STATIC = 'dhikr-static-v5.3.0';
 const CACHE_API = 'dhikr-api-v5.3.0';
 const CACHE_MAX_ITEMS = 100;
 
-// تم إزالة ?v= نهائياً لأن اسم الكاش نفسه يتغير في كل إصدار
 const PRECACHE = [
     './',
     './index.html',
     './manifest.json',
-    './css/style.css',
+    './style.css',
     './js/data.js',
     './js/app.js',
     './icon.svg',
@@ -53,7 +52,6 @@ self.addEventListener('fetch', (event) => {
 
     const url = new URL(req.url);
 
-    // 1. استثناء ملفات الصوت (لا نخزنها في الكاش لتوفير المساحة)
     if (
         url.hostname === 'everyayah.com' ||
         url.hostname === 'cdn.islamic.network' ||
@@ -63,7 +61,6 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // 2. استراتيجية API (Network First with Cache Fallback)
     if (
         url.hostname === 'api.alquran.cloud' ||
         url.hostname === 'api.quran.com' ||
@@ -87,7 +84,6 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // 3. استراتيجية المستندات (Network First, Fallback to Cache, Fallback to index.html)
     if (req.mode === 'navigate' || req.destination === 'document') {
         event.respondWith(
             fetch(req)
@@ -101,7 +97,6 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // 4. استراتيجية الملفات الثابتة (Cache First, Network Fallback)
     event.respondWith(
         caches.match(req).then((cached) => {
             if (cached) return cached;
