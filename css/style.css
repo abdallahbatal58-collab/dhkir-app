@@ -58,9 +58,11 @@
     --shadow-lg:0 12px 28px rgba(0,0,0,0.6);
 }
 
+/* خط مصحف المدينة الرسمي (الإصدار 18) */
 @font-face {
     font-family: 'KFGQPC Uthmanic Hafs';
-    src: url('https://raw.githubusercontent.com/mustafa0x/qpc-fonts/f93bf5f3/various-woff2/UthmanicHafs1%20Ver09.woff2') format('woff2');
+    src: url('https://verses.quran.foundation/fonts/quran/hafs/uthmanic_hafs/UthmanicHafs1Ver18.woff2') format('woff2'),
+         url('https://verses.quran.foundation/fonts/quran/hafs/uthmanic_hafs/UthmanicHafs1Ver18.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
