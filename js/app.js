@@ -10,7 +10,7 @@ const state = {
     qiblaBearing: 0,
     orientationListener: null,
     installPrompt: null,
-    quranZoom: 24 // سيتم تحديثه في initApp
+    quranZoom: 24
 };
 
 const settings = {
@@ -47,7 +47,6 @@ const quranAudio = {
 
 let selectedAyahData = { surah: null, ayah: null };
 
-/* ═══════════════════ أمان الحماية (Safe Helpers) ═══════════════════ */
 function safeGet(id) { return document.getElementById(id) || null; }
 function safeReadJSON(key, fallback) {
     try {
@@ -61,11 +60,8 @@ function safeWriteJSON(key, value) {
     catch (error) { console.warn('[Storage] Failed to write:', key, error); }
 }
 
-/* ═══════════════════ Bootstrap ═══════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. مزامنة حجم خط المصحف مع الإعدادات
     state.quranZoom = settings.fontScale;
-    
     initApp();
     setupServiceWorker();
 });
@@ -85,7 +81,7 @@ function initApp() {
     setupAudioPlayer();
     setupAyahDoubleTap();
     setupBottomSheet();
-    setupLocationButton(); // زر طلب الموقع الجديد
+    setupLocationButton();
     document.addEventListener('click', handleCardClick);
     renderAllAdhkar();
     renderFavorites();
@@ -93,12 +89,11 @@ function initApp() {
     renderAsma();
     updateHijriDate();
     loadQuranSurahs();
-    loadPrayerTimes(); // ستُحمل من الكاش فقط إن وجد
+    loadPrayerTimes();
     updateContinueReading();
     handleUrlParams();
 }
 
-/* ═══════════════════ PWA Service Worker ═══════════════════ */
 function setupServiceWorker() {
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -117,7 +112,6 @@ function setupServiceWorker() {
     }
 }
 
-/* ═══════════════════ Theme & Fonts ═══════════════════ */
 function applyTheme() {
     document.documentElement.dataset.theme = settings.darkMode ? 'dark' : 'light';
     const btn = safeGet('theme-btn');
@@ -138,10 +132,8 @@ function applyFontScales() {
     if (setAdhkarFont) setAdhkarFont.value = settings.adhkarScale;
 }
 
-/* ═══════════════════ Swiper & Navigation ═══════════════════ */
 function setupSwiper() {
     if (typeof Swiper === 'undefined') {
-        console.error('[ذِكْر] Swiper library not loaded.');
         document.querySelectorAll('.swiper-slide').forEach(s => { s.style.display = 'block'; s.style.height = 'auto'; });
         return;
     }
@@ -227,7 +219,7 @@ function setupNavigation() {
         menuBtn.onclick = () => {
             if (sidebar) {
                 sidebar.classList.add('open');
-                sidebar.removeAttribute('inert'); // إزالة المنع عند الفتح
+                sidebar.removeAttribute('inert');
                 sidebar.setAttribute('aria-hidden', 'false');
             }
             if (sidebarOverlay) sidebarOverlay.classList.add('show');
@@ -269,7 +261,7 @@ function closeSidebar() {
     const overlay = safeGet('sidebar-overlay');
     if (sidebar) {
         sidebar.classList.remove('open');
-        sidebar.setAttribute('inert', ''); // إعادة المنع عند الإغلاق
+        sidebar.setAttribute('inert', '');
         sidebar.setAttribute('aria-hidden', 'true');
     }
     if (overlay) overlay.classList.remove('show');
@@ -296,7 +288,6 @@ function updateUrlParam(page) {
     history.replaceState(null, '', url.pathname + url.search);
 }
 
-/* ═══════════════════ Adhkar Rendering ═══════════════════ */
 function renderAllAdhkar() {
     const categories = ['morning','evening','sleep','wake','duas','prayer','mosque','food','travel','ruqyah'];
     categories.forEach(cat => {
@@ -394,7 +385,6 @@ function resetAdhkarCounters(category) {
 async function copyDhikr(id) {
     const item = ADHKAR_DATA.find(x => x.id === id);
     if (!item) return;
-    // نستخدم النص المنسق (مع الأرقام بدلاً من ۝) للنسخ
     let plainText = formatAdhkarText(item.text).replace(/<[^>]+>/g, ''); 
     const text = `${plainText}\n\n${item.source || ''}\n\n— من تطبيق ذِكْر`;
     try {
@@ -423,7 +413,6 @@ async function shareDhikr(id) {
     }
 }
 
-/* ═══════════════════ Favorites & Stats ═══════════════════ */
 function getFavorites() { return safeReadJSON('dhikr_favorites', []); }
 
 function toggleFavorite(btn, id) {
@@ -508,7 +497,6 @@ function renderAsma() {
     `).join('');
 }
 
-/* ═══════════════════ Search ═══════════════════ */
 function setupSearch() {
     const form = safeGet('search-form');
     const input = safeGet('search-input');
@@ -549,7 +537,6 @@ function executeSearch(silent = false) {
     }
 }
 
-/* ═══════════════════ Quran & Zoom ═══════════════════ */
 function setupQuranZoom() {
     const zoomIn = safeGet('zoom-in');
     const zoomOut = safeGet('zoom-out');
@@ -641,12 +628,8 @@ async function openSurah(number, name) {
             html += `<div class="mushaf-text">`;
             data.data.ayahs.forEach(v => {
                 let text = v.text;
-                // ⚠️ تم إزالة السطر الذي كان يمسح علامات الوقف 
-                // text = text.replace(/[\u06D6-\u06ED]/g, '');
-
                 const ayahNum = v.numberInSurah;
                 const arabicNum = ayahNum.toLocaleString('ar-EG');
-
                 html += `<span class="ayah-text" data-ayah="${ayahNum}" data-surah="${number}">${text}</span> <span class="ayah-number">${arabicNum}</span> `;
             });
             html += `</div>`;
@@ -673,7 +656,6 @@ function updateContinueReading() {
     } else card.hidden = true;
 }
 
-/* ═══════════════════ Prayer Times & Location ═══════════════════ */
 function setupLocationButton() {
     const btn = safeGet('btn-request-location');
     if (!btn) return;
@@ -689,17 +671,15 @@ async function loadPrayerTimes() {
     const cached = localStorage.getItem('dhikr_prayer_cache');
     const cachedDate = localStorage.getItem('dhikr_prayer_date');
     
-    // عرض الكاش إن وجد
     if (cached && cachedDate === today) { 
         try { 
             renderPrayerTimes(JSON.parse(cached)); 
             const btn = safeGet('btn-request-location');
-            if (btn) btn.hidden = true; // إخفاء الزر لأننا نملك البيانات
+            if (btn) btn.hidden = true; 
             return; 
         } catch {} 
     }
 
-    // إذا لم يوجد كاش، نعرض مكة كافتراضي دون طلب الإذن
     const date = new Date();
     const d = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
     const locationEl = safeGet('prayer-location');
@@ -745,7 +725,7 @@ function requestLocationAndPrayerTimes(isManual = false) {
                 renderPrayerTimes(data.data.timings);
                 
                 const btn = safeGet('btn-request-location');
-                if (btn) btn.hidden = true; // إخفاء الزر بعد النجاح
+                if (btn) btn.hidden = true; 
             }
         } catch (e) { 
             if (isManual) showToast('تعذر جلب المواقيت'); 
@@ -805,7 +785,6 @@ function formatTime(t) {
     return `${h12}:${mm} ${suffix}`;
 }
 
-/* ═══════════════════ Tasbih & Qibla ═══════════════════ */
 function setupTasbih() {
     const select = safeGet('tasbih-select');
     const target = safeGet('tasbih-target');
@@ -904,7 +883,6 @@ function setupQibla() {
     };
 }
 
-/* ═══════════════════ Settings & PWA ═══════════════════ */
 function setupSettingsUI() {
     const setDark = safeGet('set-dark');
     const setFont = safeGet('set-font');
@@ -917,7 +895,7 @@ function setupSettingsUI() {
     if (setFont) setFont.oninput = e => {
         settings.fontScale = parseInt(e.target.value, 10) || 24;
         localStorage.setItem('dhikr_font', settings.fontScale);
-        state.quranZoom = settings.fontScale; // تزامن
+        state.quranZoom = settings.fontScale; 
         applyFontScales();
     };
     if (setAdhkarFont) setAdhkarFont.oninput = e => {
@@ -973,7 +951,6 @@ function setupPWA() {
     };
 }
 
-/* ═══════════════════ Utils ═══════════════════ */
 function updateHijriDate() {
     const el = safeGet('hijri-date');
     if (!el) return;
@@ -1000,7 +977,6 @@ function showToast(msg) {
     t._timeout = setTimeout(() => t.classList.remove('show'), 2400);
 }
 
-/* ═══════════════════ Quran Audio & Tafsir Logic ═══════════════════ */
 function getReciterObj() { return RECITERS.find(r => r.id === quranAudio.reciterId) || RECITERS[0]; }
 
 function stopAllAudio() {
@@ -1041,7 +1017,6 @@ function setupAudioPlayer() {
         playPauseBtn.onclick = () => {
             if (!quranAudio.currentSurah) { showToast('الرجاء فتح سورة أولاً'); return; }
             
-            // إيقاف صوت الآية إن كان يعمل
             if (quranAudio.isPlayingAyah && quranAudio.ayahAudio) {
                 quranAudio.ayahAudio.pause();
                 quranAudio.isPlayingAyah = false;
@@ -1187,7 +1162,7 @@ function selectAyah(el, surah, ayah) {
     const overlay = safeGet('bottom-sheet-overlay');
     if (sheet) {
         sheet.classList.add('open');
-        sheet.removeAttribute('inert'); // إزالة الحجب عن الشريط
+        sheet.removeAttribute('inert'); 
         sheet.setAttribute('aria-hidden', 'false');
     }
     if (overlay) overlay.classList.add('open');
@@ -1205,7 +1180,7 @@ function setupBottomSheet() {
         const sheet = safeGet('ayah-bottom-sheet');
         if (sheet) {
             sheet.classList.remove('open');
-            sheet.setAttribute('inert', ''); // إعادة الحجب
+            sheet.setAttribute('inert', ''); 
             sheet.setAttribute('aria-hidden', 'true');
         }
         if (overlay) overlay.classList.remove('open');
@@ -1254,7 +1229,6 @@ function loadAndPlayAyah(surahNum, ayahNum) {
 
     if (!quranAudio.ayahAudio) return;
 
-    // إيقاف السورة إن كانت تعمل لمنع تشغيل الصوتين معاً
     if (quranAudio.isPlayingSurah && quranAudio.surahAudio) {
         quranAudio.surahAudio.pause();
         quranAudio.isPlayingSurah = false;
