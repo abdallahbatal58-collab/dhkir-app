@@ -1,9 +1,9 @@
 /* ═══════════════════════════════════════════════════════════════
-   ذِكْر | Service Worker v5.3.0 (Stable & Secure)
+   ذِكْر | Service Worker v5.3.2 (Stable & Secure)
    ═══════════════════════════════════════════════════════════════ */
 
-const CACHE_STATIC = 'dhikr-static-v5.3.0';
-const CACHE_API = 'dhikr-api-v5.3.0';
+const CACHE_STATIC = 'dhikr-static-v5.3.2';
+const CACHE_API = 'dhikr-api-v5.3.2';
 const CACHE_MAX_ITEMS = 100;
 
 const PRECACHE = [
