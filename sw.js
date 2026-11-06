@@ -1,22 +1,23 @@
 /* ═══════════════════════════════════════════════════════════════
-   ذِكْر | Service Worker v5.2.0 (Stable & Secure)
+   ذِكْر | Service Worker v5.3.0 (Stable & Secure)
    ═══════════════════════════════════════════════════════════════ */
 
-const CACHE_STATIC = 'dhikr-static-v5.2.0';
-const CACHE_API = 'dhikr-api-v5.2.0';
+const CACHE_STATIC = 'dhikr-static-v5.3.0';
+const CACHE_API = 'dhikr-api-v5.3.0';
 const CACHE_MAX_ITEMS = 100;
 
+// تم إزالة ?v= نهائياً لأن اسم الكاش نفسه يتغير في كل إصدار
 const PRECACHE = [
     './',
     './index.html',
     './manifest.json',
-    './css/style.css?v=5.2.0',
-    './js/data.js?v=5.2.0',
-    './js/app.js?v=5.2.0',
+    './css/style.css',
+    './js/data.js',
+    './js/app.js',
     './icon.svg',
-    'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css',
-    'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js',
-    'https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&family=Tajawal:wght@300;400;500;700;800&family=Scheherazade+New:wght@400;700&display=swap'
+    'https://cdn.jsdelivr.net/npm/swiper@11.1.14/swiper-bundle.min.css',
+    'https://cdn.jsdelivr.net/npm/swiper@11.1.14/swiper-bundle.min.js',
+    'https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;500;700;800&display=swap'
 ];
 
 self.addEventListener('install', (event) => {
@@ -52,6 +53,7 @@ self.addEventListener('fetch', (event) => {
 
     const url = new URL(req.url);
 
+    // 1. استثناء ملفات الصوت (لا نخزنها في الكاش لتوفير المساحة)
     if (
         url.hostname === 'everyayah.com' ||
         url.hostname === 'cdn.islamic.network' ||
@@ -61,6 +63,7 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
+    // 2. استراتيجية API (Network First with Cache Fallback)
     if (
         url.hostname === 'api.alquran.cloud' ||
         url.hostname === 'api.quran.com' ||
@@ -84,6 +87,7 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
+    // 3. استراتيجية المستندات (Network First, Fallback to Cache, Fallback to index.html)
     if (req.mode === 'navigate' || req.destination === 'document') {
         event.respondWith(
             fetch(req)
@@ -97,6 +101,7 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
+    // 4. استراتيجية الملفات الثابتة (Cache First, Network Fallback)
     event.respondWith(
         caches.match(req).then((cached) => {
             if (cached) return cached;
