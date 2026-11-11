@@ -1,18 +1,22 @@
-const CACHE_STATIC = 'dhikr-static-v5.4.0';
-const CACHE_API = 'dhikr-api-v5.4.0';
+/* ═══════════════════════════════════════════════════════════════
+   ذِكْر | Service Worker v5.2.0 (Stable & Secure)
+   ═══════════════════════════════════════════════════════════════ */
+
+const CACHE_STATIC = 'dhikr-static-v5.2.0';
+const CACHE_API = 'dhikr-api-v5.2.0';
 const CACHE_MAX_ITEMS = 100;
 
 const PRECACHE = [
     './',
     './index.html',
     './manifest.json',
-    './style.css',
-    './js/data.js',
-    './js/app.js',
+    './css/style.css?v=5.2.0',
+    './js/data.js?v=5.2.0',
+    './js/app.js?v=5.2.0',
     './icon.svg',
-    'https://cdn.jsdelivr.net/npm/swiper@11.1.14/swiper-bundle.min.css',
-    'https://cdn.jsdelivr.net/npm/swiper@11.1.14/swiper-bundle.min.js',
-    'https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;500;700;800&display=swap'
+    'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css',
+    'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js',
+    'https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&family=Tajawal:wght@300;400;500;700;800&family=Scheherazade+New:wght@400;700&display=swap'
 ];
 
 self.addEventListener('install', (event) => {
